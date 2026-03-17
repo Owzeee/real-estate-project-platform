@@ -36,7 +36,7 @@ export function ProjectForm({
   const hasDevelopers = useMemo(() => developers.length > 0, [developers.length]);
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form action={formAction} encType="multipart/form-data" className="space-y-8">
       <ProjectFormFields
         developers={developers}
         hasDevelopers={hasDevelopers}

@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDashboardProjects } from "@/features/projects/queries";
+import { getProjectsForDeveloper } from "@/features/projects/queries";
+import { requireDeveloper } from "@/lib/auth";
 
 export default async function DeveloperProjectsDashboardPage() {
-  const projects = await getDashboardProjects();
+  const auth = await requireDeveloper();
+  const projects = await getProjectsForDeveloper(auth.developerProfile.id);
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2e8_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
@@ -33,6 +35,7 @@ export default async function DeveloperProjectsDashboardPage() {
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Approval</th>
                   <th className="px-6 py-4">Type</th>
+                  <th className="px-6 py-4"></th>
                 </tr>
               </thead>
               <tbody>

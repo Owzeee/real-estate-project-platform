@@ -2,7 +2,10 @@ import { cache } from "react";
 
 import { mockProjectSummaries, mockProjects } from "@/features/projects/mock-data";
 import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
-import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  hasPublicSupabaseEnv,
+} from "@/lib/supabase/server";
 
 function mapProjectSummary(row: {
   id: string;
@@ -71,11 +74,11 @@ function mapProjectSummary(row: {
 }
 
 export const getProjects = cache(async () => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockProjectSummaries;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockProjectSummaries;
   }
@@ -124,11 +127,11 @@ export const getProjects = cache(async () => {
 });
 
 export const getDashboardProjects = cache(async () => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockProjectSummaries;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockProjectSummaries;
   }
@@ -179,11 +182,11 @@ export const getFeaturedProjects = cache(async () => {
 });
 
 export const getProjectBySlug = cache(async (slug: string) => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockProjects.find((project) => project.slug === slug) ?? null;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockProjects.find((project) => project.slug === slug) ?? null;
   }
@@ -254,11 +257,11 @@ export const getProjectBySlug = cache(async (slug: string) => {
 });
 
 export const getProjectById = cache(async (id: string) => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockProjects.find((project) => project.id === id) ?? null;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockProjects.find((project) => project.id === id) ?? null;
   }
@@ -324,4 +327,11 @@ export const getProjectById = cache(async (id: string) => {
       sortOrder: item.sort_order,
     })) as ProjectDetail["media"],
   };
+});
+
+export const getProjectsForDeveloper = cache(async (developerProfileId: string) => {
+  const projects = await getDashboardProjects();
+  return projects.filter(
+    (project) => project.developerProfileId === developerProfileId,
+  );
 });

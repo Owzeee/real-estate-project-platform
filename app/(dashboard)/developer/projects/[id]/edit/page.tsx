@@ -2,11 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDevelopers } from "@/features/developers/queries";
 import { updateProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
 import type { ProjectFormValues } from "@/features/projects/project-form-shared";
 import { getProjectById } from "@/features/projects/queries";
+import { requireDeveloperOrAdminAccess } from "@/lib/auth";
 
 type EditProjectPageProps = {
   params: Promise<{
@@ -16,14 +16,13 @@ type EditProjectPageProps = {
 
 export default async function EditProjectPage({ params }: EditProjectPageProps) {
   const { id } = await params;
-  const [developers, project] = await Promise.all([
-    getDevelopers(),
-    getProjectById(id),
-  ]);
+  const project = await getProjectById(id);
 
   if (!project) {
     notFound();
   }
+
+  await requireDeveloperOrAdminAccess(project.developerProfileId);
 
   const initialValues: ProjectFormValues = {
     developerProfileId: project.developerProfileId,
@@ -83,10 +82,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
               formData.set("projectId", project.id);
               return updateProject(state, formData);
             }}
-            developers={developers.map((developer) => ({
-              id: developer.id,
-              companyName: developer.companyName,
-            }))}
+            developers={[
+              {
+                id: project.developerProfileId,
+                companyName: project.developerName,
+              },
+            ]}
             initialValues={initialValues}
             submitLabel="Save changes"
             pendingLabel="Saving changes..."

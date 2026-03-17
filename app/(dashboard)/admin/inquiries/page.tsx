@@ -1,8 +1,10 @@
 import { SectionHeading } from "@/components/shared/section-heading";
 import { updateInquiryStatus } from "@/features/inquiries/actions";
 import { getInquiries } from "@/features/inquiries/queries";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminInquiriesPage() {
+  await requireAdmin();
   const inquiries = await getInquiries();
 
   return (

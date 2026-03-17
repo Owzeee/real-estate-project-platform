@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDevelopers } from "@/features/developers/queries";
 import { createProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
+import { requireDeveloper } from "@/lib/auth";
 
 export default async function NewProjectPage() {
-  const developers = await getDevelopers();
+  const auth = await requireDeveloper();
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2e8_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
@@ -28,10 +28,33 @@ export default async function NewProjectPage() {
         <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
           <ProjectForm
             action={createProject}
-            developers={developers.map((developer) => ({
-              id: developer.id,
-              companyName: developer.companyName,
-            }))}
+            developers={[
+              {
+                id: auth.developerProfile.id,
+                companyName: auth.developerProfile.companyName,
+              },
+            ]}
+            initialValues={{
+              developerProfileId: auth.developerProfile.id,
+              title: "",
+              slug: "",
+              description: "",
+              location: "",
+              city: "",
+              country: "",
+              currencyCode: "USD",
+              minPrice: "",
+              maxPrice: "",
+              latitude: "",
+              longitude: "",
+              projectType: "apartment",
+              completionStage: "pre_launch",
+              status: "draft",
+              imageUrls: "",
+              videoUrls: "",
+              brochureUrls: "",
+              tour3dUrls: "",
+            }}
             submitLabel="Create project"
             pendingLabel="Creating project..."
           />

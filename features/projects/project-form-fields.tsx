@@ -231,6 +231,30 @@ export function ProjectFormFields({
       <section className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
+            Upload images
+          </label>
+          <input
+            name="imageFiles"
+            type="file"
+            accept="image/*"
+            multiple
+            className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Upload brochures or videos
+          </label>
+          <input
+            name="attachmentFiles"
+            type="file"
+            accept="image/*,video/*,.pdf"
+            multiple
+            className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">
             Image URLs
           </label>
           <textarea

@@ -10,58 +10,6 @@ begin
 end;
 $$;
 
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.profiles (id, role, full_name, email, phone, avatar_url)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data ->> 'role', 'buyer'),
-    new.raw_user_meta_data ->> 'full_name',
-    new.email,
-    new.raw_user_meta_data ->> 'phone',
-    new.raw_user_meta_data ->> 'avatar_url'
-  )
-  on conflict (id) do nothing;
-
-  return new;
-end;
-$$;
-
-create or replace function public.is_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.profiles
-    where id = auth.uid()
-      and role = 'admin'
-  );
-$$;
-
-create or replace function public.owns_developer_profile(target_developer_profile_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.developer_profiles
-    where id = target_developer_profile_id
-      and user_id = auth.uid()
-  );
-$$;
-
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   role text not null check (role in ('admin', 'developer', 'buyer')),
@@ -143,6 +91,62 @@ create table if not exists public.inquiries (
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+insert into storage.buckets (id, name, public)
+values ('project-media', 'project-media', true)
+on conflict (id) do nothing;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, role, full_name, email, phone, avatar_url)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'role', 'buyer'),
+    new.raw_user_meta_data ->> 'full_name',
+    new.email,
+    new.raw_user_meta_data ->> 'phone',
+    new.raw_user_meta_data ->> 'avatar_url'
+  )
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+create or replace function public.owns_developer_profile(target_developer_profile_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.developer_profiles
+    where id = target_developer_profile_id
+      and user_id = auth.uid()
+  );
+$$;
 
 create index if not exists profiles_role_idx on public.profiles (role);
 create index if not exists developer_profiles_user_id_idx on public.developer_profiles (user_id);

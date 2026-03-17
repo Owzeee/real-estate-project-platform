@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import { requireAdmin, getCurrentAuth } from "@/lib/auth";
+import {
+  createServerSupabaseClient,
+  hasPublicSupabaseEnv,
+} from "@/lib/supabase/server";
 
 export type InquiryActionState = {
   status: "idle" | "success" | "error";
@@ -26,7 +30,7 @@ export async function submitInquiry(
     };
   }
 
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return {
       status: "error",
       message:
@@ -34,7 +38,7 @@ export async function submitInquiry(
     };
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -42,8 +46,12 @@ export async function submitInquiry(
     };
   }
 
+  const auth = await getCurrentAuth();
+
   const { error } = await supabase.from("inquiries").insert({
     project_id: projectId,
+    buyer_profile_id:
+      auth.profile?.role === "buyer" ? auth.profile.id : null,
     full_name: fullName,
     email,
     phone,
@@ -67,7 +75,9 @@ export async function updateInquiryStatus(
   inquiryId: string,
   nextStatus: "new" | "contacted" | "qualified" | "closed",
 ) {
-  const supabase = createServerSupabaseClient();
+  await requireAdmin();
+
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return;
   }

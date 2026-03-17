@@ -1,6 +1,9 @@
 import { cache } from "react";
 
-import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  hasPublicSupabaseEnv,
+} from "@/lib/supabase/server";
 
 export type InquiryRecord = {
   id: string;
@@ -15,11 +18,11 @@ export type InquiryRecord = {
 };
 
 export const getInquiries = cache(async () => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return [] as InquiryRecord[];
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return [] as InquiryRecord[];
   }

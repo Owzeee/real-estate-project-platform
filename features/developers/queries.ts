@@ -3,14 +3,17 @@ import { cache } from "react";
 import { mockDevelopers } from "@/features/projects/mock-data";
 import type { DeveloperDetail } from "@/features/developers/types";
 import { getDashboardProjects, getProjects } from "@/features/projects/queries";
-import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  hasPublicSupabaseEnv,
+} from "@/lib/supabase/server";
 
 export const getDevelopers = cache(async () => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockDevelopers;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockDevelopers;
   }
@@ -58,11 +61,11 @@ export const getDeveloperBySlug = cache(async (slug: string) => {
 });
 
 export const getDevelopersWithAllProjects = cache(async () => {
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return mockDevelopers;
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mockDevelopers;
   }

@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import { type ProjectActionState } from "@/features/projects/action-state";
-import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
+import {
+  createAdminSupabaseClient,
+  createServerSupabaseClient,
+  hasPublicSupabaseEnv,
+} from "@/lib/supabase/server";
 
 function optionalText(formData: FormData, key: string) {
   const value = formData.get(key)?.toString().trim();
@@ -27,6 +32,60 @@ function parseMediaList(formData: FormData, key: string) {
     .filter(Boolean);
 }
 
+function getFiles(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is File => value instanceof File && value.size > 0);
+}
+
+function sanitizeFilename(filename: string) {
+  return filename.replace(/[^a-zA-Z0-9.\-_]/g, "-");
+}
+
+async function uploadFilesToStorage(
+  projectId: string,
+  files: File[],
+  mediaType: "image" | "video" | "brochure",
+) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase || files.length === 0) {
+    return [] as {
+      media_type: "image" | "video" | "brochure";
+      file_url: string;
+    }[];
+  }
+
+  const uploaded: {
+    media_type: "image" | "video" | "brochure";
+    file_url: string;
+  }[] = [];
+
+  for (const file of files) {
+    const path = `${projectId}/${Date.now()}-${sanitizeFilename(file.name)}`;
+    const { error } = await supabase.storage
+      .from("project-media")
+      .upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("project-media").getPublicUrl(path);
+
+    uploaded.push({
+      media_type: mediaType,
+      file_url: publicUrl,
+    });
+  }
+
+  return uploaded;
+}
+
 function buildMediaRows(projectId: string, formData: FormData) {
   const mediaGroups = [
     { key: "imageUrls", mediaType: "image" },
@@ -47,6 +106,47 @@ function buildMediaRows(projectId: string, formData: FormData) {
       sort_order: sortOrder++,
     })),
   );
+}
+
+async function buildAllMediaRows(projectId: string, formData: FormData) {
+  const urlRows = buildMediaRows(projectId, formData);
+
+  const uploadedImages = await uploadFilesToStorage(
+    projectId,
+    getFiles(formData, "imageFiles"),
+    "image",
+  );
+
+  const attachmentFiles = getFiles(formData, "attachmentFiles");
+  const uploadedAttachments = await Promise.all(
+    attachmentFiles.map(async (file) => {
+      const mediaType = file.type.startsWith("video/")
+        ? "video"
+        : file.type === "application/pdf"
+          ? "brochure"
+          : file.type.startsWith("image/")
+            ? "image"
+            : "brochure";
+
+      const [uploaded] = await uploadFilesToStorage(projectId, [file], mediaType);
+      return uploaded;
+    }),
+  );
+
+  const mediaRows = [
+    ...urlRows,
+    ...uploadedImages,
+    ...uploadedAttachments.filter(Boolean),
+  ];
+
+  return mediaRows.map((item, index) => ({
+    project_id: projectId,
+    media_type: item.media_type,
+    file_url: item.file_url,
+    title: null,
+    thumbnail_url: null,
+    sort_order: index,
+  }));
 }
 
 function revalidateProjectPaths(slug?: string) {
@@ -92,14 +192,16 @@ export async function createProject(
     };
   }
 
-  if (!hasSupabaseEnv()) {
+  if (!hasPublicSupabaseEnv()) {
     return {
       status: "error",
       message: "Supabase environment variables are missing.",
     };
   }
 
-  const supabase = createServerSupabaseClient();
+  await requireDeveloperOrAdminAccess(developerProfileId);
+
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -157,7 +259,7 @@ export async function createProject(
     };
   }
 
-  const mediaRows = buildMediaRows(project.id, formData);
+  const mediaRows = await buildAllMediaRows(project.id, formData);
 
   if (mediaRows.length > 0) {
     const { error: mediaError } = await supabase
@@ -213,7 +315,9 @@ export async function updateProject(
     };
   }
 
-  const supabase = createServerSupabaseClient();
+  await requireDeveloperOrAdminAccess(developerProfileId);
+
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -256,7 +360,7 @@ export async function updateProject(
 
   await supabase.from("project_media").delete().eq("project_id", projectId);
 
-  const mediaRows = buildMediaRows(projectId, formData);
+  const mediaRows = await buildAllMediaRows(projectId, formData);
   if (mediaRows.length > 0) {
     const { error: mediaError } = await supabase
       .from("project_media")
@@ -282,7 +386,9 @@ export async function moderateProject(
   projectId: string,
   nextApprovalStatus: "approved" | "rejected" | "pending",
 ) {
-  const supabase = createServerSupabaseClient();
+  await requireAdmin();
+
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return;
   }
@@ -305,7 +411,9 @@ export async function toggleFeaturedProject(
   projectId: string,
   isFeatured: boolean,
 ) {
-  const supabase = createServerSupabaseClient();
+  await requireAdmin();
+
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return;
   }
