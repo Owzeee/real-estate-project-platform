@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Real Estate Project Marketplace
 
-## Getting Started
+This repository is the MVP foundation for a billboard-style real estate development marketplace built with Next.js and Supabase.
 
-First, run the development server:
+The product is designed to showcase development projects from real estate companies and developers. It is not a classifieds platform for individual listings.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Current MVP Scope
+
+- Developer profiles
+- Projects
+- Project media
+- Inquiries
+- Basic user profiles with `admin`, `developer`, and `buyer` roles
+
+## Product Direction From Blueprint
+
+The wider platform vision includes:
+
+- Rich project presentation with images, videos, brochures, and 3D tours
+- Search filters for location, price range, project type, and completion stage
+- Interactive map browsing
+- Developer dashboards and project upload workflows
+- Admin approval before projects go live
+- Premium placement and promotional inventory
+
+The current schema keeps the data model intentionally small while preparing for that direction. In particular, the `projects` table already includes:
+
+- `approval_status` for admin moderation
+- `is_featured` for premium placement
+- `latitude` and `longitude` for future map browsing
+
+## Database Files
+
+- Schema migration: `supabase/migrations/20260316224500_mvp_marketplace_schema.sql`
+- Supabase browser client: `lib/supabase/client.ts`
+- Environment example: `.env.example`
+
+## Suggested App Structure
+
+```text
+app/
+  (marketing)/
+    page.tsx
+  (dashboard)/
+    developer/
+      projects/
+        page.tsx
+        new/
+          page.tsx
+  developers/
+    [slug]/
+      page.tsx
+  projects/
+    [slug]/
+      page.tsx
+  inquiries/
+    actions.ts
+  api/
+    inquiries/
+      route.ts
+components/
+  shared/
+    section-heading.tsx
+features/
+  developers/
+    queries.ts
+    types.ts
+  projects/
+    queries.ts
+    types.ts
+  inquiries/
+    actions.ts
+    types.ts
+lib/
+  supabase/
+    client.ts
+  utils/
+    format-price.ts
+supabase/
+  migrations/
+    20260316224500_mvp_marketplace_schema.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000`.
 
-## Learn More
+## Build Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run lint` should pass locally.
+- In this environment, `npx next build --webpack` is the reliable production build command.
+- Plain Turbopack build may fail in restricted sandboxes because of process and port-binding limitations.
