@@ -252,3 +252,76 @@ export const getProjectBySlug = cache(async (slug: string) => {
     media,
   };
 });
+
+export const getProjectById = cache(async (id: string) => {
+  if (!hasSupabaseEnv()) {
+    return mockProjects.find((project) => project.id === id) ?? null;
+  }
+
+  const supabase = createServerSupabaseClient();
+  if (!supabase) {
+    return mockProjects.find((project) => project.id === id) ?? null;
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select(
+      `
+        id,
+        developer_profile_id,
+        title,
+        slug,
+        description,
+        location,
+        city,
+        country,
+        min_price,
+        max_price,
+        currency_code,
+        status,
+        approval_status,
+        project_type,
+        completion_stage,
+        is_featured,
+        latitude,
+        longitude,
+        developer_profiles (
+          company_name,
+          slug
+        ),
+        project_media (
+          id,
+          project_id,
+          media_type,
+          file_url,
+          thumbnail_url,
+          title,
+          sort_order
+        )
+      `,
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) {
+    return mockProjects.find((project) => project.id === id) ?? null;
+  }
+
+  const summary = mapProjectSummary({
+    ...data,
+    project_media: data.project_media?.slice().sort((a, b) => a.sort_order - b.sort_order),
+  });
+
+  return {
+    ...summary,
+    media: (data.project_media ?? []).map((item) => ({
+      id: item.id,
+      projectId: item.project_id,
+      mediaType: item.media_type,
+      fileUrl: item.file_url,
+      thumbnailUrl: item.thumbnail_url,
+      title: item.title,
+      sortOrder: item.sort_order,
+    })) as ProjectDetail["media"],
+  };
+});

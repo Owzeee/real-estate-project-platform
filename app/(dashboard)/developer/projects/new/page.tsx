@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
 import { getDevelopers } from "@/features/developers/queries";
+import { createProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
 
 export default async function NewProjectPage() {
@@ -26,10 +27,13 @@ export default async function NewProjectPage() {
 
         <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
           <ProjectForm
+            action={createProject}
             developers={developers.map((developer) => ({
               id: developer.id,
               companyName: developer.companyName,
             }))}
+            submitLabel="Create project"
+            pendingLabel="Creating project..."
           />
         </section>
       </div>

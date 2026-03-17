@@ -58,6 +58,14 @@ export default async function DeveloperProjectsDashboardPage() {
                     <td className="px-6 py-5 text-sm capitalize text-stone-700">
                       {project.projectType.replace("_", " ")}
                     </td>
+                    <td className="px-6 py-5 text-right">
+                      <Link
+                        href={`/developer/projects/${project.id}/edit`}
+                        className="text-sm font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
+                      >
+                        Edit
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

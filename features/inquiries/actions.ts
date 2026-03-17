@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createServerSupabaseClient, hasSupabaseEnv } from "@/lib/supabase/server";
 
 export type InquiryActionState = {
@@ -59,4 +61,21 @@ export async function submitInquiry(
     status: "success",
     message: "Inquiry submitted successfully.",
   };
+}
+
+export async function updateInquiryStatus(
+  inquiryId: string,
+  nextStatus: "new" | "contacted" | "qualified" | "closed",
+) {
+  const supabase = createServerSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  await supabase
+    .from("inquiries")
+    .update({ status: nextStatus })
+    .eq("id", inquiryId);
+
+  revalidatePath("/admin/inquiries");
 }
