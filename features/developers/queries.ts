@@ -3,17 +3,14 @@ import { cache } from "react";
 import { mockDevelopers } from "@/features/projects/mock-data";
 import type { DeveloperDetail } from "@/features/developers/types";
 import { getDashboardProjects, getProjects } from "@/features/projects/queries";
-import {
-  createServerSupabaseClient,
-  hasPublicSupabaseEnv,
-} from "@/lib/supabase/server";
+import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 export const getDevelopers = cache(async () => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockDevelopers;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockDevelopers;
   }
@@ -60,12 +57,17 @@ export const getDeveloperBySlug = cache(async (slug: string) => {
   return developers.find((developer) => developer.slug === slug) ?? null;
 });
 
+export const getDeveloperById = cache(async (id: string) => {
+  const developers = await getDevelopersWithAllProjects();
+  return developers.find((developer) => developer.id === id) ?? null;
+});
+
 export const getDevelopersWithAllProjects = cache(async () => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockDevelopers;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockDevelopers;
   }

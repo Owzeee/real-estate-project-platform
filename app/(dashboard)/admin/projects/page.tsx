@@ -1,13 +1,13 @@
+import Link from "next/link";
+
 import { SectionHeading } from "@/components/shared/section-heading";
 import {
   moderateProject,
   toggleFeaturedProject,
 } from "@/features/projects/actions";
 import { getDashboardProjects } from "@/features/projects/queries";
-import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminProjectsPage() {
-  await requireAdmin();
   const projects = await getDashboardProjects();
 
   return (
@@ -18,6 +18,20 @@ export default async function AdminProjectsPage() {
           title="Project moderation"
           description="Approve or reject submitted projects and control homepage featuring without touching the database directly."
         />
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/admin/developers"
+            className="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
+          >
+            Review developers
+          </Link>
+          <Link
+            href="/admin/inquiries"
+            className="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
+          >
+            Review inquiries
+          </Link>
+        </div>
 
         <div className="mt-10 grid gap-6">
           {projects.map((project) => (

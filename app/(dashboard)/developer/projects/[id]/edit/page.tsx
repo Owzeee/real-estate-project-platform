@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SectionHeading } from "@/components/shared/section-heading";
+import { getDevelopers } from "@/features/developers/queries";
 import { updateProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
+import { ProjectMediaManager } from "@/features/projects/project-media-manager";
 import type { ProjectFormValues } from "@/features/projects/project-form-shared";
 import { getProjectById } from "@/features/projects/queries";
-import { requireDeveloperOrAdminAccess } from "@/lib/auth";
 
 type EditProjectPageProps = {
   params: Promise<{
@@ -16,13 +17,14 @@ type EditProjectPageProps = {
 
 export default async function EditProjectPage({ params }: EditProjectPageProps) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [developers, project] = await Promise.all([
+    getDevelopers(),
+    getProjectById(id),
+  ]);
 
   if (!project) {
     notFound();
   }
-
-  await requireDeveloperOrAdminAccess(project.developerProfileId);
 
   const initialValues: ProjectFormValues = {
     developerProfileId: project.developerProfileId,
@@ -82,16 +84,25 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
               formData.set("projectId", project.id);
               return updateProject(state, formData);
             }}
-            developers={[
-              {
-                id: project.developerProfileId,
-                companyName: project.developerName,
-              },
-            ]}
+            developers={developers.map((developer) => ({
+              id: developer.id,
+              companyName: developer.companyName,
+            }))}
             initialValues={initialValues}
             submitLabel="Save changes"
             pendingLabel="Saving changes..."
           />
+        </section>
+
+        <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
+          <SectionHeading
+            eyebrow="Project Media"
+            title="Manage gallery order"
+            description="Reorder assets, choose the cover media used on project cards, or remove outdated media without editing every field again."
+          />
+          <div className="mt-8">
+            <ProjectMediaManager projectId={project.id} media={project.media} />
+          </div>
         </section>
       </div>
     </main>

@@ -86,11 +86,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             Apply filters
           </button>
         </form>
+        <div className="mt-6 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.16em]">
+          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
+            {filteredProjects.length} visible projects
+          </span>
+          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
+            {filteredProjects.filter((project) => project.isFeatured).length} featured
+          </span>
+          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
+            {new Set(filteredProjects.map((project) => project.developerProfileId)).size} developers
+          </span>
+        </div>
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
+        {filteredProjects.length === 0 ? (
+          <article className="mt-8 rounded-[2rem] border border-dashed border-stone-300 bg-stone-50 p-8 text-sm text-stone-600">
+            No projects matched the current filters. Broaden the search terms or clear one of the filters.
+          </article>
+        ) : null}
       </div>
     </main>
   );

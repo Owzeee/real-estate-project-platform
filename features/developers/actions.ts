@@ -1,29 +1,46 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
-import { type DeveloperProfileActionState } from "@/features/developers/state";
 import { requireAuthenticatedUser } from "@/lib/auth";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
-export async function saveDeveloperProfile(
+export type DeveloperProfileActionState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+};
+
+function optionalText(formData: FormData, key: string) {
+  const value = formData.get(key)?.toString().trim();
+  return value ? value : null;
+}
+
+function revalidateDeveloperPaths(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/developers");
+  revalidatePath("/developer/profiles");
+  revalidatePath("/admin/developers");
+
+  if (slug) {
+    revalidatePath(`/developers/${slug}`);
+  }
+}
+
+export async function createDeveloperProfile(
   _previousState: DeveloperProfileActionState,
   formData: FormData,
 ): Promise<DeveloperProfileActionState> {
-  const { user, profile } = await requireAuthenticatedUser();
+  const auth = await requireAuthenticatedUser();
+  const companyName = formData.get("companyName")?.toString().trim();
+  const slug = formData.get("slug")?.toString().trim();
 
-  if (profile.role !== "developer") {
+  if (auth.profile.role !== "developer") {
     return {
       status: "error",
       message: "Only developer accounts can create developer profiles.",
     };
   }
-
-  const companyName = formData.get("companyName")?.toString().trim();
-  const slug = formData.get("slug")?.toString().trim();
-  const description = formData.get("description")?.toString().trim() || null;
-  const websiteUrl = formData.get("websiteUrl")?.toString().trim() || null;
-  const logoUrl = formData.get("logoUrl")?.toString().trim() || null;
 
   if (!companyName || !slug) {
     return {
@@ -32,27 +49,29 @@ export async function saveDeveloperProfile(
     };
   }
 
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
+  if (!hasServiceRoleEnv()) {
     return {
       status: "error",
-      message: "Supabase is not configured.",
+      message: "Supabase environment variables are missing.",
     };
   }
 
-  const { error } = await supabase.from("developer_profiles").upsert(
-    {
-      user_id: user.id,
-      company_name: companyName,
-      slug,
-      description,
-      website_url: websiteUrl,
-      logo_url: logoUrl,
-    },
-    {
-      onConflict: "user_id",
-    },
-  );
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return {
+      status: "error",
+      message: "Supabase server client is unavailable.",
+    };
+  }
+
+  const { error } = await supabase.from("developer_profiles").insert({
+    user_id: auth.user.id,
+    company_name: companyName,
+    slug,
+    description: optionalText(formData, "description"),
+    website_url: optionalText(formData, "websiteUrl"),
+    logo_url: optionalText(formData, "logoUrl"),
+  });
 
   if (error) {
     return {
@@ -61,12 +80,81 @@ export async function saveDeveloperProfile(
     };
   }
 
-  revalidatePath("/");
-  revalidatePath("/developer/projects");
-  revalidatePath("/developer/onboarding");
+  revalidateDeveloperPaths(slug);
+  redirect("/developer/projects");
+}
+
+export async function saveDeveloperProfile(
+  _previousState: DeveloperProfileActionState,
+  formData: FormData,
+): Promise<DeveloperProfileActionState> {
+  const developerId = formData.get("developerId")?.toString().trim();
+  const companyName = formData.get("companyName")?.toString().trim();
+  const slug = formData.get("slug")?.toString().trim();
+
+  if (!developerId || !companyName || !slug) {
+    return {
+      status: "error",
+      message: "Developer, company name, and slug are required.",
+    };
+  }
+
+  if (!hasServiceRoleEnv()) {
+    return {
+      status: "error",
+      message: "Supabase environment variables are missing.",
+    };
+  }
+
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return {
+      status: "error",
+      message: "Supabase server client is unavailable.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("developer_profiles")
+    .update({
+      company_name: companyName,
+      slug,
+      description: optionalText(formData, "description"),
+      website_url: optionalText(formData, "websiteUrl"),
+      logo_url: optionalText(formData, "logoUrl"),
+    })
+    .eq("id", developerId);
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  revalidateDeveloperPaths(slug);
 
   return {
     status: "success",
-    message: "Developer profile saved successfully.",
+    message: "Developer profile updated successfully.",
   };
+}
+
+export async function toggleDeveloperVerification(
+  developerId: string,
+  isVerified: boolean,
+) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  const { data } = await supabase
+    .from("developer_profiles")
+    .update({ is_verified: isVerified })
+    .eq("id", developerId)
+    .select("slug")
+    .maybeSingle();
+
+  revalidateDeveloperPaths(data?.slug ?? undefined);
 }

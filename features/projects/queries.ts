@@ -2,10 +2,7 @@ import { cache } from "react";
 
 import { mockProjectSummaries, mockProjects } from "@/features/projects/mock-data";
 import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
-import {
-  createServerSupabaseClient,
-  hasPublicSupabaseEnv,
-} from "@/lib/supabase/server";
+import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 function mapProjectSummary(row: {
   id: string;
@@ -39,6 +36,7 @@ function mapProjectSummary(row: {
   project_media:
     | {
         file_url: string;
+        sort_order: number;
       }[]
     | null;
 }): ProjectSummary {
@@ -46,7 +44,7 @@ function mapProjectSummary(row: {
     ? row.developer_profiles[0]
     : row.developer_profiles;
 
-  const media = row.project_media?.[0];
+  const media = row.project_media?.slice().sort((a, b) => a.sort_order - b.sort_order)[0];
 
   return {
     id: row.id,
@@ -74,11 +72,11 @@ function mapProjectSummary(row: {
 }
 
 export const getProjects = cache(async () => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockProjectSummaries;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockProjectSummaries;
   }
@@ -110,7 +108,8 @@ export const getProjects = cache(async () => {
           slug
         ),
         project_media (
-          file_url
+          file_url,
+          sort_order
         )
       `,
     )
@@ -127,11 +126,11 @@ export const getProjects = cache(async () => {
 });
 
 export const getDashboardProjects = cache(async () => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockProjectSummaries;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockProjectSummaries;
   }
@@ -163,7 +162,8 @@ export const getDashboardProjects = cache(async () => {
           slug
         ),
         project_media (
-          file_url
+          file_url,
+          sort_order
         )
       `,
     )
@@ -182,11 +182,11 @@ export const getFeaturedProjects = cache(async () => {
 });
 
 export const getProjectBySlug = cache(async (slug: string) => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockProjects.find((project) => project.slug === slug) ?? null;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockProjects.find((project) => project.slug === slug) ?? null;
   }
@@ -257,11 +257,11 @@ export const getProjectBySlug = cache(async (slug: string) => {
 });
 
 export const getProjectById = cache(async (id: string) => {
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return mockProjects.find((project) => project.id === id) ?? null;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return mockProjects.find((project) => project.id === id) ?? null;
   }
@@ -327,11 +327,4 @@ export const getProjectById = cache(async (id: string) => {
       sortOrder: item.sort_order,
     })) as ProjectDetail["media"],
   };
-});
-
-export const getProjectsForDeveloper = cache(async (developerProfileId: string) => {
-  const projects = await getDashboardProjects();
-  return projects.filter(
-    (project) => project.developerProfileId === developerProfileId,
-  );
 });

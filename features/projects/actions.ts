@@ -3,12 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { type ProjectActionState } from "@/features/projects/action-state";
-import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
-import {
-  createAdminSupabaseClient,
-  createServerSupabaseClient,
-  hasPublicSupabaseEnv,
-} from "@/lib/supabase/server";
+import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 function optionalText(formData: FormData, key: string) {
   const value = formData.get(key)?.toString().trim();
@@ -30,60 +25,6 @@ function parseMediaList(formData: FormData, key: string) {
     .split("\n")
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function getFiles(formData: FormData, key: string) {
-  return formData
-    .getAll(key)
-    .filter((value): value is File => value instanceof File && value.size > 0);
-}
-
-function sanitizeFilename(filename: string) {
-  return filename.replace(/[^a-zA-Z0-9.\-_]/g, "-");
-}
-
-async function uploadFilesToStorage(
-  projectId: string,
-  files: File[],
-  mediaType: "image" | "video" | "brochure",
-) {
-  const supabase = createAdminSupabaseClient();
-  if (!supabase || files.length === 0) {
-    return [] as {
-      media_type: "image" | "video" | "brochure";
-      file_url: string;
-    }[];
-  }
-
-  const uploaded: {
-    media_type: "image" | "video" | "brochure";
-    file_url: string;
-  }[] = [];
-
-  for (const file of files) {
-    const path = `${projectId}/${Date.now()}-${sanitizeFilename(file.name)}`;
-    const { error } = await supabase.storage
-      .from("project-media")
-      .upload(path, file, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("project-media").getPublicUrl(path);
-
-    uploaded.push({
-      media_type: mediaType,
-      file_url: publicUrl,
-    });
-  }
-
-  return uploaded;
 }
 
 function buildMediaRows(projectId: string, formData: FormData) {
@@ -108,57 +49,65 @@ function buildMediaRows(projectId: string, formData: FormData) {
   );
 }
 
-async function buildAllMediaRows(projectId: string, formData: FormData) {
-  const urlRows = buildMediaRows(projectId, formData);
-
-  const uploadedImages = await uploadFilesToStorage(
-    projectId,
-    getFiles(formData, "imageFiles"),
-    "image",
-  );
-
-  const attachmentFiles = getFiles(formData, "attachmentFiles");
-  const uploadedAttachments = await Promise.all(
-    attachmentFiles.map(async (file) => {
-      const mediaType = file.type.startsWith("video/")
-        ? "video"
-        : file.type === "application/pdf"
-          ? "brochure"
-          : file.type.startsWith("image/")
-            ? "image"
-            : "brochure";
-
-      const [uploaded] = await uploadFilesToStorage(projectId, [file], mediaType);
-      return uploaded;
-    }),
-  );
-
-  const mediaRows = [
-    ...urlRows,
-    ...uploadedImages,
-    ...uploadedAttachments.filter(Boolean),
-  ];
-
-  return mediaRows.map((item, index) => ({
-    project_id: projectId,
-    media_type: item.media_type,
-    file_url: item.file_url,
-    title: null,
-    thumbnail_url: null,
-    sort_order: index,
-  }));
-}
-
 function revalidateProjectPaths(slug?: string) {
   revalidatePath("/");
   revalidatePath("/projects");
   revalidatePath("/developer/projects");
+  revalidatePath("/developer/inquiries");
   revalidatePath("/admin/projects");
   revalidatePath("/admin/inquiries");
 
   if (slug) {
     revalidatePath(`/projects/${slug}`);
   }
+}
+
+async function getProjectSlug(projectId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("projects")
+    .select("slug")
+    .eq("id", projectId)
+    .maybeSingle();
+
+  return data?.slug ?? null;
+}
+
+async function getSortedProjectMedia(projectId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return [];
+  }
+
+  const { data } = await supabase
+    .from("project_media")
+    .select("id, sort_order")
+    .eq("project_id", projectId)
+    .order("sort_order", { ascending: true });
+
+  return data ?? [];
+}
+
+async function normalizeProjectMediaSortOrder(projectId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  const media = await getSortedProjectMedia(projectId);
+
+  await Promise.all(
+    media.map((item, index) =>
+      supabase
+        .from("project_media")
+        .update({ sort_order: index })
+        .eq("id", item.id),
+    ),
+  );
 }
 
 export async function createProject(
@@ -192,16 +141,14 @@ export async function createProject(
     };
   }
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return {
       status: "error",
       message: "Supabase environment variables are missing.",
     };
   }
 
-  await requireDeveloperOrAdminAccess(developerProfileId);
-
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -259,7 +206,7 @@ export async function createProject(
     };
   }
 
-  const mediaRows = await buildAllMediaRows(project.id, formData);
+  const mediaRows = buildMediaRows(project.id, formData);
 
   if (mediaRows.length > 0) {
     const { error: mediaError } = await supabase
@@ -315,9 +262,7 @@ export async function updateProject(
     };
   }
 
-  await requireDeveloperOrAdminAccess(developerProfileId);
-
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -360,7 +305,7 @@ export async function updateProject(
 
   await supabase.from("project_media").delete().eq("project_id", projectId);
 
-  const mediaRows = await buildAllMediaRows(projectId, formData);
+  const mediaRows = buildMediaRows(projectId, formData);
   if (mediaRows.length > 0) {
     const { error: mediaError } = await supabase
       .from("project_media")
@@ -386,9 +331,7 @@ export async function moderateProject(
   projectId: string,
   nextApprovalStatus: "approved" | "rejected" | "pending",
 ) {
-  await requireAdmin();
-
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
   }
@@ -400,8 +343,8 @@ export async function moderateProject(
       status:
         nextApprovalStatus === "approved"
           ? "active"
-          : nextApprovalStatus === "pending"
-            ? "draft"
+          : nextApprovalStatus === "rejected"
+            ? "archived"
             : "draft",
       approved_at:
         nextApprovalStatus === "approved"
@@ -417,9 +360,7 @@ export async function toggleFeaturedProject(
   projectId: string,
   isFeatured: boolean,
 ) {
-  await requireAdmin();
-
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
   }
@@ -430,4 +371,82 @@ export async function toggleFeaturedProject(
     .eq("id", projectId);
 
   revalidateProjectPaths();
+}
+
+export async function deleteProjectMedia(projectId: string, mediaId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  await supabase
+    .from("project_media")
+    .delete()
+    .eq("id", mediaId)
+    .eq("project_id", projectId);
+
+  await normalizeProjectMediaSortOrder(projectId);
+
+  const slug = await getProjectSlug(projectId);
+  revalidateProjectPaths(slug ?? undefined);
+  revalidatePath(`/developer/projects/${projectId}/edit`);
+}
+
+export async function moveProjectMedia(
+  projectId: string,
+  mediaId: string,
+  direction: "up" | "down",
+) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  const media = await getSortedProjectMedia(projectId);
+  const currentIndex = media.findIndex((item) => item.id === mediaId);
+  if (currentIndex === -1) {
+    return;
+  }
+
+  const swapIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+  if (swapIndex < 0 || swapIndex >= media.length) {
+    return;
+  }
+
+  const current = media[currentIndex];
+  const adjacent = media[swapIndex];
+
+  await Promise.all([
+    supabase
+      .from("project_media")
+      .update({ sort_order: adjacent.sort_order })
+      .eq("id", current.id),
+    supabase
+      .from("project_media")
+      .update({ sort_order: current.sort_order })
+      .eq("id", adjacent.id),
+  ]);
+
+  const slug = await getProjectSlug(projectId);
+  revalidateProjectPaths(slug ?? undefined);
+  revalidatePath(`/developer/projects/${projectId}/edit`);
+}
+
+export async function setProjectCoverMedia(projectId: string, mediaId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  await supabase
+    .from("project_media")
+    .update({ sort_order: -1 })
+    .eq("id", mediaId)
+    .eq("project_id", projectId);
+
+  await normalizeProjectMediaSortOrder(projectId);
+
+  const slug = await getProjectSlug(projectId);
+  revalidateProjectPaths(slug ?? undefined);
+  revalidatePath(`/developer/projects/${projectId}/edit`);
 }

@@ -2,11 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin, getCurrentAuth } from "@/lib/auth";
-import {
-  createServerSupabaseClient,
-  hasPublicSupabaseEnv,
-} from "@/lib/supabase/server";
+import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 export type InquiryActionState = {
   status: "idle" | "success" | "error";
@@ -30,7 +26,7 @@ export async function submitInquiry(
     };
   }
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasServiceRoleEnv()) {
     return {
       status: "error",
       message:
@@ -38,7 +34,7 @@ export async function submitInquiry(
     };
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return {
       status: "error",
@@ -46,12 +42,8 @@ export async function submitInquiry(
     };
   }
 
-  const auth = await getCurrentAuth();
-
   const { error } = await supabase.from("inquiries").insert({
     project_id: projectId,
-    buyer_profile_id:
-      auth.profile?.role === "buyer" ? auth.profile.id : null,
     full_name: fullName,
     email,
     phone,
@@ -75,9 +67,7 @@ export async function updateInquiryStatus(
   inquiryId: string,
   nextStatus: "new" | "contacted" | "qualified" | "closed",
 ) {
-  await requireAdmin();
-
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
   }
@@ -87,5 +77,45 @@ export async function updateInquiryStatus(
     .update({ status: nextStatus })
     .eq("id", inquiryId);
 
+  revalidatePath("/admin/inquiries");
+}
+
+export async function updateDeveloperInquiryStatus(
+  developerProfileId: string,
+  inquiryId: string,
+  nextStatus: "new" | "contacted" | "qualified" | "closed",
+) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  const { data } = await supabase
+    .from("inquiries")
+    .select(
+      `
+        id,
+        projects!inner (
+          developer_profile_id
+        )
+      `,
+    )
+    .eq("id", inquiryId)
+    .maybeSingle();
+
+  const relatedProject = Array.isArray(data?.projects)
+    ? data.projects[0]
+    : data?.projects;
+
+  if (relatedProject?.developer_profile_id !== developerProfileId) {
+    return;
+  }
+
+  await supabase
+    .from("inquiries")
+    .update({ status: nextStatus })
+    .eq("id", inquiryId);
+
+  revalidatePath("/developer/inquiries");
   revalidatePath("/admin/inquiries");
 }

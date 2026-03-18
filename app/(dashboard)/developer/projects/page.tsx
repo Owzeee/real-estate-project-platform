@@ -1,28 +1,42 @@
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getProjectsForDeveloper } from "@/features/projects/queries";
-import { requireDeveloper } from "@/lib/auth";
+import { getDashboardProjects } from "@/features/projects/queries";
 
 export default async function DeveloperProjectsDashboardPage() {
-  const auth = await requireDeveloper();
-  const projects = await getProjectsForDeveloper(auth.developerProfile.id);
+  const projects = await getDashboardProjects();
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2e8_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHeading
-            eyebrow="Developer Dashboard"
-            title="Manage project submissions"
-            description="Create new projects, keep drafts private, and track which submissions are still pending admin approval."
-          />
-          <Link
-            href="/developer/projects/new"
-            className="rounded-full bg-stone-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
-          >
-            New project
-          </Link>
+          <div className="flex-1">
+            <SectionHeading
+              eyebrow="Developer Dashboard"
+              title="Manage project submissions"
+              description="Create new projects, keep drafts private, track approval state, and move between profile and inquiry workflows from one place."
+            />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/developer/projects/new"
+              className="rounded-full bg-stone-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+            >
+              New project
+            </Link>
+            <Link
+              href="/developer/profiles"
+              className="rounded-full border border-stone-300 px-6 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
+            >
+              Profiles
+            </Link>
+            <Link
+              href="/developer/inquiries"
+              className="rounded-full border border-stone-300 px-6 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
+            >
+              Inquiry inbox
+            </Link>
+          </div>
         </div>
 
         <div className="mt-10 overflow-hidden rounded-[2rem] border border-stone-900/10 bg-white shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
@@ -35,7 +49,6 @@ export default async function DeveloperProjectsDashboardPage() {
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Approval</th>
                   <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4"></th>
                 </tr>
               </thead>
               <tbody>

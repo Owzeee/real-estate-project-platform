@@ -38,7 +38,7 @@ export default async function Home() {
                   Explore projects
                 </Link>
                 <Link
-                  href="/developers/novastone-developments"
+                  href="/developers"
                   className="rounded-full border border-stone-300 px-6 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
                 >
                   View developer profiles
