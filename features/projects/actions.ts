@@ -397,6 +397,12 @@ export async function moderateProject(
     .from("projects")
     .update({
       approval_status: nextApprovalStatus,
+      status:
+        nextApprovalStatus === "approved"
+          ? "active"
+          : nextApprovalStatus === "pending"
+            ? "draft"
+            : "draft",
       approved_at:
         nextApprovalStatus === "approved"
           ? new Date().toISOString()
