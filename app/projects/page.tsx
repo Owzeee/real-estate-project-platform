@@ -1,4 +1,3 @@
-import { SectionHeading } from "@/components/shared/section-heading";
 import { ProjectCard } from "@/features/projects/project-card";
 import { getProjects } from "@/features/projects/queries";
 
@@ -35,78 +34,116 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   });
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f8f5ee_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
-      <div className="mx-auto max-w-6xl">
-        <SectionHeading
-          eyebrow="Marketplace"
-          title="Live development projects"
-          description="A billboard-style project marketplace with media-rich showcase pages, developer visibility, and direct inquiry capture."
-        />
-        <form className="mt-8 grid gap-4 rounded-[2rem] border border-stone-900/10 bg-white p-6 shadow-[0_20px_60px_rgba(41,37,36,0.08)] md:grid-cols-4">
-          <input
-            name="q"
-            defaultValue={params.q}
-            placeholder="Search title or developer"
-            className="rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
-          />
-          <input
-            name="location"
-            defaultValue={params.location}
-            placeholder="Location"
-            className="rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
-          />
-          <select
-            name="type"
-            defaultValue={params.type}
-            className="rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
-          >
-            <option value="">All project types</option>
-            <option value="apartment">Apartment</option>
-            <option value="villa">Villa</option>
-            <option value="townhouse">Townhouse</option>
-            <option value="mixed_use">Mixed use</option>
-            <option value="commercial">Commercial</option>
-            <option value="land">Land</option>
-          </select>
-          <select
-            name="stage"
-            defaultValue={params.stage}
-            className="rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
-          >
-            <option value="">All completion stages</option>
-            <option value="pre_launch">Pre-launch</option>
-            <option value="under_construction">Under construction</option>
-            <option value="ready">Ready</option>
-            <option value="completed">Completed</option>
-          </select>
-          <button
-            type="submit"
-            className="rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-white md:col-span-4 md:justify-self-start"
-          >
-            Apply filters
-          </button>
-        </form>
-        <div className="mt-6 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.16em]">
-          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
-            {filteredProjects.length} visible projects
-          </span>
-          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
-            {filteredProjects.filter((project) => project.isFeatured).length} featured
-          </span>
-          <span className="rounded-full bg-white px-4 py-2 text-stone-700 shadow-sm">
-            {new Set(filteredProjects.map((project) => project.developerProfileId)).size} developers
-          </span>
+    <main className="min-h-screen bg-transparent">
+      <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <p className="inline-flex rounded-full bg-[rgba(198,154,91,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
+            Marketplace
+          </p>
+          <h1 className="mt-5 font-display text-5xl font-bold tracking-tight text-stone-950 sm:text-6xl">
+            Live development projects
+          </h1>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
+            Browse approved projects with pricing, location, stage, and developer visibility already connected to your Supabase data.
+          </p>
         </div>
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
+      </section>
+
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[300px_1fr]">
+          <aside className="lg:sticky lg:top-28 lg:self-start">
+            <form className="space-y-5 rounded-[1.75rem] border border-[rgba(141,104,71,0.12)] bg-[var(--card)] p-6 shadow-[0_18px_50px_rgba(32,28,25,0.06)]">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Search
+                </label>
+                <input
+                  name="q"
+                  defaultValue={params.q}
+                  placeholder="Project, developer, keyword"
+                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Location
+                </label>
+                <input
+                  name="location"
+                  defaultValue={params.location}
+                  placeholder="City, district, country"
+                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Project type
+                </label>
+                <select
+                  name="type"
+                  defaultValue={params.type}
+                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                >
+                  <option value="">All project types</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="townhouse">Townhouse</option>
+                  <option value="mixed_use">Mixed use</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="land">Land</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Completion stage
+                </label>
+                <select
+                  name="stage"
+                  defaultValue={params.stage}
+                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                >
+                  <option value="">All completion stages</option>
+                  <option value="pre_launch">Pre-launch</option>
+                  <option value="under_construction">Under construction</option>
+                  <option value="ready">Ready</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)]"
+              >
+                Apply filters
+              </button>
+            </form>
+          </aside>
+
+          <section>
+            <div className="mb-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
+              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+                {filteredProjects.length} visible projects
+              </span>
+              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+                {filteredProjects.filter((project) => project.isFeatured).length} featured
+              </span>
+              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+                {new Set(filteredProjects.map((project) => project.developerProfileId)).size} developers
+              </span>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+
+            {filteredProjects.length === 0 ? (
+              <article className="mt-10 rounded-[1.75rem] border border-dashed border-[var(--border)] bg-[rgba(255,255,255,0.55)] p-10 text-center text-sm text-[var(--muted-foreground)]">
+                No projects matched the current filters. Broaden the search terms or clear one of the filters.
+              </article>
+            ) : null}
+          </section>
         </div>
-        {filteredProjects.length === 0 ? (
-          <article className="mt-8 rounded-[2rem] border border-dashed border-stone-300 bg-stone-50 p-8 text-sm text-stone-600">
-            No projects matched the current filters. Broaden the search terms or clear one of the filters.
-          </article>
-        ) : null}
       </div>
     </main>
   );

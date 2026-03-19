@@ -9,45 +9,52 @@ type ProjectCardProps = {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-stone-900/10 bg-white shadow-[0_18px_50px_rgba(41,37,36,0.08)]">
+    <article className="group h-full overflow-hidden rounded-[1.6rem] border border-[rgba(141,104,71,0.12)] bg-[var(--card)] shadow-[0_20px_60px_rgba(32,28,25,0.07)] transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
       <div
-        className="h-56 bg-cover bg-center"
+        className="relative h-60 bg-cover bg-center"
         style={{
           backgroundImage: project.heroMediaUrl
-            ? `linear-gradient(rgba(28,25,23,0.12),rgba(28,25,23,0.28)), url(${project.heroMediaUrl})`
-            : "linear-gradient(135deg, #d6c7ad, #8f7156)",
+            ? `linear-gradient(rgba(23,20,18,0.12),rgba(23,20,18,0.28)), url(${project.heroMediaUrl})`
+            : "linear-gradient(135deg, rgba(141,104,71,0.24), rgba(198,154,91,0.18))",
         }}
-      />
-      <div className="p-6">
+      >
+        <div className="absolute right-4 top-4 rounded-full bg-[rgba(141,104,71,0.88)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-foreground)]">
+          {project.completionStage.replace("_", " ")}
+        </div>
+      </div>
+
+      <div className="flex h-[calc(100%-15rem)] flex-col p-6">
         <div className="flex items-center justify-between gap-4">
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-950">
+          <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
             {project.projectType.replace("_", " ")}
           </span>
-          <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-500">
-            {project.completionStage.replace("_", " ")}
-          </span>
+          {project.isFeatured ? (
+            <span className="rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--secondary-foreground)]">
+              Featured
+            </span>
+          ) : null}
         </div>
-        <h3 className="mt-4 text-2xl font-semibold tracking-tight text-stone-950">
+
+        <h3 className="mt-5 font-display text-3xl font-bold tracking-tight text-stone-950 transition-colors group-hover:text-[var(--primary)]">
           {project.title}
         </h3>
-        <p className="mt-2 text-sm text-stone-500">{project.developerName}</p>
-        <p className="mt-4 line-clamp-3 text-sm leading-6 text-stone-700">
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">{project.developerName}</p>
+        <p className="mt-4 line-clamp-3 text-sm leading-7 text-stone-700">
           {project.description}
         </p>
-        <div className="mt-6 flex items-end justify-between gap-4">
+
+        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
               Location
             </p>
-            <p className="mt-1 text-sm font-medium text-stone-800">
-              {project.location}
-            </p>
+            <p className="mt-2 text-sm font-medium text-stone-900">{project.location}</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-              Price
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+              Price Range
             </p>
-            <p className="mt-1 text-sm font-semibold text-stone-950">
+            <p className="mt-2 text-sm font-semibold text-[var(--primary)]">
               {formatPriceRange(
                 project.minPrice,
                 project.maxPrice,
@@ -56,18 +63,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </p>
           </div>
         </div>
-        <div className="mt-6 flex items-center justify-between">
+
+        <div className="mt-6 pt-2">
           <Link
             href={`/projects/${project.slug}`}
-            className="text-sm font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
+            className="inline-flex items-center rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)]"
           >
             View project
           </Link>
-          {project.isFeatured ? (
-            <span className="rounded-full bg-stone-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-100">
-              Featured
-            </span>
-          ) : null}
         </div>
       </div>
     </article>
