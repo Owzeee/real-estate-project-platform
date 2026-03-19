@@ -24,6 +24,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
   return (
     <form action={formAction} className="space-y-5">
       {next ? <input type="hidden" name="next" value={next} /> : null}
+
       {mode === "signup" ? (
         <>
           <div>
@@ -33,7 +34,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             <input
               name="fullName"
               required
-              className="w-full rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
+              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
             />
           </div>
           <div>
@@ -43,7 +44,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             <select
               name="role"
               defaultValue="buyer"
-              className="w-full rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
+              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
             >
               <option value="buyer">Buyer</option>
               <option value="developer">Developer</option>
@@ -51,6 +52,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           </div>
         </>
       ) : null}
+
       <div>
         <label className="mb-2 block text-sm font-medium text-stone-700">
           Email
@@ -59,9 +61,10 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           name="email"
           type="email"
           required
-          className="w-full rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
+          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
         />
       </div>
+
       <div>
         <label className="mb-2 block text-sm font-medium text-stone-700">
           Password
@@ -70,13 +73,14 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           name="password"
           type="password"
           required
-          className="w-full rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none focus:border-stone-950"
+          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
         />
       </div>
+
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-white"
+        className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending
           ? mode === "login"
@@ -86,6 +90,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             ? "Sign in"
             : "Create account"}
       </button>
+
       {state.message ? (
         <p
           className={`text-sm ${
@@ -95,11 +100,12 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           {state.message}
         </p>
       ) : null}
-      <p className="text-sm text-stone-600">
+
+      <p className="text-sm text-[var(--muted-foreground)]">
         {mode === "login" ? "Need an account? " : "Already registered? "}
         <Link
           href={mode === "login" ? "/auth/signup" : "/auth/login"}
-          className="font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
+          className="font-semibold text-stone-950 underline decoration-[var(--border)] underline-offset-4"
         >
           {mode === "login" ? "Sign up" : "Sign in"}
         </Link>
