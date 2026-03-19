@@ -1,8 +1,10 @@
 import { SectionHeading } from "@/components/shared/section-heading";
 import { toggleDeveloperVerification } from "@/features/developers/actions";
 import { getDevelopersWithAllProjects } from "@/features/developers/queries";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminDevelopersPage() {
+  await requireAdmin();
   const developers = await getDevelopersWithAllProjects();
 
   return (

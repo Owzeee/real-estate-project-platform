@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDashboardProjects } from "@/features/projects/queries";
+import { getDashboardProjectsForDeveloper } from "@/features/projects/queries";
+import { requireDeveloper } from "@/lib/auth";
 
 export default async function DeveloperProjectsDashboardPage() {
-  const projects = await getDashboardProjects();
+  const auth = await requireDeveloper();
+  const projects = await getDashboardProjectsForDeveloper(auth.developerProfile.id);
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2e8_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
@@ -14,7 +16,7 @@ export default async function DeveloperProjectsDashboardPage() {
             <SectionHeading
               eyebrow="Developer Dashboard"
               title="Manage project submissions"
-              description="Create new projects, keep drafts private, track approval state, and move between profile and inquiry workflows from one place."
+              description="Create new projects, keep drafts private, track approval state, and manage only the submissions that belong to your company."
             />
           </div>
           <div className="flex flex-wrap gap-3">
@@ -28,7 +30,7 @@ export default async function DeveloperProjectsDashboardPage() {
               href="/developer/profiles"
               className="rounded-full border border-stone-300 px-6 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-950"
             >
-              Profiles
+              Profile
             </Link>
             <Link
               href="/developer/inquiries"
@@ -40,15 +42,22 @@ export default async function DeveloperProjectsDashboardPage() {
         </div>
 
         <div className="mt-10 overflow-hidden rounded-[2rem] border border-stone-900/10 bg-white shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
+          {projects.length === 0 ? (
+            <div className="border-b border-stone-100 p-8 text-sm text-stone-600">
+              No projects yet. Create your first project submission to start the approval flow.
+            </div>
+          ) : null}
+
           <div className="overflow-x-auto">
             <table className="min-w-full text-left">
               <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-[0.18em] text-stone-500">
                 <tr>
                   <th className="px-6 py-4">Project</th>
-                  <th className="px-6 py-4">Developer</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Approval</th>
                   <th className="px-6 py-4">Type</th>
+                  <th className="px-6 py-4">Stage</th>
+                  <th className="px-6 py-4" />
                 </tr>
               </thead>
               <tbody>
@@ -60,9 +69,6 @@ export default async function DeveloperProjectsDashboardPage() {
                         <p className="mt-1 text-sm text-stone-500">{project.location}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-sm text-stone-700">
-                      {project.developerName}
-                    </td>
                     <td className="px-6 py-5 text-sm capitalize text-stone-700">
                       {project.status.replace("_", " ")}
                     </td>
@@ -73,6 +79,9 @@ export default async function DeveloperProjectsDashboardPage() {
                     </td>
                     <td className="px-6 py-5 text-sm capitalize text-stone-700">
                       {project.projectType.replace("_", " ")}
+                    </td>
+                    <td className="px-6 py-5 text-sm capitalize text-stone-700">
+                      {project.completionStage.replace("_", " ")}
                     </td>
                     <td className="px-6 py-5 text-right">
                       <Link

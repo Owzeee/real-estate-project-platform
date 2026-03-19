@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { type ProjectActionState } from "@/features/projects/action-state";
+import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 function optionalText(formData: FormData, key: string) {
@@ -75,6 +76,26 @@ async function getProjectSlug(projectId: string) {
     .maybeSingle();
 
   return data?.slug ?? null;
+}
+
+async function getProjectOwner(projectId: string) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("projects")
+    .select("developer_profile_id, slug")
+    .eq("id", projectId)
+    .maybeSingle();
+
+  return data
+    ? {
+        developerProfileId: data.developer_profile_id,
+        slug: data.slug,
+      }
+    : null;
 }
 
 async function getSortedProjectMedia(projectId: string) {
@@ -175,10 +196,16 @@ export async function createProject(
     };
   }
 
+  const auth = await requireDeveloperOrAdminAccess(developerProfileId);
+  const finalDeveloperProfileId =
+    auth.profile.role === "developer" && auth.developerProfile
+      ? auth.developerProfile.id
+      : developerProfileId;
+
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert({
-      developer_profile_id: developerProfileId,
+      developer_profile_id: finalDeveloperProfileId,
       title,
       slug,
       description,
@@ -274,11 +301,27 @@ export async function updateProject(
   const maxPrice = optionalNumber(formData, "maxPrice");
   const latitude = optionalNumber(formData, "latitude");
   const longitude = optionalNumber(formData, "longitude");
+  const currentProject = await getProjectOwner(projectId);
+
+  if (!currentProject) {
+    return {
+      status: "error",
+      message: "Project not found.",
+    };
+  }
+
+  const auth = await requireDeveloperOrAdminAccess(
+    currentProject.developerProfileId,
+  );
+  const finalDeveloperProfileId =
+    auth.profile.role === "developer" && auth.developerProfile
+      ? auth.developerProfile.id
+      : developerProfileId;
 
   const { error: updateError } = await supabase
     .from("projects")
     .update({
-      developer_profile_id: developerProfileId,
+      developer_profile_id: finalDeveloperProfileId,
       title,
       slug,
       description,
@@ -331,6 +374,7 @@ export async function moderateProject(
   projectId: string,
   nextApprovalStatus: "approved" | "rejected" | "pending",
 ) {
+  await requireAdmin();
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
@@ -360,6 +404,7 @@ export async function toggleFeaturedProject(
   projectId: string,
   isFeatured: boolean,
 ) {
+  await requireAdmin();
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
@@ -374,6 +419,12 @@ export async function toggleFeaturedProject(
 }
 
 export async function deleteProjectMedia(projectId: string, mediaId: string) {
+  const owner = await getProjectOwner(projectId);
+  if (!owner) {
+    return;
+  }
+
+  await requireDeveloperOrAdminAccess(owner.developerProfileId);
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
@@ -397,6 +448,12 @@ export async function moveProjectMedia(
   mediaId: string,
   direction: "up" | "down",
 ) {
+  const owner = await getProjectOwner(projectId);
+  if (!owner) {
+    return;
+  }
+
+  await requireDeveloperOrAdminAccess(owner.developerProfileId);
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
@@ -433,6 +490,12 @@ export async function moveProjectMedia(
 }
 
 export async function setProjectCoverMedia(projectId: string, mediaId: string) {
+  const owner = await getProjectOwner(projectId);
+  if (!owner) {
+    return;
+  }
+
+  await requireDeveloperOrAdminAccess(owner.developerProfileId);
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;

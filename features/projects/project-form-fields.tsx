@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 import type {
   DeveloperOption,
   ProjectFormValues,
@@ -14,32 +18,64 @@ type ProjectFormFieldsProps = {
   initialValues: ProjectFormValues;
 };
 
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
 export function ProjectFormFields({
   developers,
   hasDevelopers,
   initialValues,
 }: ProjectFormFieldsProps) {
+  const singleDeveloper = developers.length === 1 ? developers[0] : null;
+  const [title, setTitle] = useState(initialValues.title);
+  const [slug, setSlug] = useState(initialValues.slug);
+  const [slugTouched, setSlugTouched] = useState(Boolean(initialValues.slug));
+
+  const generatedSlug = useMemo(() => slugify(title), [title]);
+
   return (
     <>
+      <section className="rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5 text-sm text-stone-600">
+        <p className="font-semibold text-stone-950">Publishing checklist</p>
+        <p className="mt-2">
+          Use a clean title and slug, keep status as draft until the content is ready, and add at least one image so the marketplace card has a strong cover.
+        </p>
+      </section>
+
       <section className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Developer profile
           </label>
-          <select
-            name="developerProfileId"
-            required
-            defaultValue={initialValues.developerProfileId}
-            disabled={!hasDevelopers}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
-          >
-            <option value="">Select developer</option>
-            {developers.map((developer) => (
-              <option key={developer.id} value={developer.id}>
-                {developer.companyName}
-              </option>
-            ))}
-          </select>
+          {singleDeveloper ? (
+            <>
+              <input type="hidden" name="developerProfileId" value={singleDeveloper.id} />
+              <div className="rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-950">
+                {singleDeveloper.companyName}
+              </div>
+            </>
+          ) : (
+            <select
+              name="developerProfileId"
+              required
+              defaultValue={initialValues.developerProfileId}
+              disabled={!hasDevelopers}
+              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
+            >
+              <option value="">Select developer</option>
+              {developers.map((developer) => (
+                <option key={developer.id} value={developer.id}>
+                  {developer.companyName}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>
@@ -49,7 +85,15 @@ export function ProjectFormFields({
           <input
             name="title"
             required
-            defaultValue={initialValues.title}
+            value={title}
+            onChange={(event) => {
+              const nextTitle = event.target.value;
+              setTitle(nextTitle);
+
+              if (!slugTouched) {
+                setSlug(slugify(nextTitle));
+              }
+            }}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
@@ -60,10 +104,17 @@ export function ProjectFormFields({
           <input
             name="slug"
             required
-            defaultValue={initialValues.slug}
+            value={slug}
+            onChange={(event) => {
+              setSlugTouched(true);
+              setSlug(slugify(event.target.value));
+            }}
             placeholder="aurora-residences"
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
+          <p className="mt-2 text-xs text-stone-500">
+            URL preview: <span className="font-medium text-stone-700">/projects/{slug || generatedSlug || "your-project-slug"}</span>
+          </p>
         </div>
 
         <div className="md:col-span-2">
@@ -75,7 +126,7 @@ export function ProjectFormFields({
             required
             rows={5}
             defaultValue={initialValues.description}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
 
@@ -209,7 +260,7 @@ export function ProjectFormFields({
             ))}
           </select>
         </div>
-        <div>
+        <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Visibility status
           </label>
@@ -225,11 +276,14 @@ export function ProjectFormFields({
               </option>
             ))}
           </select>
+          <p className="mt-2 text-xs text-stone-500">
+            Draft keeps the project private until approved. Approved projects are automatically switched to active by admin moderation.
+          </p>
         </div>
       </section>
 
       <section className="grid gap-5 md:grid-cols-2">
-        <div>
+        <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5">
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Upload images
           </label>
@@ -240,8 +294,9 @@ export function ProjectFormFields({
             multiple
             className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
           />
+          <p className="mt-2 text-xs text-stone-500">Best for cover images and gallery presentation.</p>
         </div>
-        <div>
+        <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5">
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Upload brochures or videos
           </label>
@@ -252,6 +307,7 @@ export function ProjectFormFields({
             multiple
             className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
           />
+          <p className="mt-2 text-xs text-stone-500">Use this for PDFs, videos, and any other supporting campaign assets.</p>
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireAdmin, requireDeveloper } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 export type InquiryActionState = {
@@ -67,6 +68,7 @@ export async function updateInquiryStatus(
   inquiryId: string,
   nextStatus: "new" | "contacted" | "qualified" | "closed",
 ) {
+  await requireAdmin();
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
@@ -85,6 +87,12 @@ export async function updateDeveloperInquiryStatus(
   inquiryId: string,
   nextStatus: "new" | "contacted" | "qualified" | "closed",
 ) {
+  const auth = await requireDeveloper();
+
+  if (auth.developerProfile.id !== developerProfileId) {
+    return;
+  }
+
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;

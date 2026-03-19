@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDevelopers } from "@/features/developers/queries";
 import { updateProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
 import { ProjectMediaManager } from "@/features/projects/project-media-manager";
 import type { ProjectFormValues } from "@/features/projects/project-form-shared";
 import { getProjectById } from "@/features/projects/queries";
+import { requireDeveloper } from "@/lib/auth";
 
 type EditProjectPageProps = {
   params: Promise<{
@@ -16,13 +16,11 @@ type EditProjectPageProps = {
 };
 
 export default async function EditProjectPage({ params }: EditProjectPageProps) {
+  const auth = await requireDeveloper();
   const { id } = await params;
-  const [developers, project] = await Promise.all([
-    getDevelopers(),
-    getProjectById(id),
-  ]);
+  const project = await getProjectById(id);
 
-  if (!project) {
+  if (!project || project.developerProfileId !== auth.developerProfile.id) {
     notFound();
   }
 
@@ -67,7 +65,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           <SectionHeading
             eyebrow="Developer Dashboard"
             title={`Edit ${project.title}`}
-            description="Update project content, media links, pricing, and visibility. Approval state is managed separately by admins."
+            description="Update project content, pricing, media, and visibility while keeping ownership tied to your developer profile."
           />
           <Link
             href="/developer/projects"
@@ -84,10 +82,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
               formData.set("projectId", project.id);
               return updateProject(state, formData);
             }}
-            developers={developers.map((developer) => ({
-              id: developer.id,
-              companyName: developer.companyName,
-            }))}
+            developers={[
+              {
+                id: auth.developerProfile.id,
+                companyName: auth.developerProfile.companyName,
+              },
+            ]}
             initialValues={initialValues}
             submitLabel="Save changes"
             pendingLabel="Saving changes..."
@@ -98,7 +98,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           <SectionHeading
             eyebrow="Project Media"
             title="Manage gallery order"
-            description="Reorder assets, choose the cover media used on project cards, or remove outdated media without editing every field again."
+            description="Reorder assets, choose the cover media used on project cards, or remove outdated media without re-entering every field."
           />
           <div className="mt-8">
             <ProjectMediaManager projectId={project.id} media={project.media} />

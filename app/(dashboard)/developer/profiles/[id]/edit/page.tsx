@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { SectionHeading } from "@/components/shared/section-heading";
 import { saveDeveloperProfile } from "@/features/developers/actions";
 import { DeveloperProfileForm } from "@/features/developers/developer-profile-form";
 import { getDeveloperById } from "@/features/developers/queries";
+import { requireDeveloper } from "@/lib/auth";
 
 type EditDeveloperProfilePageProps = {
   params: Promise<{
@@ -15,7 +16,13 @@ type EditDeveloperProfilePageProps = {
 export default async function EditDeveloperProfilePage({
   params,
 }: EditDeveloperProfilePageProps) {
+  const auth = await requireDeveloper();
   const { id } = await params;
+
+  if (auth.developerProfile.id !== id) {
+    redirect("/developer/profiles");
+  }
+
   const developer = await getDeveloperById(id);
 
   if (!developer) {
@@ -29,13 +36,13 @@ export default async function EditDeveloperProfilePage({
           <SectionHeading
             eyebrow="Developer Dashboard"
             title={`Edit ${developer.companyName}`}
-            description="Keep the public-facing company profile current across project cards, developer pages, and admin review surfaces."
+            description="Keep your public company profile current across project cards, developer pages, and inquiry touchpoints."
           />
           <Link
             href="/developer/profiles"
             className="text-sm font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
           >
-            Back to profiles
+            Back to profile
           </Link>
         </div>
 

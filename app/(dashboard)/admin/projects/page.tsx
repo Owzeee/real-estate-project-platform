@@ -6,8 +6,10 @@ import {
   toggleFeaturedProject,
 } from "@/features/projects/actions";
 import { getDashboardProjects } from "@/features/projects/queries";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminProjectsPage() {
+  await requireAdmin();
   const projects = await getDashboardProjects();
 
   return (

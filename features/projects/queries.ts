@@ -126,6 +126,10 @@ export const getProjects = cache(async () => {
 });
 
 export const getDashboardProjects = cache(async () => {
+  return getDashboardProjectsForDeveloper();
+});
+
+export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?: string) => {
   if (!hasServiceRoleEnv()) {
     return mockProjectSummaries;
   }
@@ -135,7 +139,7 @@ export const getDashboardProjects = cache(async () => {
     return mockProjectSummaries;
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("projects")
     .select(
       `
@@ -168,6 +172,12 @@ export const getDashboardProjects = cache(async () => {
       `,
     )
     .order("created_at", { ascending: false });
+
+  if (developerProfileId) {
+    query = query.eq("developer_profile_id", developerProfileId);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) {
     return mockProjectSummaries;

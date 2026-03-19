@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireAuthenticatedUser } from "@/lib/auth";
+import {
+  requireAdmin,
+  requireAuthenticatedUser,
+  requireDeveloperOrAdminAccess,
+} from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 export type DeveloperProfileActionState = {
@@ -64,6 +68,19 @@ export async function createDeveloperProfile(
     };
   }
 
+  const { data: existingDeveloperProfile } = await supabase
+    .from("developer_profiles")
+    .select("id")
+    .eq("user_id", auth.user.id)
+    .maybeSingle();
+
+  if (existingDeveloperProfile) {
+    return {
+      status: "error",
+      message: "This account already has a developer profile.",
+    };
+  }
+
   const { error } = await supabase.from("developer_profiles").insert({
     user_id: auth.user.id,
     company_name: companyName,
@@ -106,6 +123,8 @@ export async function saveDeveloperProfile(
     };
   }
 
+  await requireDeveloperOrAdminAccess(developerId);
+
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return {
@@ -144,6 +163,7 @@ export async function toggleDeveloperVerification(
   developerId: string,
   isVerified: boolean,
 ) {
+  await requireAdmin();
   const supabase = createAdminSupabaseClient();
   if (!supabase) {
     return;
