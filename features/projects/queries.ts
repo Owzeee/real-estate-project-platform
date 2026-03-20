@@ -2,7 +2,11 @@ import { cache } from "react";
 
 import { mockProjectSummaries, mockProjects } from "@/features/projects/mock-data";
 import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
-import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
+import {
+  createAdminSupabaseClient,
+  hasServiceRoleEnv,
+  useMockData,
+} from "@/lib/supabase/server";
 
 function mapProjectSummary(row: {
   id: string;
@@ -72,7 +76,7 @@ function mapProjectSummary(row: {
 }
 
 export const getProjects = cache(async () => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockProjectSummaries;
   }
 
@@ -130,7 +134,7 @@ export const getDashboardProjects = cache(async () => {
 });
 
 export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?: string) => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockProjectSummaries;
   }
 
@@ -192,7 +196,7 @@ export const getFeaturedProjects = cache(async () => {
 });
 
 export const getProjectBySlug = cache(async (slug: string) => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockProjects.find((project) => project.slug === slug) ?? null;
   }
 
@@ -267,7 +271,7 @@ export const getProjectBySlug = cache(async (slug: string) => {
 });
 
 export const getProjectById = cache(async (id: string) => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockProjects.find((project) => project.id === id) ?? null;
   }
 

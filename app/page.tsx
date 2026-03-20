@@ -72,9 +72,7 @@ export default async function Home() {
             </div>
             <div className="relative flex h-full flex-col justify-between p-8 text-white sm:p-10">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[rgba(255,255,255,0.65)]">
-                  Why This Platform
-                </p>
+                
                 <div className="mt-8 grid gap-4">
                   {[
                     {

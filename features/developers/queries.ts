@@ -3,10 +3,14 @@ import { cache } from "react";
 import { mockDevelopers } from "@/features/projects/mock-data";
 import type { DeveloperDetail } from "@/features/developers/types";
 import { getDashboardProjects, getProjects } from "@/features/projects/queries";
-import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
+import {
+  createAdminSupabaseClient,
+  hasServiceRoleEnv,
+  useMockData,
+} from "@/lib/supabase/server";
 
 export const getDevelopers = cache(async () => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockDevelopers;
   }
 
@@ -63,7 +67,7 @@ export const getDeveloperById = cache(async (id: string) => {
 });
 
 export const getDevelopersWithAllProjects = cache(async () => {
-  if (!hasServiceRoleEnv()) {
+  if (useMockData() || !hasServiceRoleEnv()) {
     return mockDevelopers;
   }
 

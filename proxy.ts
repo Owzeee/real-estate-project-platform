@@ -5,6 +5,9 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function proxy(request: NextRequest) {
   const response = await updateSession(request);
   const pathname = request.nextUrl.pathname;
+  const isDeveloperArea =
+    pathname === "/developer" || pathname.startsWith("/developer/");
+  const isAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -19,8 +22,7 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPage =
     pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup");
-  const needsAuth =
-    pathname.startsWith("/admin") || pathname.startsWith("/developer");
+  const needsAuth = isAdminArea || isDeveloperArea;
 
   if (needsAuth && !authCookiePresent) {
     const loginUrl = new URL("/auth/login", request.url);

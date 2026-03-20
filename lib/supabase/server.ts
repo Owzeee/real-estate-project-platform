@@ -2,6 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
+export function useMockData() {
+  return process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+}
+
 export function hasPublicSupabaseEnv() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
