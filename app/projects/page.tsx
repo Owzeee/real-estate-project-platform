@@ -34,16 +34,14 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   });
 
   return (
-    <main className="min-h-screen bg-transparent">
+    <main className="page-shell min-h-screen bg-transparent">
       <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <p className="inline-flex rounded-full bg-[rgba(198,154,91,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
-            Marketplace
-          </p>
+          <p className="eyebrow">Marketplace</p>
           <h1 className="mt-5 font-display text-5xl font-bold tracking-tight text-stone-950 sm:text-6xl">
             Live development projects
           </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
+          <p className="font-copy mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
             Browse approved projects with pricing, location, stage, and developer visibility already connected to your Supabase data.
           </p>
         </div>
@@ -52,37 +50,39 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[300px_1fr]">
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <form className="space-y-5 rounded-[1.75rem] border border-[rgba(141,104,71,0.12)] bg-[var(--card)] p-6 shadow-[0_18px_50px_rgba(32,28,25,0.06)]">
+            <form className="surface-panel space-y-5 rounded-[1.75rem] p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-stone-950">Refine results</p>
+                  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                    Narrow by keyword, location, type, and stage.
+                  </p>
+                </div>
+              </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Search
-                </label>
+                <label className="field-label">Search</label>
                 <input
                   name="q"
                   defaultValue={params.q}
                   placeholder="Project, developer, keyword"
-                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                  className="field-input"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Location
-                </label>
+                <label className="field-label">Location</label>
                 <input
                   name="location"
                   defaultValue={params.location}
                   placeholder="City, district, country"
-                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                  className="field-input"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Project type
-                </label>
+                <label className="field-label">Project type</label>
                 <select
                   name="type"
                   defaultValue={params.type}
-                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                  className="field-input"
                 >
                   <option value="">All project types</option>
                   <option value="apartment">Apartment</option>
@@ -94,13 +94,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Completion stage
-                </label>
+                <label className="field-label">Completion stage</label>
                 <select
                   name="stage"
                   defaultValue={params.stage}
-                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+                  className="field-input"
                 >
                   <option value="">All completion stages</option>
                   <option value="pre_launch">Pre-launch</option>
@@ -109,10 +107,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                   <option value="completed">Completed</option>
                 </select>
               </div>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)]"
-              >
+              <button type="submit" className="primary-button w-full text-sm">
                 Apply filters
               </button>
             </form>
@@ -120,13 +115,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
           <section>
             <div className="mb-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
-              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+              <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
                 {filteredProjects.length} visible projects
               </span>
-              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+              <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
                 {filteredProjects.filter((project) => project.isFeatured).length} featured
               </span>
-              <span className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-stone-700">
+              <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
                 {new Set(filteredProjects.map((project) => project.developerProfileId)).size} developers
               </span>
             </div>

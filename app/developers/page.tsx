@@ -27,33 +27,37 @@ export default async function DevelopersPage({
   });
 
   return (
-    <main className="min-h-screen bg-transparent">
+    <main className="page-shell min-h-screen bg-transparent">
       <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <p className="inline-flex rounded-full bg-[rgba(198,154,91,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
-            Developer Network
-          </p>
+          <p className="eyebrow">Developer Network</p>
           <h1 className="mt-5 font-display text-5xl font-bold tracking-tight text-stone-950 sm:text-6xl">
             Trusted development brands
           </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
+          <p className="font-copy mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
             Explore the developers behind the projects, including verification status, public profile content, and current marketplace exposure.
           </p>
 
-          <form className="mt-8 max-w-xl">
+          <form className="surface-panel mt-8 max-w-2xl rounded-[1.75rem] p-4 sm:p-5">
+            <label className="field-label">Search developers</label>
             <input
               name="q"
               defaultValue={params.q}
               placeholder="Search developer, website, or description"
-              className="w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-4 text-sm outline-none focus:border-[var(--primary)]"
+              className="field-input"
             />
           </form>
         </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8 text-sm text-[var(--muted-foreground)]">
-          Showing {filteredDevelopers.length} developer{filteredDevelopers.length === 1 ? "" : "s"}.
+        <div className="mb-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
+          <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+            {filteredDevelopers.length} visible developer{filteredDevelopers.length === 1 ? "" : "s"}
+          </span>
+          <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+            {filteredDevelopers.filter((developer) => developer.isVerified).length} verified
+          </span>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
