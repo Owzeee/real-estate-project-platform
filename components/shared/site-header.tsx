@@ -37,7 +37,7 @@ export async function SiteHeader() {
           </div>
           <div>
             <p className="font-display text-lg font-bold tracking-tight text-stone-950 sm:text-xl">
-              Real Estate Project Marketplace
+              IMMO NEUF
             </p>
             <p className="text-[11px] uppercase tracking-[0.26em] text-[var(--muted-foreground)]">
               Premium Development Platform
