@@ -73,9 +73,6 @@ export default async function Home() {
           <div className="relative min-h-[34rem] lg:min-h-[38rem]">
             <div className="absolute inset-0 rounded-[2.25rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] shadow-[0_40px_100px_rgba(32,28,25,0.25)]" />
             <div className="absolute inset-0 rounded-[2.25rem] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)]" />
-            <div className="absolute right-6 top-6 rounded-full bg-[rgba(255,255,255,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
-              Built For Managed Inventory
-            </div>
             <div className="relative flex h-full flex-col justify-between p-8 text-white sm:p-10">
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
