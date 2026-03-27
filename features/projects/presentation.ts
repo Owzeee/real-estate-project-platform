@@ -1,5 +1,14 @@
 import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
 
+type HousingExample = {
+  id: string;
+  title: string;
+  priceLabel: string;
+  areaLabel: string;
+  roomsLabel: string;
+  imageUrl: string | null;
+};
+
 function titleCase(value: string) {
   return value
     .split("_")
@@ -111,4 +120,57 @@ export function getProjectNarrative(project: ProjectDetail) {
           : "The project presentation is optimized for credibility, full asset access, and mature demand capture.";
 
   return `${opening} ${delivery}`;
+}
+
+export function getHousingExamples(project: ProjectDetail): HousingExample[] {
+  const mediaImages = project.media.filter((item) => item.mediaType === "image");
+  const imageFallback = project.heroMediaUrl ?? mediaImages[0]?.fileUrl ?? null;
+  const minPrice = project.minPrice ?? 180000;
+  const maxPrice = project.maxPrice ?? minPrice * 1.35;
+  const areaBase =
+    project.projectType === "villa"
+      ? 180
+      : project.projectType === "townhouse"
+        ? 145
+        : project.projectType === "commercial"
+          ? 110
+          : project.projectType === "mixed_use"
+            ? 98
+            : 56;
+  const roomBase =
+    project.projectType === "villa"
+      ? 5
+      : project.projectType === "townhouse"
+        ? 4
+        : project.projectType === "commercial"
+          ? 3
+          : project.projectType === "mixed_use"
+            ? 3
+            : 2;
+
+  const variants = [
+    { title: "Signature residence", priceFactor: 0.78, area: areaBase, rooms: roomBase },
+    { title: "Corner plan", priceFactor: 0.9, area: areaBase + 18, rooms: roomBase + 1 },
+    { title: "Panoramic layout", priceFactor: 1.02, area: areaBase + 34, rooms: roomBase + 1 },
+    { title: "Premium collection", priceFactor: 1.18, area: areaBase + 52, rooms: roomBase + 2 },
+  ];
+
+  return variants.map((variant, index) => {
+    const price = Math.round(
+      Math.min(maxPrice, Math.max(minPrice, minPrice * variant.priceFactor)),
+    );
+
+    return {
+      id: `${project.id}-example-${index + 1}`,
+      title: `${variant.rooms}-room ${variant.title.toLowerCase()} in ${project.title}`,
+      priceLabel: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: project.currencyCode,
+        maximumFractionDigits: 0,
+      }).format(price),
+      areaLabel: `${variant.area.toFixed(0)} m²`,
+      roomsLabel: `${variant.rooms} rooms`,
+      imageUrl: mediaImages[index]?.thumbnailUrl ?? mediaImages[index]?.fileUrl ?? imageFallback,
+    };
+  });
 }

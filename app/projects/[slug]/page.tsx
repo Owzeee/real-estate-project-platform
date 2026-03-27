@@ -7,6 +7,7 @@ import {
   formatCompletionStageLabel,
   formatProjectTypeLabel,
   formatStatusLabel,
+  getHousingExamples,
   getProjectAmenities,
   getProjectHighlights,
   getProjectNarrative,
@@ -33,6 +34,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const mapUrl = buildMapEmbedUrl(project);
   const highlights = getProjectHighlights(project);
+  const housingExamples = getHousingExamples(project);
   const amenities = getProjectAmenities(project);
   const narrative = getProjectNarrative(project);
   const mediaGallery = project.media.length > 0 ? project.media : [];
@@ -199,6 +201,53 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       {item}
                     </p>
                   </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+              <p className="eyebrow">Examples of Housing</p>
+              <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
+                Inventory-style layouts buyers can compare quickly
+              </h2>
+              <p className="font-copy mt-4 max-w-3xl text-base leading-8 text-[var(--muted-foreground)]">
+                This section mirrors the marketplace pattern from your screenshot: visual unit examples, fast pricing context, and compact specs that are easy to scan.
+              </p>
+
+              <div className="mt-8 space-y-4">
+                {housingExamples.map((example) => (
+                  <article
+                    key={example.id}
+                    className="rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-4 sm:p-5"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <div
+                        className="h-28 rounded-[1.2rem] bg-cover bg-center sm:w-36 sm:flex-none"
+                        style={{
+                          backgroundImage: example.imageUrl
+                            ? `linear-gradient(rgba(23,20,18,0.08),rgba(23,20,18,0.18)), url(${example.imageUrl})`
+                            : "linear-gradient(135deg, rgba(141,104,71,0.24), rgba(198,154,91,0.18))",
+                        }}
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="font-copy text-base leading-7 text-stone-700">
+                          {example.title}
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+                          <span className="text-lg font-semibold text-stone-950">
+                            {example.priceLabel}
+                          </span>
+                          <span className="text-sm font-semibold text-stone-700">
+                            {example.areaLabel}
+                          </span>
+                          <span className="text-sm font-semibold text-stone-700">
+                            {example.roomsLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
                 ))}
               </div>
             </article>
