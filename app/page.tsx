@@ -26,20 +26,26 @@ export default async function Home() {
   return (
     <main className="page-shell min-h-screen bg-transparent">
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(198,154,91,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(141,104,71,0.12),transparent_32%)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-14 px-4 py-16 sm:px-6 md:grid-cols-[1.08fr_0.92fr] md:items-center md:py-24 lg:px-8">
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <p className="eyebrow">Curated Real Estate Marketplace</p>
-              <h1 className="max-w-4xl font-display text-5xl font-bold leading-[0.95] tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">
-                Browse admin-managed real estate projects with the structure of a serious marketplace.
-              </h1>
-              <p className="font-copy max-w-2xl text-lg leading-8 text-[var(--muted-foreground)]">
-                This platform is designed for curated project inventory, developer visibility, reporting-ready presentation, and buyer inquiry capture instead of open listing spam.
-              </p>
-            </div>
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: mapProject?.heroMediaUrl
+              ? `linear-gradient(rgba(250,248,243,0.78),rgba(250,248,243,0.9)), url(${mapProject.heroMediaUrl})`
+              : "radial-gradient(circle_at_top_right,rgba(198,154,91,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(141,104,71,0.12),transparent_32%)",
+          }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,248,243,0.9)_0%,rgba(250,248,243,0.72)_42%,rgba(250,248,243,0.5)_100%)]" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:px-8 lg:py-20">
+          <div className="surface-panel max-w-xl rounded-[2rem] p-7 sm:p-8">
+            <p className="eyebrow">Curated Real Estate Marketplace</p>
+            <h1 className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">
+              Admin-managed inventory with a cleaner discovery experience.
+            </h1>
+            <p className="font-copy mt-5 text-base leading-8 text-[var(--muted-foreground)] sm:text-lg">
+              Browse serious development projects, compare credible brands, and move into inquiry without the noise of an open listings marketplace.
+            </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="mt-7 flex flex-wrap gap-4">
               <Link href="/projects" className="primary-button px-7 py-3.5 text-sm">
                 Explore projects
               </Link>
@@ -48,10 +54,10 @@ export default async function Home() {
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="mt-7 grid gap-4 sm:grid-cols-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="stat-chip rounded-[1.5rem] p-5">
-                  <p className="font-display text-4xl font-bold text-[var(--primary)]">{stat.value}</p>
+                <div key={stat.label} className="stat-chip rounded-[1.4rem] p-4">
+                  <p className="font-display text-3xl font-bold text-[var(--primary)]">{stat.value}</p>
                   <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted-foreground)]">
                     {stat.label}
                   </p>
@@ -60,76 +66,53 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative min-h-[28rem]">
-            <div className="absolute inset-0 rounded-[2rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] shadow-[0_40px_100px_rgba(32,28,25,0.25)]" />
-            <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)]" />
+          <div className="relative min-h-[34rem] lg:min-h-[38rem]">
+            <div className="absolute inset-0 rounded-[2.25rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] shadow-[0_40px_100px_rgba(32,28,25,0.25)]" />
+            <div className="absolute inset-0 rounded-[2.25rem] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)]" />
             <div className="absolute right-6 top-6 rounded-full bg-[rgba(255,255,255,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
               Built For Managed Inventory
             </div>
             <div className="relative flex h-full flex-col justify-between p-8 text-white sm:p-10">
-              <div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    "Admin created",
-                    "Map browsing",
-                    "Developer profiles",
-                    "Inquiry capture",
-                  ].map((item) => (
-                    <div key={item} className="rounded-full border border-white/10 bg-white/8 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/84">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-
-                {mapProject && mapProjectUrl ? (
-                  <div className="mt-8 overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/6">
-                    <div className="flex items-center justify-between px-5 py-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                          Map Spotlight
-                        </p>
-                        <p className="mt-2 font-display text-2xl font-semibold">
-                          {mapProject.title}
-                        </p>
-                      </div>
-                      <Link
-                        href="/projects"
-                        className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white/88 hover:bg-white/10"
-                      >
-                        Explore map
-                      </Link>
-                    </div>
-                    <iframe
-                      title={`${mapProject.title} map preview`}
-                      src={mapProjectUrl}
-                      className="h-60 w-full border-0"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  "Admin created",
+                  "Map browsing",
+                  "Developer profiles",
+                  "Inquiry capture",
+                ].map((item) => (
+                  <div key={item} className="rounded-full border border-white/10 bg-white/8 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/84">
+                    {item}
                   </div>
-                ) : (
-                  <div className="mt-8 grid gap-4">
-                    {[
-                      {
-                        title: "Structured discovery",
-                        body: "Map context, filters, and curated inventory make project browsing feel intentional rather than cluttered.",
-                      },
-                      {
-                        title: "Built for media",
-                        body: "Images, brochures, videos, and 3D tours fit naturally into the project model.",
-                      },
-                    ].map((item) => (
-                      <article
-                        key={item.title}
-                        className="rounded-[1.5rem] border border-white/10 bg-white/7 p-5 backdrop-blur-sm"
-                      >
-                        <h2 className="font-display text-2xl font-semibold">{item.title}</h2>
-                        <p className="mt-3 text-sm leading-7 text-white/78">{item.body}</p>
-                      </article>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
+
+              {mapProject && mapProjectUrl ? (
+                <div className="mt-8 overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/6">
+                  <div className="flex items-center justify-between px-5 py-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                        Map Spotlight
+                      </p>
+                      <p className="mt-2 font-display text-3xl font-semibold">
+                        {mapProject.title}
+                      </p>
+                    </div>
+                    <Link
+                      href="/projects?view=map"
+                      className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white/88 hover:bg-white/10"
+                    >
+                      Explore map
+                    </Link>
+                  </div>
+                  <iframe
+                    title={`${mapProject.title} map preview`}
+                    src={mapProjectUrl}
+                    className="h-72 w-full border-0 sm:h-80"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
