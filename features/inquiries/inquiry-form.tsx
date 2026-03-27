@@ -26,24 +26,18 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="projectId" value={projectId} />
       <div>
-        <label
-          htmlFor="fullName"
-          className="mb-2 block text-sm font-medium text-stone-700"
-        >
+        <label htmlFor="fullName" className="field-label">
           Full name
         </label>
         <input
           id="fullName"
           name="fullName"
           required
-          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          className="field-input"
         />
       </div>
       <div>
-        <label
-          htmlFor="email"
-          className="mb-2 block text-sm font-medium text-stone-700"
-        >
+        <label htmlFor="email" className="field-label">
           Email
         </label>
         <input
@@ -51,41 +45,35 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
           name="email"
           type="email"
           required
-          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          className="field-input"
         />
       </div>
       <div>
-        <label
-          htmlFor="phone"
-          className="mb-2 block text-sm font-medium text-stone-700"
-        >
+        <label htmlFor="phone" className="field-label">
           Phone
         </label>
         <input
           id="phone"
           name="phone"
-          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          className="field-input"
         />
       </div>
       <div>
-        <label
-          htmlFor="message"
-          className="mb-2 block text-sm font-medium text-stone-700"
-        >
+        <label htmlFor="message" className="field-label">
           Message
         </label>
         <textarea
           id="message"
           name="message"
           rows={5}
-          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          className="field-input min-h-32 resize-y"
           placeholder="Tell the developer what you are looking for."
         />
       </div>
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="primary-button w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Sending inquiry..." : "Send inquiry"}
       </button>
