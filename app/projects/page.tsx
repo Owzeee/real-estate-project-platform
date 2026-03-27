@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import { ProjectCard } from "@/features/projects/project-card";
 import {
   buildMapEmbedUrl,
@@ -349,6 +350,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                             </div>
 
                             <div className="mt-6 flex flex-wrap items-center gap-3">
+                              <ProjectSaveActions project={project} />
                               <Link
                                 href={buildProjectsHref({
                                   view: "map",

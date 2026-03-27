@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lora, Playfair_Display } from "next/font/google";
 
 import { SiteHeader } from "@/components/shared/site-header";
+import { ProjectsStoreProvider } from "@/features/projects/client-store";
+import { ProjectsUtilityTray } from "@/features/projects/projects-utility-tray";
 import "./globals.css";
 
 const geist = Geist({
@@ -43,8 +45,11 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable}`}
     >
       <body className="font-sans antialiased">
-        <SiteHeader />
-        {children}
+        <ProjectsStoreProvider>
+          <SiteHeader />
+          {children}
+          <ProjectsUtilityTray />
+        </ProjectsStoreProvider>
       </body>
     </html>
   );

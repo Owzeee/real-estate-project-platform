@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import type { ProjectSummary } from "@/features/projects/types";
 import { formatPriceRange } from "@/lib/utils/format-price";
 
@@ -68,13 +69,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto flex items-center justify-between gap-4 pt-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-            Marketplace listing
-          </p>
+        <div className="mt-auto pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+              Marketplace listing
+            </p>
+            <ProjectSaveActions project={project} />
+          </div>
           <Link
             href={`/projects/${project.slug}`}
-            className="primary-button px-5 py-3 text-sm"
+            className="primary-button mt-4 w-full text-sm"
           >
             View project
           </Link>

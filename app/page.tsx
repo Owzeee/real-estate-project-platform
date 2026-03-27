@@ -11,6 +11,8 @@ export default async function Home() {
     getFeaturedProjects(),
     getDevelopers(),
   ]);
+  const luxuryHeroImage =
+    "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80";
   const mapProject = featuredProjects[0] ?? null;
   const mapProjectUrl = mapProject ? buildMapEmbedUrl(mapProject) : null;
 
@@ -29,14 +31,13 @@ export default async function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: mapProject?.heroMediaUrl
-              ? `linear-gradient(rgba(250,248,243,0.78),rgba(250,248,243,0.9)), url(${mapProject.heroMediaUrl})`
-              : "radial-gradient(circle_at_top_right,rgba(198,154,91,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(141,104,71,0.12),transparent_32%)",
+            backgroundImage: `linear-gradient(rgba(22,18,14,0.18),rgba(22,18,14,0.24)), url(${luxuryHeroImage})`,
           }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,248,243,0.9)_0%,rgba(250,248,243,0.72)_42%,rgba(250,248,243,0.5)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,248,243,0.58)_0%,rgba(250,248,243,0.38)_34%,rgba(250,248,243,0.14)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(198,154,91,0.16),transparent_28%)]" />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:px-8 lg:py-20">
-          <div className="surface-panel max-w-xl rounded-[2rem] p-7 sm:p-8">
+          <div className="max-w-xl rounded-[2rem] border border-white/55 bg-[rgba(255,251,245,0.72)] p-7 shadow-[0_24px_70px_rgba(32,28,25,0.14)] backdrop-blur-md sm:p-8">
             <p className="eyebrow">Curated Real Estate Marketplace</p>
             <h1 className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">
               Admin-managed inventory with a cleaner discovery experience.
@@ -56,7 +57,10 @@ export default async function Home() {
 
             <div className="mt-7 grid gap-4 sm:grid-cols-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="stat-chip rounded-[1.4rem] p-4">
+                <div
+                  key={stat.label}
+                  className="rounded-[1.4rem] border border-white/60 bg-[rgba(255,255,255,0.74)] p-4 shadow-[0_12px_30px_rgba(32,28,25,0.08)]"
+                >
                   <p className="font-display text-3xl font-bold text-[var(--primary)]">{stat.value}</p>
                   <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted-foreground)]">
                     {stat.label}

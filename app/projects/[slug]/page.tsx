@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { InquiryForm } from "@/features/inquiries/inquiry-form";
+import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
   buildMapEmbedUrl,
   formatCompletionStageLabel,
@@ -119,6 +120,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     Admin-curated
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <ProjectSaveActions project={project} />
               </div>
             </div>
 
