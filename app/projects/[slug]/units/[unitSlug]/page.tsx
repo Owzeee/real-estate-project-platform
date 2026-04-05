@@ -46,7 +46,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
           <span>{unit.title}</span>
         </div>
 
-        <div className="grid gap-10 xl:grid-cols-[1.18fr_0.82fr]">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1.42fr)_minmax(300px,0.58fr)]">
           <section className="space-y-8">
             <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
               <p className="eyebrow">Unit Details</p>
@@ -160,7 +160,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
           </section>
 
           <aside className="xl:sticky xl:top-28 xl:self-start">
-            <div className="surface-panel rounded-[1.75rem] p-5 sm:p-6">
+            <div className="surface-panel ml-auto rounded-[1.75rem] p-5 sm:max-w-[21rem] sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 {unit.priceHeading}
               </p>
