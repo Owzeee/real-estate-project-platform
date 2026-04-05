@@ -20,7 +20,7 @@ export default async function AdminProjectsPage() {
             <SectionHeading
               eyebrow="Admin"
               title="Project moderation"
-              description="Create projects, assign them to developers, add unit-level properties, and moderate visibility without touching the database directly."
+              description=""
             />
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
