@@ -134,7 +134,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </section>
 
-        <div className="mt-10 grid gap-10 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1.38fr)_minmax(320px,0.62fr)]">
           <section className="space-y-8">
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
               <p className="eyebrow">About This Project</p>
@@ -341,7 +341,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </section>
 
           <aside className="xl:sticky xl:top-28 xl:self-start">
-            <div className="surface-panel rounded-[1.75rem] p-5 sm:p-6">
+            <div className="surface-panel ml-auto rounded-[1.75rem] p-5 sm:max-w-[22rem] sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Contact card
               </p>
