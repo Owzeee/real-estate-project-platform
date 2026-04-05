@@ -20,9 +20,15 @@ export default async function AdminProjectsPage() {
             <SectionHeading
               eyebrow="Admin"
               title="Project moderation"
-              description="Approve, reject, and feature submissions without touching the database directly."
+              description="Create projects, assign them to developers, add unit-level properties, and moderate visibility without touching the database directly."
             />
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/admin/projects/new"
+                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-950 hover:bg-white/90"
+              >
+                Create project
+              </Link>
               <Link
                 href="/admin/developers"
                 className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/8"
@@ -72,6 +78,12 @@ export default async function AdminProjectsPage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    href={`/admin/projects/${project.id}/edit`}
+                    className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:border-[var(--primary)] hover:bg-[rgba(141,104,71,0.05)]"
+                  >
+                    Edit project
+                  </Link>
                   <form action={moderateProject.bind(null, project.id, "approved")}>
                     <button className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)]">
                       Approve

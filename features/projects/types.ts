@@ -24,6 +24,42 @@ export type ProjectMedia = {
   sortOrder: number;
 };
 
+export type ProjectUnitAmenityGroup = {
+  title: string;
+  items: string[];
+};
+
+export type ProjectUnitBed = {
+  label: string;
+  roomLabel: string;
+};
+
+export type ProjectUnitAvailabilityMonth = {
+  label: string;
+  status: "available" | "limited";
+};
+
+export type ProjectUnit = {
+  id: string;
+  projectId: string;
+  title: string;
+  slug: string;
+  summary: string | null;
+  monthlyRent: number | null;
+  currencyCode: string;
+  areaSqm: number | null;
+  rooms: number | null;
+  imageUrl: string | null;
+  gallery: { src: string; alt: string }[];
+  amenityGroups: ProjectUnitAmenityGroup[];
+  beds: ProjectUnitBed[];
+  minimumStayMonths: number | null;
+  maximumStayMonths: number | null;
+  availableFrom: string | null;
+  availabilityMonths: ProjectUnitAvailabilityMonth[];
+  sortOrder: number;
+};
+
 export type ProjectSummary = {
   id: string;
   developerProfileId: string;
@@ -50,4 +86,5 @@ export type ProjectSummary = {
 
 export type ProjectDetail = ProjectSummary & {
   media: ProjectMedia[];
+  units: ProjectUnit[];
 };

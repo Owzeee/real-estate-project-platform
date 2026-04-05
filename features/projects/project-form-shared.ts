@@ -4,6 +4,26 @@ import type {
   ProjectType,
 } from "@/features/projects/types";
 
+export type ProjectUnitFormValue = {
+  title: string;
+  slug: string;
+  summary: string;
+  monthlyRent: string;
+  areaSqm: string;
+  rooms: string;
+  availableFrom: string;
+  minimumStayMonths: string;
+  maximumStayMonths: string;
+  imageUrl: string;
+  galleryUrls: string;
+  essentials: string;
+  kitchen: string;
+  bedroom: string;
+  bathroom: string;
+  other: string;
+  beds: string;
+};
+
 export type DeveloperOption = {
   id: string;
   companyName: string;
@@ -29,6 +49,7 @@ export type ProjectFormValues = {
   videoUrls: string;
   brochureUrls: string;
   tour3dUrls: string;
+  units: ProjectUnitFormValue[];
 };
 
 export const projectTypes = [
@@ -74,4 +95,5 @@ export const emptyProjectFormValues: ProjectFormValues = {
   videoUrls: "",
   brochureUrls: "",
   tour3dUrls: "",
+  units: [],
 };

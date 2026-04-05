@@ -2,25 +2,30 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SectionHeading } from "@/components/shared/section-heading";
+import { getDevelopersWithAllProjects } from "@/features/developers/queries";
 import { updateProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
-import { ProjectMediaManager } from "@/features/projects/project-media-manager";
 import type { ProjectFormValues } from "@/features/projects/project-form-shared";
 import { getProjectById } from "@/features/projects/queries";
-import { requireDeveloper } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 
-type EditProjectPageProps = {
+type AdminEditProjectPageProps = {
   params: Promise<{
     id: string;
   }>;
 };
 
-export default async function EditProjectPage({ params }: EditProjectPageProps) {
-  const auth = await requireDeveloper();
+export default async function AdminEditProjectPage({
+  params,
+}: AdminEditProjectPageProps) {
+  await requireAdmin();
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [project, developers] = await Promise.all([
+    getProjectById(id),
+    getDevelopersWithAllProjects(),
+  ]);
 
-  if (!project || project.developerProfileId !== auth.developerProfile.id) {
+  if (!project) {
     notFound();
   }
 
@@ -88,50 +93,37 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   };
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2e8_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-transparent px-6 py-12 sm:px-10">
+      <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
-            eyebrow="Developer Dashboard"
+            eyebrow="Admin"
             title={`Edit ${project.title}`}
-            description="Update project content, pricing, media, and visibility while keeping ownership tied to your developer profile."
+            description="Update the project, change its developer assignment, and manage the unit-level properties inside it."
           />
           <Link
-            href="/developer/projects"
+            href="/admin/projects"
             className="text-sm font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
           >
-            Back to dashboard
+            Back to admin projects
           </Link>
         </div>
 
-        <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
+        <section className="mt-10 rounded-[2rem] border border-[rgba(141,104,71,0.12)] bg-[var(--card)] p-8 shadow-[0_24px_70px_rgba(32,28,25,0.08)] sm:p-10">
           <ProjectForm
             action={async (state, formData) => {
               "use server";
               formData.set("projectId", project.id);
               return updateProject(state, formData);
             }}
-            developers={[
-              {
-                id: auth.developerProfile.id,
-                companyName: auth.developerProfile.companyName,
-              },
-            ]}
+            developers={developers.map((developer) => ({
+              id: developer.id,
+              companyName: developer.companyName,
+            }))}
             initialValues={initialValues}
             submitLabel="Save changes"
             pendingLabel="Saving changes..."
           />
-        </section>
-
-        <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
-          <SectionHeading
-            eyebrow="Project Media"
-            title="Manage gallery order"
-            description="Reorder assets, choose the cover media used on project cards, or remove outdated media without re-entering every field."
-          />
-          <div className="mt-8">
-            <ProjectMediaManager projectId={project.id} media={project.media} />
-          </div>
         </section>
       </div>
     </main>

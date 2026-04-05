@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { type ProjectActionState } from "@/features/projects/action-state";
+import type { ProjectUnit } from "@/features/projects/types";
 import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
@@ -48,6 +49,100 @@ function buildMediaRows(projectId: string, formData: FormData) {
       sort_order: sortOrder++,
     })),
   );
+}
+
+function parseUnitItems(value: string) {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseUnitsJson(formData: FormData) {
+  const raw = formData.get("unitsJson")?.toString().trim();
+
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildUnitRows(
+  projectId: string,
+  currencyCode: string,
+  formData: FormData,
+) {
+  const units = parseUnitsJson(formData);
+
+  return units
+    .map((unit, index) => {
+      const title = unit.title?.toString().trim();
+      const slug = unit.slug?.toString().trim();
+
+      if (!title || !slug) {
+        return null;
+      }
+
+      const monthlyRent = Number(unit.monthlyRent);
+      const areaSqm = Number(unit.areaSqm);
+      const rooms = Number(unit.rooms);
+      const minimumStayMonths = Number(unit.minimumStayMonths);
+      const maximumStayMonths = Number(unit.maximumStayMonths);
+
+      const amenityGroups = [
+        { title: "Essentials", items: parseUnitItems(unit.essentials ?? "") },
+        { title: "Kitchen", items: parseUnitItems(unit.kitchen ?? "") },
+        { title: "Bedroom", items: parseUnitItems(unit.bedroom ?? "") },
+        { title: "Bathroom", items: parseUnitItems(unit.bathroom ?? "") },
+        { title: "Other", items: parseUnitItems(unit.other ?? "") },
+      ].filter((group) => group.items.length > 0);
+
+      const beds = parseUnitItems(unit.beds ?? "").map((item) => ({
+        label: item,
+        roomLabel: "Bedroom",
+      }));
+
+      return {
+        project_id: projectId,
+        title,
+        slug,
+        summary: unit.summary?.toString().trim() || null,
+        monthly_rent: Number.isFinite(monthlyRent) ? monthlyRent : null,
+        currency_code: currencyCode,
+        area_sqm: Number.isFinite(areaSqm) ? areaSqm : null,
+        rooms: Number.isFinite(rooms) ? rooms : null,
+        image_url: unit.imageUrl?.toString().trim() || null,
+        gallery: parseUnitItems(unit.galleryUrls ?? "").map((src, galleryIndex) => ({
+          src,
+          alt: `${title} image ${galleryIndex + 1}`,
+        })),
+        amenity_groups: amenityGroups,
+        beds,
+        minimum_stay_months: Number.isFinite(minimumStayMonths)
+          ? minimumStayMonths
+          : null,
+        maximum_stay_months: Number.isFinite(maximumStayMonths)
+          ? maximumStayMonths
+          : null,
+        available_from: unit.availableFrom?.toString().trim() || null,
+        availability_months: [
+          { label: "Mar 2026", status: "limited" },
+          { label: "Apr 2026", status: "available" },
+          { label: "May 2026", status: "available" },
+          { label: "Jun 2026", status: "available" },
+          { label: "Jul 2026", status: "available" },
+          { label: "Aug 2026", status: "available" },
+        ] satisfies ProjectUnit["availabilityMonths"],
+        sort_order: index,
+      };
+    })
+    .filter(Boolean);
 }
 
 function revalidateProjectPaths(slug?: string) {
@@ -131,6 +226,39 @@ async function normalizeProjectMediaSortOrder(projectId: string) {
   );
 }
 
+async function replaceProjectUnits(
+  projectId: string,
+  currencyCode: string,
+  formData: FormData,
+) {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("project_units")
+    .delete()
+    .eq("project_id", projectId);
+
+  if (deleteError) {
+    return deleteError.message;
+  }
+
+  const unitRows = buildUnitRows(projectId, currencyCode, formData);
+  if (unitRows.length > 0) {
+    const { error: insertError } = await supabase
+      .from("project_units")
+      .insert(unitRows);
+
+    if (insertError) {
+      return insertError.message;
+    }
+  }
+
+  return null;
+}
+
 export async function createProject(
   _previousState: ProjectActionState,
   formData: FormData,
@@ -201,6 +329,7 @@ export async function createProject(
     auth.profile.role === "developer" && auth.developerProfile
       ? auth.developerProfile.id
       : developerProfileId;
+  const isAdmin = auth.profile.role === "admin";
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
@@ -220,8 +349,9 @@ export async function createProject(
       status,
       project_type: projectType,
       completion_stage: completionStage,
-      approval_status: "pending",
+      approval_status: isAdmin ? "approved" : "pending",
       is_featured: false,
+      approved_at: isAdmin ? new Date().toISOString() : null,
     })
     .select("id")
     .single();
@@ -246,6 +376,14 @@ export async function createProject(
         message: mediaError.message,
       };
     }
+  }
+
+  const unitError = await replaceProjectUnits(project.id, currencyCode, formData);
+  if (unitError) {
+    return {
+      status: "error",
+      message: unitError,
+    };
   }
 
   revalidateProjectPaths(slug);
@@ -360,6 +498,14 @@ export async function updateProject(
         message: mediaError.message,
       };
     }
+  }
+
+  const unitError = await replaceProjectUnits(projectId, currencyCode, formData);
+  if (unitError) {
+    return {
+      status: "error",
+      message: unitError,
+    };
   }
 
   revalidateProjectPaths(slug);

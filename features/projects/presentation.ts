@@ -1,4 +1,8 @@
-import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
+import type {
+  ProjectDetail,
+  ProjectSummary,
+  ProjectUnit as StoredProjectUnit,
+} from "@/features/projects/types";
 
 export type ProjectAmenityGroup = {
   title: string;
@@ -15,7 +19,7 @@ export type ProjectAvailabilityMonth = {
   status: "available" | "limited";
 };
 
-export type ProjectUnit = {
+export type ProjectUnitView = {
   id: string;
   slug: string;
   title: string;
@@ -291,7 +295,7 @@ export function getProjectNarrative(project: ProjectDetail) {
   return `${opening} ${delivery}`;
 }
 
-export function getProjectUnits(project: ProjectDetail): ProjectUnit[] {
+function buildGeneratedProjectUnits(project: ProjectDetail): ProjectUnitView[] {
   const mediaImages = project.media.filter((item) => item.mediaType === "image");
   const imageFallback = project.heroMediaUrl ?? mediaImages[0]?.fileUrl ?? null;
   const minPrice = project.minPrice ?? 180000;
@@ -375,4 +379,52 @@ export function getHousingExamples(project: ProjectDetail) {
 
 export function getProjectUnitBySlug(project: ProjectDetail, unitSlug: string) {
   return getProjectUnits(project).find((unit) => unit.slug === unitSlug) ?? null;
+}
+
+function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
+  const price =
+    unit.monthlyRent ?? 0;
+
+  return {
+    id: unit.id,
+    slug: unit.slug,
+    title: unit.title,
+    summary:
+      unit.summary ??
+      "A furnished, managed apartment option inside the project with buyer-ready specs, availability guidance, and unit-level details.",
+    priceLabel: formatCurrency(unit.currencyCode, price),
+    monthlyRentLabel: `${formatCurrency(unit.currencyCode, price)} per month`,
+    areaLabel: unit.areaSqm ? `${unit.areaSqm.toFixed(0)} m²` : "Area on request",
+    roomsLabel: unit.rooms ? `${unit.rooms} rooms` : "Rooms on request",
+    imageUrl: unit.imageUrl,
+    gallery: unit.gallery,
+    amenityGroups: unit.amenityGroups,
+    beds: unit.beds,
+    minimumStayLabel: unit.minimumStayMonths
+      ? `${unit.minimumStayMonths} Months`
+      : "Flexible",
+    maximumStayLabel: unit.maximumStayMonths
+      ? `${unit.maximumStayMonths} Months`
+      : "Flexible",
+    availableFromLabel: unit.availableFrom
+      ? new Date(unit.availableFrom).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "Ask for timing",
+    availabilityMonths:
+      unit.availabilityMonths.length > 0 ? unit.availabilityMonths : getAvailabilityMonths(),
+  };
+}
+
+export function getProjectUnits(project: ProjectDetail): ProjectUnitView[] {
+  if (project.units.length > 0) {
+    return project.units
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map(mapStoredProjectUnit);
+  }
+
+  return buildGeneratedProjectUnits(project);
 }

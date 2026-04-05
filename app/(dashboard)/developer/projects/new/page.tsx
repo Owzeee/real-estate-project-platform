@@ -59,6 +59,7 @@ export default async function NewProjectPage() {
                 videoUrls: "",
                 brochureUrls: "",
                 tour3dUrls: "",
+                units: [],
               }}
               submitLabel="Create project"
               pendingLabel="Creating project..."

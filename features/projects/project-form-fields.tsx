@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { ProjectUnitsEditor } from "@/features/projects/project-units-editor";
 import type {
   DeveloperOption,
   ProjectFormValues,
@@ -358,6 +359,8 @@ export function ProjectFormFields({
           />
         </div>
       </section>
+
+      <ProjectUnitsEditor initialUnits={initialValues.units} />
     </>
   );
 }

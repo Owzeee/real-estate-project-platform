@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { mockProjectSummaries, mockProjects } from "@/features/projects/mock-data";
-import type { ProjectDetail, ProjectSummary } from "@/features/projects/types";
+import type { ProjectDetail, ProjectSummary, ProjectUnit } from "@/features/projects/types";
 import {
   createAdminSupabaseClient,
   hasServiceRoleEnv,
@@ -73,6 +73,52 @@ function mapProjectSummary(row: {
     longitude: row.longitude,
     heroMediaUrl: media?.file_url ?? null,
   };
+}
+
+function mapProjectUnits(
+  units:
+    | {
+        id: string;
+        project_id: string;
+        title: string;
+        slug: string;
+        summary: string | null;
+        monthly_rent: number | null;
+        currency_code: string;
+        area_sqm: number | null;
+        rooms: number | null;
+        image_url: string | null;
+        gallery: ProjectUnit["gallery"] | null;
+        amenity_groups: ProjectUnit["amenityGroups"] | null;
+        beds: ProjectUnit["beds"] | null;
+        minimum_stay_months: number | null;
+        maximum_stay_months: number | null;
+        available_from: string | null;
+        availability_months: ProjectUnit["availabilityMonths"] | null;
+        sort_order: number;
+      }[]
+    | null,
+): ProjectUnit[] {
+  return (units ?? []).map((unit) => ({
+    id: unit.id,
+    projectId: unit.project_id,
+    title: unit.title,
+    slug: unit.slug,
+    summary: unit.summary,
+    monthlyRent: unit.monthly_rent,
+    currencyCode: unit.currency_code,
+    areaSqm: unit.area_sqm,
+    rooms: unit.rooms,
+    imageUrl: unit.image_url,
+    gallery: unit.gallery ?? [],
+    amenityGroups: unit.amenity_groups ?? [],
+    beds: unit.beds ?? [],
+    minimumStayMonths: unit.minimum_stay_months,
+    maximumStayMonths: unit.maximum_stay_months,
+    availableFrom: unit.available_from,
+    availabilityMonths: unit.availability_months ?? [],
+    sortOrder: unit.sort_order,
+  }));
 }
 
 export const getProjects = cache(async () => {
@@ -239,6 +285,26 @@ export const getProjectBySlug = cache(async (slug: string) => {
           thumbnail_url,
           title,
           sort_order
+        ),
+        project_units (
+          id,
+          project_id,
+          title,
+          slug,
+          summary,
+          monthly_rent,
+          currency_code,
+          area_sqm,
+          rooms,
+          image_url,
+          gallery,
+          amenity_groups,
+          beds,
+          minimum_stay_months,
+          maximum_stay_months,
+          available_from,
+          availability_months,
+          sort_order
         )
       `,
     )
@@ -267,6 +333,7 @@ export const getProjectBySlug = cache(async (slug: string) => {
   return {
     ...summary,
     media,
+    units: mapProjectUnits(data.project_units),
   };
 });
 
@@ -314,6 +381,26 @@ export const getProjectById = cache(async (id: string) => {
           thumbnail_url,
           title,
           sort_order
+        ),
+        project_units (
+          id,
+          project_id,
+          title,
+          slug,
+          summary,
+          monthly_rent,
+          currency_code,
+          area_sqm,
+          rooms,
+          image_url,
+          gallery,
+          amenity_groups,
+          beds,
+          minimum_stay_months,
+          maximum_stay_months,
+          available_from,
+          availability_months,
+          sort_order
         )
       `,
     )
@@ -340,5 +427,6 @@ export const getProjectById = cache(async (id: string) => {
       title: item.title,
       sortOrder: item.sort_order,
     })) as ProjectDetail["media"],
+    units: mapProjectUnits(data.project_units),
   };
 });

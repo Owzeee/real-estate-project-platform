@@ -57,6 +57,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 2,
       },
     ],
+    units: [],
   },
   {
     id: "project-canyon",
@@ -101,6 +102,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 1,
       },
     ],
+    units: [],
   },
   {
     id: "project-serene",
@@ -136,6 +138,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 0,
       },
     ],
+    units: [],
   },
   {
     id: "project-oceanic",
@@ -171,6 +174,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 0,
       },
     ],
+    units: [],
   },
   {
     id: "project-orchid",
@@ -206,6 +210,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 0,
       },
     ],
+    units: [],
   },
   {
     id: "project-harbor",
@@ -241,6 +246,7 @@ export const mockProjects: ProjectDetail[] = [
         sortOrder: 0,
       },
     ],
+    units: [],
   },
 ];
 
