@@ -10,7 +10,7 @@ import {
 
 import { formatCompletionStageLabel, formatProjectTypeLabel } from "@/features/projects/presentation";
 import type { ProjectSummary } from "@/features/projects/types";
-import { formatPriceRange } from "@/lib/utils/format-price";
+import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type StoredProject = Pick<
   ProjectSummary,
@@ -23,7 +23,10 @@ type StoredProject = Pick<
   | "completionStage"
   | "minPrice"
   | "maxPrice"
+  | "rentPrice"
   | "currencyCode"
+  | "offerType"
+  | "priceMode"
   | "heroMediaUrl"
 >;
 
@@ -151,7 +154,10 @@ export function toStoredProject(project: ProjectSummary): StoredProject {
     completionStage: project.completionStage,
     minPrice: project.minPrice,
     maxPrice: project.maxPrice,
+    rentPrice: project.rentPrice,
     currencyCode: project.currencyCode,
+    offerType: project.offerType,
+    priceMode: project.priceMode,
     heroMediaUrl: project.heroMediaUrl,
   };
 }
@@ -167,7 +173,15 @@ export function getCompareRows(project: StoredProject) {
     },
     {
       label: "Price",
-      value: formatPriceRange(project.minPrice, project.maxPrice, project.currencyCode),
+      value: formatProjectPricing({
+        offerType: project.offerType,
+        priceMode: project.priceMode,
+        fixedPrice: project.minPrice,
+        minPrice: project.minPrice,
+        maxPrice: project.maxPrice,
+        rentPrice: project.rentPrice,
+        currencyCode: project.currencyCode,
+      }),
     },
   ];
 }

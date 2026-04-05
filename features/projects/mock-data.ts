@@ -192,6 +192,11 @@ function makeUnit(
   input: {
     title: string;
     summary: string;
+    offerType?: ProjectUnit["offerType"];
+    priceMode?: ProjectUnit["priceMode"];
+    fixedPrice?: number;
+    minPrice?: number;
+    maxPrice?: number;
     monthlyRent: number;
     currencyCode: string;
     areaSqm: number;
@@ -211,6 +216,22 @@ function makeUnit(
     title: input.title,
     slug,
     summary: input.summary,
+    offerType: input.offerType ?? "sale",
+    priceMode: input.priceMode ?? "fixed",
+    fixedPrice:
+      input.offerType === "rent"
+        ? null
+        : (input.fixedPrice ?? input.minPrice ?? Math.round(input.monthlyRent * 180)),
+    minPrice:
+      input.offerType === "rent"
+        ? null
+        : (input.priceMode === "range"
+            ? (input.minPrice ?? null)
+            : (input.fixedPrice ?? input.minPrice ?? Math.round(input.monthlyRent * 180))),
+    maxPrice:
+      input.offerType === "rent"
+        ? null
+        : (input.priceMode === "range" ? (input.maxPrice ?? null) : null),
     monthlyRent: input.monthlyRent,
     currencyCode: input.currencyCode,
     areaSqm: input.areaSqm,
@@ -242,10 +263,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "United Arab Emirates",
     minPrice: 420000,
     maxPrice: 1350000,
+    rentPrice: null,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "sale",
+    priceMode: "range",
     category: "residential",
     projectType: "apartment",
     completionStage: "under_construction",
@@ -375,10 +398,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "Saudi Arabia",
     minPrice: 310000,
     maxPrice: 2200000,
+    rentPrice: null,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "sale",
+    priceMode: "contact",
     category: "commercial",
     projectType: "mixed_use",
     completionStage: "pre_launch",
@@ -439,6 +464,7 @@ export const mockProjects: ProjectDetail[] = [
         title: "Retail showroom suite",
         summary:
           "A flagship ground-floor commercial unit with dual frontage, full-height display glazing, and direct loading access.",
+        offerType: "rent",
         monthlyRent: 4450,
         currencyCode: "USD",
         areaSqm: 136,
@@ -494,10 +520,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "Egypt",
     minPrice: 580000,
     maxPrice: 990000,
+    rentPrice: null,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "sale",
+    priceMode: "fixed",
     category: "residential",
     projectType: "villa",
     completionStage: "ready",
@@ -598,10 +626,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "United Arab Emirates",
     minPrice: 690000,
     maxPrice: 3100000,
+    rentPrice: null,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "sale",
+    priceMode: "fixed",
     category: "residential",
     projectType: "apartment",
     completionStage: "pre_launch",
@@ -700,10 +730,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "United Arab Emirates",
     minPrice: 760000,
     maxPrice: 1490000,
+    rentPrice: null,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "sale",
+    priceMode: "range",
     category: "residential",
     projectType: "townhouse",
     completionStage: "under_construction",
@@ -799,10 +831,12 @@ export const mockProjects: ProjectDetail[] = [
     country: "Qatar",
     minPrice: 980000,
     maxPrice: 5400000,
+    rentPrice: 6200,
     currencyCode: "USD",
     status: "active",
     approvalStatus: "approved",
     offerType: "rent",
+    priceMode: "fixed",
     category: "office",
     projectType: "commercial",
     completionStage: "under_construction",
@@ -843,6 +877,7 @@ export const mockProjects: ProjectDetail[] = [
         title: "Executive office suite",
         summary:
           "A premium fitted office with reception, boardroom, and panoramic waterfront glazing for leadership teams.",
+        offerType: "rent",
         monthlyRent: 6200,
         currencyCode: "USD",
         areaSqm: 188,
@@ -863,6 +898,7 @@ export const mockProjects: ProjectDetail[] = [
         title: "Waterfront HQ floor",
         summary:
           "A larger office plate configured for HQ occupancy, with a client arrival zone, executive suites, and branded front-of-house space.",
+        offerType: "rent",
         monthlyRent: 12400,
         currencyCode: "USD",
         areaSqm: 426,
@@ -896,10 +932,12 @@ export const mockProjectSummaries: ProjectSummary[] = mockProjects.map((project)
   country: project.country,
   minPrice: project.minPrice,
   maxPrice: project.maxPrice,
+  rentPrice: project.rentPrice,
   currencyCode: project.currencyCode,
   status: project.status,
   approvalStatus: project.approvalStatus,
   offerType: project.offerType,
+  priceMode: project.priceMode,
   category: project.category,
   projectType: project.projectType,
   completionStage: project.completionStage,

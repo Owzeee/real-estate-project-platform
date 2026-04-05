@@ -2,6 +2,7 @@ import type {
   CompletionStage,
   ProjectCategory,
   ProjectOfferType,
+  ProjectPriceMode,
   ProjectStatus,
   ProjectType,
 } from "@/features/projects/types";
@@ -13,6 +14,11 @@ export type ProjectUnitFormValue = {
   title: string;
   slug: string;
   summary: string;
+  offerType: ProjectOfferType;
+  priceMode: ProjectPriceMode;
+  fixedPrice: string;
+  minPrice: string;
+  maxPrice: string;
   monthlyRent: string;
   areaSqm: string;
   rooms: string;
@@ -39,8 +45,11 @@ export type ProjectFormValues = {
   city: string;
   country: string;
   currencyCode: string;
+  priceMode: ProjectPriceMode;
+  fixedPrice: string;
   minPrice: string;
   maxPrice: string;
+  rentPrice: string;
   latitude: string;
   longitude: string;
   offerType: ProjectOfferType;
@@ -81,6 +90,7 @@ export const completionStages = [
 ] as const;
 
 export const projectOfferTypes = ["sale", "rent"] as const;
+export const projectPriceModes = ["fixed", "range", "contact"] as const;
 
 export const projectCategories = [
   "residential",
@@ -104,8 +114,11 @@ export const emptyProjectFormValues: ProjectFormValues = {
   city: "",
   country: "",
   currencyCode: "USD",
+  priceMode: "fixed",
+  fixedPrice: "",
   minPrice: "",
   maxPrice: "",
+  rentPrice: "",
   latitude: "",
   longitude: "",
   offerType: "sale",

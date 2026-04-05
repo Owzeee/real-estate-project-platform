@@ -8,6 +8,7 @@ import { emptyAmenitySelectionMap } from "@/features/projects/project-form-share
 
 type ProjectUnitsEditorProps = {
   initialUnits: ProjectUnitFormValue[];
+  projectOfferType: "sale" | "rent";
 };
 
 function slugify(value: string) {
@@ -19,11 +20,16 @@ function slugify(value: string) {
     .replace(/-{2,}/g, "-");
 }
 
-function createEmptyUnit(): ProjectUnitFormValue {
+function createEmptyUnit(projectOfferType: "sale" | "rent"): ProjectUnitFormValue {
   return {
     title: "",
     slug: "",
     summary: "",
+    offerType: projectOfferType,
+    priceMode: "fixed",
+    fixedPrice: "",
+    minPrice: "",
+    maxPrice: "",
     monthlyRent: "",
     areaSqm: "",
     rooms: "",
@@ -37,16 +43,12 @@ function createEmptyUnit(): ProjectUnitFormValue {
   };
 }
 
-export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
+export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUnitsEditorProps) {
   const [units, setUnits] = useState<ProjectUnitFormValue[]>(
-    initialUnits.length > 0 ? initialUnits : [createEmptyUnit()],
+    initialUnits.length > 0 ? initialUnits : [createEmptyUnit(projectOfferType)],
   );
 
-  const updateUnit = (
-    index: number,
-    key: keyof ProjectUnitFormValue,
-    value: string,
-  ) => {
+  const updateUnit = (index: number, key: keyof ProjectUnitFormValue, value: string) => {
     setUnits((current) =>
       current.map((unit, unitIndex) => {
         if (unitIndex !== index) {
@@ -68,7 +70,9 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
     );
   };
 
-  const addUnit = () => setUnits((current) => [...current, createEmptyUnit()]);
+  const addUnit = () =>
+    setUnits((current) => [...current, createEmptyUnit(projectOfferType)]);
+
   const removeUnit = (index: number) =>
     setUnits((current) => current.filter((_, unitIndex) => unitIndex !== index));
 
@@ -145,19 +149,119 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Monthly rent
+                  Listing intent
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={unit.monthlyRent}
-                  onChange={(event) => updateUnit(index, "monthlyRent", event.target.value)}
+                <select
+                  value={unit.offerType}
+                  onChange={(event) => {
+                    const nextOfferType = event.target.value as "sale" | "rent";
+                    setUnits((current) =>
+                      current.map((item, unitIndex) =>
+                        unitIndex === index
+                          ? {
+                              ...item,
+                              offerType: nextOfferType,
+                              priceMode: nextOfferType === "sale" ? item.priceMode || "fixed" : "fixed",
+                            }
+                          : item,
+                      ),
+                    );
+                  }}
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-                />
+                >
+                  <option value="sale">sale</option>
+                  <option value="rent">rent</option>
+                </select>
               </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Sale pricing
+                </label>
+                <select
+                  value={unit.priceMode}
+                  onChange={(event) => updateUnit(index, "priceMode", event.target.value)}
+                  disabled={unit.offerType !== "sale"}
+                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
+                >
+                  <option value="fixed">fixed</option>
+                  <option value="range">range</option>
+                  <option value="contact">contact</option>
+                </select>
+              </div>
+
+              {unit.offerType === "rent" ? (
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-stone-700">
+                    Monthly rent
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={unit.monthlyRent}
+                    onChange={(event) => updateUnit(index, "monthlyRent", event.target.value)}
+                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  />
+                </div>
+              ) : null}
+
+              {unit.offerType === "sale" && unit.priceMode === "fixed" ? (
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-stone-700">
+                    Fixed sale price
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={unit.fixedPrice}
+                    onChange={(event) => updateUnit(index, "fixedPrice", event.target.value)}
+                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  />
+                </div>
+              ) : null}
+
+              {unit.offerType === "sale" && unit.priceMode === "range" ? (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-stone-700">
+                      Minimum price
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={unit.minPrice}
+                      onChange={(event) => updateUnit(index, "minPrice", event.target.value)}
+                      className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-stone-700">
+                      Maximum price
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={unit.maxPrice}
+                      onChange={(event) => updateUnit(index, "maxPrice", event.target.value)}
+                      className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    />
+                  </div>
+                </>
+              ) : null}
+
+              {unit.offerType === "sale" && unit.priceMode === "contact" ? (
+                <div className="md:col-span-2 rounded-[1.2rem] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-600">
+                  This property will display as contact for price.
+                </div>
+              ) : null}
+
               <div>
                 <label className="mb-2 block text-sm font-medium text-stone-700">
                   Area (sqm)
@@ -204,9 +308,7 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                   min="0"
                   step="1"
                   value={unit.minimumStayMonths}
-                  onChange={(event) =>
-                    updateUnit(index, "minimumStayMonths", event.target.value)
-                  }
+                  onChange={(event) => updateUnit(index, "minimumStayMonths", event.target.value)}
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
@@ -216,9 +318,7 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                 </label>
                 <input
                   value={unit.imageUrl}
-                  onChange={(event) =>
-                    updateUnit(index, "imageUrl", event.target.value)
-                  }
+                  onChange={(event) => updateUnit(index, "imageUrl", event.target.value)}
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
@@ -231,9 +331,7 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                   min="0"
                   step="1"
                   value={unit.maximumStayMonths}
-                  onChange={(event) =>
-                    updateUnit(index, "maximumStayMonths", event.target.value)
-                  }
+                  onChange={(event) => updateUnit(index, "maximumStayMonths", event.target.value)}
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>

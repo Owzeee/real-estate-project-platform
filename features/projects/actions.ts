@@ -8,6 +8,7 @@ import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
 const allowedOfferTypes = new Set(["sale", "rent"]);
+const allowedPriceModes = new Set(["fixed", "range", "contact"]);
 const allowedCategories = new Set(["residential", "commercial", "office"]);
 const allowedProjectTypes = new Set([
   "apartment",
@@ -113,6 +114,81 @@ function parseAmenitySelectionJson(formData: FormData, key: string) {
   }
 }
 
+function normalizeProjectPricing(formData: FormData) {
+  const offerType = formData.get("offerType")?.toString().trim();
+  const priceMode = formData.get("priceMode")?.toString().trim();
+  const fixedPrice = optionalNumber(formData, "fixedPrice");
+  const minPrice = optionalNumber(formData, "minPrice");
+  const maxPrice = optionalNumber(formData, "maxPrice");
+  const rentPrice = optionalNumber(formData, "rentPrice");
+
+  if (!offerType || !allowedOfferTypes.has(offerType)) {
+    return { error: "Listing intent is invalid." } as const;
+  }
+
+  if (offerType === "rent") {
+    if (rentPrice == null) {
+      return { error: "Rent listings need a rent price." } as const;
+    }
+
+    return {
+      offerType,
+      priceMode: "fixed",
+      fixedPrice: null,
+      minPrice: rentPrice,
+      maxPrice: null,
+      rentPrice,
+    } as const;
+  }
+
+  if (!priceMode || !allowedPriceModes.has(priceMode)) {
+    return { error: "Sale listings need a valid pricing mode." } as const;
+  }
+
+  if (priceMode === "fixed") {
+    if (fixedPrice == null) {
+      return { error: "Fixed sale pricing needs a price." } as const;
+    }
+
+    return {
+      offerType,
+      priceMode,
+      fixedPrice,
+      minPrice: fixedPrice,
+      maxPrice: null,
+      rentPrice: null,
+    } as const;
+  }
+
+  if (priceMode === "range") {
+    if (minPrice == null || maxPrice == null) {
+      return { error: "Range pricing needs both minimum and maximum price." } as const;
+    }
+
+    if (minPrice > maxPrice) {
+      return { error: "Minimum price cannot be greater than maximum price." } as const;
+    }
+
+    return {
+      offerType,
+      priceMode,
+      fixedPrice: null,
+      minPrice,
+      maxPrice,
+      rentPrice: null,
+    } as const;
+  }
+
+  return {
+    offerType,
+    priceMode: "contact",
+    fixedPrice: null,
+    minPrice: null,
+    maxPrice: null,
+    rentPrice: null,
+  } as const;
+}
+
 function buildUnitRows(
   projectId: string,
   currencyCode: string,
@@ -129,11 +205,60 @@ function buildUnitRows(
         return null;
       }
 
+      const offerType = unit.offerType?.toString().trim();
+      const priceMode = unit.priceMode?.toString().trim();
+      const fixedPrice = Number(unit.fixedPrice);
+      const minPrice = Number(unit.minPrice);
+      const maxPrice = Number(unit.maxPrice);
       const monthlyRent = Number(unit.monthlyRent);
       const areaSqm = Number(unit.areaSqm);
       const rooms = Number(unit.rooms);
       const minimumStayMonths = Number(unit.minimumStayMonths);
       const maximumStayMonths = Number(unit.maximumStayMonths);
+
+      if (!offerType || !allowedOfferTypes.has(offerType)) {
+        return null;
+      }
+
+      let normalizedPriceMode: "fixed" | "range" | "contact" = "fixed";
+      let normalizedFixedPrice: number | null = null;
+      let normalizedMinPrice: number | null = null;
+      let normalizedMaxPrice: number | null = null;
+      let normalizedMonthlyRent: number | null = null;
+
+      if (offerType === "rent") {
+        normalizedMonthlyRent = Number.isFinite(monthlyRent) ? monthlyRent : null;
+
+        if (normalizedMonthlyRent == null) {
+          return null;
+        }
+      } else {
+        if (!priceMode || !allowedPriceModes.has(priceMode)) {
+          return null;
+        }
+
+        normalizedPriceMode = priceMode as "fixed" | "range" | "contact";
+
+        if (normalizedPriceMode === "fixed") {
+          normalizedFixedPrice = Number.isFinite(fixedPrice) ? fixedPrice : null;
+          normalizedMinPrice = normalizedFixedPrice;
+          if (normalizedFixedPrice == null) {
+            return null;
+          }
+        }
+
+        if (normalizedPriceMode === "range") {
+          normalizedMinPrice = Number.isFinite(minPrice) ? minPrice : null;
+          normalizedMaxPrice = Number.isFinite(maxPrice) ? maxPrice : null;
+          if (
+            normalizedMinPrice == null ||
+            normalizedMaxPrice == null ||
+            normalizedMinPrice > normalizedMaxPrice
+          ) {
+            return null;
+          }
+        }
+      }
 
       const amenityGroups = [
         ...(Object.entries(unit.amenities ?? {}) as [string, string[]][])
@@ -156,7 +281,12 @@ function buildUnitRows(
         title,
         slug,
         summary: unit.summary?.toString().trim() || null,
-        monthly_rent: Number.isFinite(monthlyRent) ? monthlyRent : null,
+        offer_type: offerType,
+        price_mode: normalizedPriceMode,
+        fixed_price: normalizedFixedPrice,
+        min_price: normalizedMinPrice,
+        max_price: normalizedMaxPrice,
+        monthly_rent: normalizedMonthlyRent,
         currency_code: currencyCode,
         area_sqm: Number.isFinite(areaSqm) ? areaSqm : null,
         rooms: Number.isFinite(rooms) ? rooms : null,
@@ -352,17 +482,16 @@ export async function createProject(
     };
   }
 
-  const minPrice = optionalNumber(formData, "minPrice");
-  const maxPrice = optionalNumber(formData, "maxPrice");
-  const latitude = optionalNumber(formData, "latitude");
-  const longitude = optionalNumber(formData, "longitude");
-
-  if (minPrice && maxPrice && minPrice > maxPrice) {
+  const pricing = normalizeProjectPricing(formData);
+  if ("error" in pricing) {
     return {
       status: "error",
-      message: "Minimum price cannot be greater than maximum price.",
+      message: pricing.error ?? "Invalid pricing configuration.",
     };
   }
+
+  const latitude = optionalNumber(formData, "latitude");
+  const longitude = optionalNumber(formData, "longitude");
 
   if ((latitude === null) !== (longitude === null)) {
     return {
@@ -373,6 +502,7 @@ export async function createProject(
 
   if (
     !allowedOfferTypes.has(offerType) ||
+    (offerType === "sale" && !allowedPriceModes.has(pricing.priceMode)) ||
     !allowedCategories.has(category) ||
     !allowedProjectTypes.has(projectType) ||
     !allowedCompletionStages.has(completionStage) ||
@@ -401,13 +531,16 @@ export async function createProject(
       location,
       amenity_groups: parseAmenitySelectionJson(formData, "projectAmenitiesJson"),
       offer_type: offerType,
+      price_mode: pricing.priceMode,
+      fixed_price: pricing.fixedPrice,
       category,
       city: optionalText(formData, "city"),
       country: optionalText(formData, "country"),
       latitude,
       longitude,
-      min_price: minPrice,
-      max_price: maxPrice,
+      min_price: pricing.minPrice,
+      max_price: pricing.maxPrice,
+      rent_price: pricing.rentPrice,
       currency_code: currencyCode,
       status,
       project_type: projectType,
@@ -502,8 +635,14 @@ export async function updateProject(
     };
   }
 
-  const minPrice = optionalNumber(formData, "minPrice");
-  const maxPrice = optionalNumber(formData, "maxPrice");
+  const pricing = normalizeProjectPricing(formData);
+  if ("error" in pricing) {
+    return {
+      status: "error",
+      message: pricing.error ?? "Invalid pricing configuration.",
+    };
+  }
+
   const latitude = optionalNumber(formData, "latitude");
   const longitude = optionalNumber(formData, "longitude");
   const currentProject = await getProjectOwner(projectId);
@@ -517,6 +656,7 @@ export async function updateProject(
 
   if (
     !allowedOfferTypes.has(offerType) ||
+    (offerType === "sale" && !allowedPriceModes.has(pricing.priceMode)) ||
     !allowedCategories.has(category) ||
     !allowedProjectTypes.has(projectType) ||
     !allowedCompletionStages.has(completionStage) ||
@@ -546,13 +686,16 @@ export async function updateProject(
       location,
       amenity_groups: parseAmenitySelectionJson(formData, "projectAmenitiesJson"),
       offer_type: offerType,
+      price_mode: pricing.priceMode,
+      fixed_price: pricing.fixedPrice,
       category,
       city: optionalText(formData, "city"),
       country: optionalText(formData, "country"),
       latitude,
       longitude,
-      min_price: minPrice,
-      max_price: maxPrice,
+      min_price: pricing.minPrice,
+      max_price: pricing.maxPrice,
+      rent_price: pricing.rentPrice,
       currency_code: currencyCode,
       status,
       project_type: projectType,

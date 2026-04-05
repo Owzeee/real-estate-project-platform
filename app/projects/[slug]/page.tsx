@@ -17,7 +17,7 @@ import {
   getProjectUnits,
 } from "@/features/projects/presentation";
 import { getProjectBySlug, getProjects } from "@/features/projects/queries";
-import { formatPriceRange } from "@/lib/utils/format-price";
+import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -56,10 +56,22 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     )
     .slice(0, 3);
   const summaryStats = [
-    project.minPrice != null || project.maxPrice != null
+    project.offerType === "rent" ||
+    project.priceMode === "contact" ||
+    project.minPrice != null ||
+    project.maxPrice != null ||
+    project.rentPrice != null
       ? {
-          label: "Price range",
-          value: formatPriceRange(project.minPrice, project.maxPrice, project.currencyCode),
+          label: project.offerType === "rent" ? "Rent" : "Pricing",
+          value: formatProjectPricing({
+            offerType: project.offerType,
+            priceMode: project.priceMode,
+            fixedPrice: project.minPrice,
+            minPrice: project.minPrice,
+            maxPrice: project.maxPrice,
+            rentPrice: project.rentPrice,
+            currencyCode: project.currencyCode,
+          }),
           accent: true,
         }
       : null,

@@ -24,6 +24,8 @@ export type ProjectUnitView = {
   slug: string;
   title: string;
   summary: string;
+  offerType: ProjectDetail["offerType"];
+  priceHeading: string;
   priceLabel: string;
   monthlyRentLabel: string;
   areaLabel: string;
@@ -242,6 +244,41 @@ export function formatOfferTypeLabel(offerType: ProjectSummary["offerType"]) {
   return offerType === "sale" ? "For Sale" : "For Rent";
 }
 
+export function formatProjectPriceLabel(input: {
+  offerType: ProjectSummary["offerType"];
+  priceMode: ProjectSummary["priceMode"];
+  fixedPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  rentPrice?: number | null;
+  currencyCode: string;
+}) {
+  if (input.offerType === "rent") {
+    return input.rentPrice != null
+      ? `${formatCurrency(input.currencyCode, input.rentPrice)} per month`
+      : "Rent on request";
+  }
+
+  if (input.priceMode === "contact") {
+    return "Contact for price";
+  }
+
+  if (input.priceMode === "fixed") {
+    const fixedPrice = input.fixedPrice ?? input.minPrice;
+    return fixedPrice != null ? formatCurrency(input.currencyCode, fixedPrice) : "Contact for price";
+  }
+
+  if (input.minPrice != null && input.maxPrice != null) {
+    return `${formatCurrency(input.currencyCode, input.minPrice)} - ${formatCurrency(input.currencyCode, input.maxPrice)}`;
+  }
+
+  if (input.minPrice != null) {
+    return `From ${formatCurrency(input.currencyCode, input.minPrice)}`;
+  }
+
+  return "Contact for price";
+}
+
 export function formatCategoryLabel(category: ProjectSummary["category"]) {
   return titleCase(category);
 }
@@ -357,7 +394,12 @@ function buildGeneratedProjectUnits(project: ProjectDetail): ProjectUnitView[] {
       title: `${variant.rooms}-room ${variant.title.toLowerCase()} in ${project.title}`,
       summary:
         "A furnished, managed apartment option inside the project with buyer-ready specs, availability guidance, and unit-level details.",
-      priceLabel: formatCurrency(project.currencyCode, price),
+      offerType: project.offerType,
+      priceHeading: project.offerType === "rent" ? "Rent" : "Price",
+      priceLabel:
+        project.offerType === "rent"
+          ? `${formatCurrency(project.currencyCode, monthlyRent)} per month`
+          : formatCurrency(project.currencyCode, price),
       monthlyRentLabel: `${formatCurrency(project.currencyCode, monthlyRent)} per month`,
       areaLabel: `${variant.area.toFixed(0)} m²`,
       roomsLabel: `${variant.rooms} rooms`,
@@ -390,6 +432,15 @@ export function getProjectUnitBySlug(project: ProjectDetail, unitSlug: string) {
 }
 
 function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
+  const salePriceLabel = formatProjectPriceLabel({
+    offerType: unit.offerType,
+    priceMode: unit.priceMode,
+    fixedPrice: unit.fixedPrice,
+    minPrice: unit.minPrice,
+    maxPrice: unit.maxPrice,
+    currencyCode: unit.currencyCode,
+  });
+
   return {
     id: unit.id,
     slug: unit.slug,
@@ -397,11 +448,17 @@ function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
     summary:
       unit.summary ??
       "A furnished, managed apartment option inside the project with buyer-ready specs, availability guidance, and unit-level details.",
-    priceLabel: unit.monthlyRent != null ? formatCurrency(unit.currencyCode, unit.monthlyRent) : "",
+    offerType: unit.offerType,
+    priceHeading: unit.offerType === "rent" ? "Rent" : "Price",
+    priceLabel: unit.offerType === "rent"
+      ? (unit.monthlyRent != null ? `${formatCurrency(unit.currencyCode, unit.monthlyRent)} per month` : "Rent on request")
+      : salePriceLabel,
     monthlyRentLabel:
-      unit.monthlyRent != null
-        ? `${formatCurrency(unit.currencyCode, unit.monthlyRent)} per month`
-        : "",
+      unit.offerType === "rent"
+        ? unit.monthlyRent != null
+          ? `${formatCurrency(unit.currencyCode, unit.monthlyRent)} per month`
+          : "Rent on request"
+        : salePriceLabel,
     areaLabel: unit.areaSqm != null ? `${unit.areaSqm.toFixed(0)} m²` : "",
     roomsLabel: unit.rooms != null ? `${unit.rooms} rooms` : "",
     imageUrl: unit.imageUrl,

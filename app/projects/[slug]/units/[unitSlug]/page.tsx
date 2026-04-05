@@ -63,7 +63,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                 {unit.monthlyRentLabel ? (
                   <div className="stat-chip rounded-[1.4rem] p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                      Rent
+                      {unit.priceHeading}
                     </p>
                     <p className="mt-2 font-display text-2xl font-semibold text-[var(--primary)]">
                       {unit.monthlyRentLabel}
@@ -162,7 +162,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
           <aside className="xl:sticky xl:top-28 xl:self-start">
             <div className="surface-panel rounded-[1.75rem] p-5 sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                Rent
+                {unit.priceHeading}
               </p>
               {unit.monthlyRentLabel ? (
                 <p className="mt-2 text-3xl font-semibold text-stone-950">

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import type { ProjectSummary } from "@/features/projects/types";
-import { formatPriceRange } from "@/lib/utils/format-price";
+import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type ProjectCardProps = {
   project: ProjectSummary;
@@ -57,14 +57,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-              Price Range
+              {project.offerType === "rent" ? "Rent" : "Pricing"}
             </p>
             <p className="mt-2 text-sm font-semibold text-[var(--primary)]">
-              {formatPriceRange(
-                project.minPrice,
-                project.maxPrice,
-                project.currencyCode,
-              )}
+              {formatProjectPricing({
+                offerType: project.offerType,
+                priceMode: project.priceMode,
+                fixedPrice: project.minPrice,
+                minPrice: project.minPrice,
+                maxPrice: project.maxPrice,
+                rentPrice: project.rentPrice,
+                currencyCode: project.currencyCode,
+              })}
             </p>
           </div>
         </div>

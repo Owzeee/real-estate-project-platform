@@ -12,6 +12,7 @@ import {
   completionStages,
   projectCategories,
   projectOfferTypes,
+  projectPriceModes,
   projectStatuses,
   projectTypes,
 } from "@/features/projects/project-form-shared";
@@ -41,6 +42,8 @@ export function ProjectFormFields({
   const [slug, setSlug] = useState(initialValues.slug);
   const [slugTouched, setSlugTouched] = useState(Boolean(initialValues.slug));
   const [amenities, setAmenities] = useState(initialValues.amenities);
+  const [offerType, setOfferType] = useState(initialValues.offerType);
+  const [priceMode, setPriceMode] = useState(initialValues.priceMode);
 
   const generatedSlug = useMemo(() => slugify(title), [title]);
 
@@ -181,33 +184,6 @@ export function ProjectFormFields({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
-            Minimum price
-          </label>
-          <input
-            name="minPrice"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={initialValues.minPrice}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">
-            Maximum price
-          </label>
-          <input
-            name="maxPrice"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={initialValues.maxPrice}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">
             Latitude
           </label>
           <input
@@ -239,7 +215,14 @@ export function ProjectFormFields({
             name="offerType"
             list="project-offer-types"
             required
-            defaultValue={initialValues.offerType}
+            value={offerType}
+            onChange={(event) => {
+              const nextOfferType = event.target.value as typeof initialValues.offerType;
+              setOfferType(nextOfferType);
+              if (nextOfferType === "rent") {
+                setPriceMode("fixed");
+              }
+            }}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="project-offer-types">
@@ -248,6 +231,28 @@ export function ProjectFormFields({
             ))}
           </datalist>
         </div>
+        {offerType === "sale" ? (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-stone-700">
+              Sale pricing
+            </label>
+            <input
+              name="priceMode"
+              list="project-price-modes"
+              required
+              value={priceMode}
+              onChange={(event) => setPriceMode(event.target.value as typeof initialValues.priceMode)}
+              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            />
+            <datalist id="project-price-modes">
+              {projectPriceModes.map((mode) => (
+                <option key={mode} value={mode} />
+              ))}
+            </datalist>
+          </div>
+        ) : (
+          <input type="hidden" name="priceMode" value="fixed" />
+        )}
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Asset category
@@ -320,6 +325,75 @@ export function ProjectFormFields({
             Draft keeps the project private until approved. Approved projects are automatically switched to active by admin moderation.
           </p>
         </div>
+
+        {offerType === "rent" ? (
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
+              Monthly rent
+            </label>
+            <input
+              name="rentPrice"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={initialValues.rentPrice}
+              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            />
+          </div>
+        ) : null}
+
+        {offerType === "sale" && priceMode === "fixed" ? (
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
+              Fixed sale price
+            </label>
+            <input
+              name="fixedPrice"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={initialValues.fixedPrice}
+              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            />
+          </div>
+        ) : null}
+
+        {offerType === "sale" && priceMode === "range" ? (
+          <>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-stone-700">
+                Minimum price
+              </label>
+              <input
+                name="minPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={initialValues.minPrice}
+                className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-stone-700">
+                Maximum price
+              </label>
+              <input
+                name="maxPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={initialValues.maxPrice}
+                className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+              />
+            </div>
+          </>
+        ) : null}
+
+        {offerType === "sale" && priceMode === "contact" ? (
+          <div className="md:col-span-2 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
+            This project will display as contact for price on the public listing.
+          </div>
+        ) : null}
       </section>
 
       <section className="grid gap-5 md:grid-cols-2">
@@ -410,7 +484,7 @@ export function ProjectFormFields({
         <AmenityCheckboxGroups mode="project" value={amenities} onChange={setAmenities} />
       </section>
 
-      <ProjectUnitsEditor initialUnits={initialValues.units} />
+      <ProjectUnitsEditor initialUnits={initialValues.units} projectOfferType={offerType} />
     </>
   );
 }

@@ -34,8 +34,14 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     city: project.city ?? "",
     country: project.country ?? "",
     currencyCode: project.currencyCode,
+    priceMode: project.priceMode,
+    fixedPrice:
+      project.priceMode === "fixed" && project.minPrice != null
+        ? project.minPrice.toString()
+        : "",
     minPrice: project.minPrice?.toString() ?? "",
     maxPrice: project.maxPrice?.toString() ?? "",
+    rentPrice: project.rentPrice?.toString() ?? "",
     latitude: project.latitude?.toString() ?? "",
     longitude: project.longitude?.toString() ?? "",
     offerType: project.offerType,
@@ -72,6 +78,11 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       title: unit.title,
       slug: unit.slug,
       summary: unit.summary ?? "",
+      offerType: unit.offerType,
+      priceMode: unit.priceMode,
+      fixedPrice: unit.fixedPrice?.toString() ?? "",
+      minPrice: unit.minPrice?.toString() ?? "",
+      maxPrice: unit.maxPrice?.toString() ?? "",
       monthlyRent: unit.monthlyRent?.toString() ?? "",
       areaSqm: unit.areaSqm?.toString() ?? "",
       rooms: unit.rooms?.toString() ?? "",

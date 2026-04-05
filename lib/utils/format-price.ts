@@ -6,6 +6,10 @@ function formatAmount(amount: number, currencyCode: string) {
   }).format(amount);
 }
 
+export function formatAmountLabel(amount: number, currencyCode: string) {
+  return formatAmount(amount, currencyCode);
+}
+
 export function formatPriceRange(
   minPrice: number | null,
   maxPrice: number | null,
@@ -24,4 +28,32 @@ export function formatPriceRange(
   }
 
   return "Price on request";
+}
+
+export function formatProjectPricing(input: {
+  offerType: "sale" | "rent";
+  priceMode: "fixed" | "range" | "contact";
+  fixedPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  rentPrice?: number | null;
+  currencyCode: string;
+}) {
+  if (input.offerType === "rent") {
+    return input.rentPrice != null
+      ? `${formatAmount(input.rentPrice, input.currencyCode)} per month`
+      : "Rent on request";
+  }
+
+  if (input.priceMode === "contact") {
+    return "Contact for price";
+  }
+
+  if (input.priceMode === "fixed") {
+    return input.fixedPrice != null
+      ? formatAmount(input.fixedPrice, input.currencyCode)
+      : formatPriceRange(input.minPrice ?? null, input.maxPrice ?? null, input.currencyCode);
+  }
+
+  return formatPriceRange(input.minPrice ?? null, input.maxPrice ?? null, input.currencyCode);
 }

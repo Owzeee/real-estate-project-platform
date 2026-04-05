@@ -19,10 +19,12 @@ function mapProjectSummary(row: {
   country: string | null;
   min_price: number | null;
   max_price: number | null;
+  rent_price: number | null;
   currency_code: string;
   status: ProjectSummary["status"];
   approval_status: ProjectSummary["approvalStatus"];
   offer_type: ProjectSummary["offerType"];
+  price_mode: ProjectSummary["priceMode"];
   category: ProjectSummary["category"];
   project_type: ProjectSummary["projectType"];
   completion_stage: ProjectSummary["completionStage"];
@@ -65,10 +67,12 @@ function mapProjectSummary(row: {
     country: row.country,
     minPrice: row.min_price,
     maxPrice: row.max_price,
+    rentPrice: row.rent_price,
     currencyCode: row.currency_code,
     status: row.status,
     approvalStatus: row.approval_status,
     offerType: row.offer_type,
+    priceMode: row.price_mode,
     category: row.category,
     projectType: row.project_type,
     completionStage: row.completion_stage,
@@ -87,6 +91,11 @@ function mapProjectUnits(
         title: string;
         slug: string;
         summary: string | null;
+        offer_type: ProjectUnit["offerType"];
+        price_mode: ProjectUnit["priceMode"];
+        fixed_price: number | null;
+        min_price: number | null;
+        max_price: number | null;
         monthly_rent: number | null;
         currency_code: string;
         area_sqm: number | null;
@@ -109,6 +118,11 @@ function mapProjectUnits(
     title: unit.title,
     slug: unit.slug,
     summary: unit.summary,
+    offerType: unit.offer_type,
+    priceMode: unit.price_mode,
+    fixedPrice: unit.fixed_price,
+    minPrice: unit.min_price,
+    maxPrice: unit.max_price,
     monthlyRent: unit.monthly_rent,
     currencyCode: unit.currency_code,
     areaSqm: unit.area_sqm,
@@ -149,10 +163,12 @@ export const getProjects = cache(async () => {
         country,
         min_price,
         max_price,
+        rent_price,
         currency_code,
         status,
         approval_status,
         offer_type,
+        price_mode,
         category,
         project_type,
         completion_stage,
@@ -209,10 +225,12 @@ export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?
         country,
         min_price,
         max_price,
+        rent_price,
         currency_code,
         status,
         approval_status,
         offer_type,
+        price_mode,
         category,
         project_type,
         completion_stage,
@@ -273,10 +291,12 @@ export const getProjectBySlug = cache(async (slug: string) => {
         country,
         min_price,
         max_price,
+        rent_price,
         currency_code,
         status,
         approval_status,
         offer_type,
+        price_mode,
         category,
         project_type,
         completion_stage,
@@ -303,6 +323,11 @@ export const getProjectBySlug = cache(async (slug: string) => {
           title,
           slug,
           summary,
+          offer_type,
+          price_mode,
+          fixed_price,
+          min_price,
+          max_price,
           monthly_rent,
           currency_code,
           area_sqm,
@@ -373,10 +398,12 @@ export const getProjectById = cache(async (id: string) => {
         country,
         min_price,
         max_price,
+        rent_price,
         currency_code,
         status,
         approval_status,
         offer_type,
+        price_mode,
         category,
         project_type,
         completion_stage,
@@ -403,6 +430,11 @@ export const getProjectById = cache(async (id: string) => {
           title,
           slug,
           summary,
+          offer_type,
+          price_mode,
+          fixed_price,
+          min_price,
+          max_price,
           monthly_rent,
           currency_code,
           area_sqm,

@@ -1,6 +1,7 @@
 export type ProjectStatus = "draft" | "active" | "sold_out" | "archived";
 export type ProjectApprovalStatus = "pending" | "approved" | "rejected";
 export type ProjectOfferType = "sale" | "rent";
+export type ProjectPriceMode = "fixed" | "range" | "contact";
 export type ProjectCategory = "residential" | "commercial" | "office";
 export type ProjectType =
   | "apartment"
@@ -47,6 +48,11 @@ export type ProjectUnit = {
   title: string;
   slug: string;
   summary: string | null;
+  offerType: ProjectOfferType;
+  priceMode: ProjectPriceMode;
+  fixedPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
   monthlyRent: number | null;
   currencyCode: string;
   areaSqm: number | null;
@@ -75,10 +81,12 @@ export type ProjectSummary = {
   country: string | null;
   minPrice: number | null;
   maxPrice: number | null;
+  rentPrice: number | null;
   currencyCode: string;
   status: ProjectStatus;
   approvalStatus: ProjectApprovalStatus;
   offerType: ProjectOfferType;
+  priceMode: ProjectPriceMode;
   category: ProjectCategory;
   projectType: ProjectType;
   completionStage: CompletionStage;
