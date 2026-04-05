@@ -259,6 +259,7 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                 </p>
               </div>
               <AmenityCheckboxGroups
+                mode="property"
                 value={unit.amenities}
                 onChange={(next) =>
                   setUnits((current) =>

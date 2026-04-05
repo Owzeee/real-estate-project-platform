@@ -407,7 +407,7 @@ export function ProjectFormFields({
           </p>
         </div>
         <input type="hidden" name="projectAmenitiesJson" value={JSON.stringify(amenities)} />
-        <AmenityCheckboxGroups value={amenities} onChange={setAmenities} />
+        <AmenityCheckboxGroups mode="project" value={amenities} onChange={setAmenities} />
       </section>
 
       <ProjectUnitsEditor initialUnits={initialValues.units} />

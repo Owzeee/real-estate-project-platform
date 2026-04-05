@@ -1,17 +1,26 @@
 "use client";
 
-import { amenityOptionGroups, type AmenityGroupKey } from "@/features/projects/amenity-options";
+import {
+  projectAmenityOptionGroups,
+  propertyAmenityOptionGroups,
+  type AmenityGroupKey,
+} from "@/features/projects/amenity-options";
 import type { AmenitySelectionMap } from "@/features/projects/project-form-shared";
 
 type AmenityCheckboxGroupsProps = {
+  mode: "project" | "property";
   value: AmenitySelectionMap;
   onChange: (next: AmenitySelectionMap) => void;
 };
 
 export function AmenityCheckboxGroups({
+  mode,
   value,
   onChange,
 }: AmenityCheckboxGroupsProps) {
+  const optionGroups =
+    mode === "project" ? projectAmenityOptionGroups : propertyAmenityOptionGroups;
+
   const toggle = (groupKey: AmenityGroupKey, option: string) => {
     const current = value[groupKey];
     const nextGroup = current.includes(option)
@@ -26,7 +35,7 @@ export function AmenityCheckboxGroups({
 
   return (
     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-      {amenityOptionGroups.map((group) => (
+      {optionGroups.map((group) => (
         <div key={group.key} className="rounded-[1.25rem] border border-stone-200 bg-stone-50 p-4">
           <p className="text-sm font-semibold text-stone-950">{group.title}</p>
           <div className="mt-4 space-y-3">
