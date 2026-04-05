@@ -5,6 +5,9 @@ import type {
   ProjectStatus,
   ProjectType,
 } from "@/features/projects/types";
+import type { AmenityGroupKey } from "@/features/projects/amenity-options";
+
+export type AmenitySelectionMap = Record<AmenityGroupKey, string[]>;
 
 export type ProjectUnitFormValue = {
   title: string;
@@ -18,11 +21,7 @@ export type ProjectUnitFormValue = {
   maximumStayMonths: string;
   imageUrl: string;
   galleryUrls: string;
-  essentials: string;
-  kitchen: string;
-  bedroom: string;
-  bathroom: string;
-  other: string;
+  amenities: AmenitySelectionMap;
   beds: string;
 };
 
@@ -53,7 +52,16 @@ export type ProjectFormValues = {
   videoUrls: string;
   brochureUrls: string;
   tour3dUrls: string;
+  amenities: AmenitySelectionMap;
   units: ProjectUnitFormValue[];
+};
+
+export const emptyAmenitySelectionMap: AmenitySelectionMap = {
+  essentials: [],
+  kitchen: [],
+  bedroom: [],
+  bathroom: [],
+  other: [],
 };
 
 export const projectTypes = [
@@ -109,5 +117,6 @@ export const emptyProjectFormValues: ProjectFormValues = {
   videoUrls: "",
   brochureUrls: "",
   tour3dUrls: "",
+  amenities: emptyAmenitySelectionMap,
   units: [],
 };

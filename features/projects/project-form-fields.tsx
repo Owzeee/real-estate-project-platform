@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { AmenityCheckboxGroups } from "@/features/projects/amenity-checkbox-groups";
 import { ProjectUnitsEditor } from "@/features/projects/project-units-editor";
 import type {
   DeveloperOption,
@@ -39,6 +40,7 @@ export function ProjectFormFields({
   const [title, setTitle] = useState(initialValues.title);
   const [slug, setSlug] = useState(initialValues.slug);
   const [slugTouched, setSlugTouched] = useState(Boolean(initialValues.slug));
+  const [amenities, setAmenities] = useState(initialValues.amenities);
 
   const generatedSlug = useMemo(() => slugify(title), [title]);
 
@@ -233,87 +235,87 @@ export function ProjectFormFields({
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Listing intent
           </label>
-          <select
+          <input
             name="offerType"
+            list="project-offer-types"
             required
             defaultValue={initialValues.offerType}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          >
+          />
+          <datalist id="project-offer-types">
             {projectOfferTypes.map((offerType) => (
-              <option key={offerType} value={offerType}>
-                {offerType === "sale" ? "For sale" : "For rent"}
-              </option>
+              <option key={offerType} value={offerType} />
             ))}
-          </select>
+          </datalist>
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Asset category
           </label>
-          <select
+          <input
             name="category"
+            list="project-categories"
             required
             defaultValue={initialValues.category}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          >
+          />
+          <datalist id="project-categories">
             {projectCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
+              <option key={category} value={category} />
             ))}
-          </select>
+          </datalist>
         </div>
 
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Project type
           </label>
-          <select
+          <input
             name="projectType"
+            list="project-types"
             required
             defaultValue={initialValues.projectType}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          >
+          />
+          <datalist id="project-types">
             {projectTypes.map((projectType) => (
-              <option key={projectType} value={projectType}>
-                {projectType.replace("_", " ")}
-              </option>
+              <option key={projectType} value={projectType} />
             ))}
-          </select>
+          </datalist>
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Completion stage
           </label>
-          <select
+          <input
             name="completionStage"
+            list="completion-stages"
             required
             defaultValue={initialValues.completionStage}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          >
+          />
+          <datalist id="completion-stages">
             {completionStages.map((completionStage) => (
-              <option key={completionStage} value={completionStage}>
-                {completionStage.replace("_", " ")}
-              </option>
+              <option key={completionStage} value={completionStage} />
             ))}
-          </select>
+          </datalist>
         </div>
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-stone-700">
             Visibility status
           </label>
-          <select
+          <input
             name="status"
+            list="project-statuses"
             required
             defaultValue={initialValues.status}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-          >
+          />
+          <datalist id="project-statuses">
             {projectStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status.replace("_", " ")}
-              </option>
+              <option key={status} value={status} />
             ))}
-          </select>
+          </datalist>
           <p className="mt-2 text-xs text-stone-500">
             Draft keeps the project private until approved. Approved projects are automatically switched to active by admin moderation.
           </p>
@@ -395,6 +397,17 @@ export function ProjectFormFields({
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
+      </section>
+
+      <section className="space-y-4 rounded-[1.75rem] border border-stone-200 bg-white p-6">
+        <div>
+          <p className="text-lg font-semibold text-stone-950">Project amenities</p>
+          <p className="mt-1 text-sm text-stone-600">
+            Choose the amenities that apply to the overall project.
+          </p>
+        </div>
+        <input type="hidden" name="projectAmenitiesJson" value={JSON.stringify(amenities)} />
+        <AmenityCheckboxGroups value={amenities} onChange={setAmenities} />
       </section>
 
       <ProjectUnitsEditor initialUnits={initialValues.units} />

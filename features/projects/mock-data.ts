@@ -60,6 +60,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
   {
     id: "project-canyon",
@@ -107,6 +108,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
   {
     id: "project-serene",
@@ -145,6 +147,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
   {
     id: "project-oceanic",
@@ -183,6 +186,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
   {
     id: "project-orchid",
@@ -221,6 +225,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
   {
     id: "project-harbor",
@@ -259,6 +264,7 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     units: [],
+    amenityGroups: [],
   },
 ];
 

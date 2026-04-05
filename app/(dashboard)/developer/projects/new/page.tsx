@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { createProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
+import { emptyAmenitySelectionMap } from "@/features/projects/project-form-shared";
 import { requireDeveloper } from "@/lib/auth";
 
 export default async function NewProjectPage() {
@@ -61,6 +62,7 @@ export default async function NewProjectPage() {
                 videoUrls: "",
                 brochureUrls: "",
                 tour3dUrls: "",
+                amenities: emptyAmenitySelectionMap,
                 units: [],
               }}
               submitLabel="Create project"

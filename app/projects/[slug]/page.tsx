@@ -55,6 +55,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         item.city === project.city,
     )
     .slice(0, 3);
+  const summaryStats = [
+    project.minPrice != null || project.maxPrice != null
+      ? {
+          label: "Price range",
+          value: formatPriceRange(project.minPrice, project.maxPrice, project.currencyCode),
+          accent: true,
+        }
+      : null,
+    {
+      label: "Marketplace status",
+      value: formatStatusLabel(project.status),
+      accent: false,
+    },
+    {
+      label: "Inventory model",
+      value: "Admin-curated",
+      accent: false,
+    },
+  ].filter((stat): stat is { label: string; value: string; accent: boolean } => stat !== null);
 
   return (
     <main className="page-shell min-h-screen bg-transparent px-4 py-10 sm:px-6 lg:px-8">
@@ -104,31 +123,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {" "}in {project.location}
               </p>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Price range
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-[var(--primary)]">
-                    {formatPriceRange(project.minPrice, project.maxPrice, project.currencyCode)}
-                  </p>
-                </div>
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Marketplace status
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
-                    {formatStatusLabel(project.status)}
-                  </p>
-                </div>
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Inventory model
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
-                    Admin-curated
-                  </p>
-                </div>
+              <div className={`mt-8 grid gap-4 ${summaryStats.length > 1 ? "sm:grid-cols-2 lg:grid-cols-3" : ""}`}>
+                {summaryStats.map((stat) => (
+                  <div key={stat.label} className="stat-chip rounded-[1.4rem] p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                      {stat.label}
+                    </p>
+                    <p className={`mt-2 font-display text-2xl font-semibold ${stat.accent ? "text-[var(--primary)]" : "text-stone-950"}`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -146,9 +151,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <section className="space-y-8">
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
               <p className="eyebrow">About This Project</p>
-              <p className="font-copy mt-6 text-lg leading-8 text-stone-700">
-                {project.description}
-              </p>
+              {project.description ? (
+                <p className="font-copy mt-6 text-lg leading-8 text-stone-700">
+                  {project.description}
+                </p>
+              ) : null}
               <p className="font-copy mt-5 text-base leading-8 text-[var(--muted-foreground)]">
                 {narrative}
               </p>
@@ -211,15 +218,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                           {unit.title}
                         </p>
                         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-                          <span className="text-lg font-semibold text-stone-950">
-                            {unit.priceLabel}
-                          </span>
-                          <span className="text-sm font-semibold text-stone-700">
-                            {unit.areaLabel}
-                          </span>
-                          <span className="text-sm font-semibold text-stone-700">
-                            {unit.roomsLabel}
-                          </span>
+                          {unit.priceLabel ? (
+                            <span className="text-lg font-semibold text-stone-950">
+                              {unit.priceLabel}
+                            </span>
+                          ) : null}
+                          {unit.areaLabel ? (
+                            <span className="text-sm font-semibold text-stone-700">
+                              {unit.areaLabel}
+                            </span>
+                          ) : null}
+                          {unit.roomsLabel ? (
+                            <span className="text-sm font-semibold text-stone-700">
+                              {unit.roomsLabel}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
 
@@ -259,26 +272,32 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                     Project snapshot
                   </p>
-                  <p className="mt-3 text-lg font-semibold text-stone-950">
-                    {units[0]?.monthlyRentLabel ?? "Contact for pricing"}
-                  </p>
+                  {units[0]?.monthlyRentLabel ? (
+                    <p className="mt-3 text-lg font-semibold text-stone-950">
+                      {units[0].monthlyRentLabel}
+                    </p>
+                  ) : null}
                   <div className="mt-5 space-y-4">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                        Available from
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-stone-950">
-                        {units[0]?.availableFromLabel ?? "Ask for availability"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                        Minimum stay
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-stone-950">
-                        {units[0]?.minimumStayLabel ?? "Flexible"}
-                      </p>
-                    </div>
+                    {units[0]?.availableFromLabel ? (
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                          Available from
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-stone-950">
+                          {units[0].availableFromLabel}
+                        </p>
+                      </div>
+                    ) : null}
+                    {units[0]?.minimumStayLabel ? (
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                          Minimum stay
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-stone-950">
+                          {units[0].minimumStayLabel}
+                        </p>
+                      </div>
+                    ) : null}
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                         Best next step
@@ -353,18 +372,22 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Contact card
               </p>
-              <p className="mt-3 text-2xl font-semibold text-stone-950">
-                {units[0]?.monthlyRentLabel ?? "Request pricing"}
-              </p>
+              {units[0]?.monthlyRentLabel ? (
+                <p className="mt-3 text-2xl font-semibold text-stone-950">
+                  {units[0].monthlyRentLabel}
+                </p>
+              ) : null}
 
-              <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                  Stay duration
-                </p>
-                <p className="mt-1 text-sm font-semibold text-stone-950">
-                  {units[0]?.availableFromLabel ?? "Ask for timing"} - Move out
-                </p>
-              </div>
+              {units[0]?.availableFromLabel ? (
+                <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                    Available from
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-stone-950">
+                    {units[0].availableFromLabel}
+                  </p>
+                </div>
+              ) : null}
 
               <div className="mt-5 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">

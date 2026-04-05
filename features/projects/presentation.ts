@@ -282,11 +282,11 @@ export function getProjectHighlights(project: ProjectDetail) {
 }
 
 export function getProjectAmenities(project: ProjectDetail) {
-  return getAmenityGroups(project).flatMap((group) => group.items).slice(0, 6);
+  return getProjectAmenityGroups(project).flatMap((group) => group.items).slice(0, 6);
 }
 
 export function getProjectAmenityGroups(project: ProjectDetail) {
-  return getAmenityGroups(project);
+  return project.amenityGroups.length > 0 ? project.amenityGroups : getAmenityGroups(project);
 }
 
 export function getProjectNarrative(project: ProjectDetail) {
@@ -390,9 +390,6 @@ export function getProjectUnitBySlug(project: ProjectDetail, unitSlug: string) {
 }
 
 function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
-  const price =
-    unit.monthlyRent ?? 0;
-
   return {
     id: unit.id,
     slug: unit.slug,
@@ -400,27 +397,30 @@ function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
     summary:
       unit.summary ??
       "A furnished, managed apartment option inside the project with buyer-ready specs, availability guidance, and unit-level details.",
-    priceLabel: formatCurrency(unit.currencyCode, price),
-    monthlyRentLabel: `${formatCurrency(unit.currencyCode, price)} per month`,
-    areaLabel: unit.areaSqm ? `${unit.areaSqm.toFixed(0)} m²` : "Area on request",
-    roomsLabel: unit.rooms ? `${unit.rooms} rooms` : "Rooms on request",
+    priceLabel: unit.monthlyRent != null ? formatCurrency(unit.currencyCode, unit.monthlyRent) : "",
+    monthlyRentLabel:
+      unit.monthlyRent != null
+        ? `${formatCurrency(unit.currencyCode, unit.monthlyRent)} per month`
+        : "",
+    areaLabel: unit.areaSqm != null ? `${unit.areaSqm.toFixed(0)} m²` : "",
+    roomsLabel: unit.rooms != null ? `${unit.rooms} rooms` : "",
     imageUrl: unit.imageUrl,
     gallery: unit.gallery,
     amenityGroups: unit.amenityGroups,
     beds: unit.beds,
-    minimumStayLabel: unit.minimumStayMonths
+    minimumStayLabel: unit.minimumStayMonths != null
       ? `${unit.minimumStayMonths} Months`
-      : "Flexible",
-    maximumStayLabel: unit.maximumStayMonths
+      : "",
+    maximumStayLabel: unit.maximumStayMonths != null
       ? `${unit.maximumStayMonths} Months`
-      : "Flexible",
+      : "",
     availableFromLabel: unit.availableFrom
       ? new Date(unit.availableFrom).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
           year: "numeric",
         })
-      : "Ask for timing",
+      : "",
     availabilityMonths:
       unit.availabilityMonths.length > 0 ? unit.availabilityMonths : getAvailabilityMonths(),
   };

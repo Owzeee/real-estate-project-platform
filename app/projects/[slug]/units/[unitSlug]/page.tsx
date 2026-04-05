@@ -53,35 +53,43 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">
                 {unit.title}
               </h1>
-              <p className="font-copy mt-4 text-base leading-8 text-[var(--muted-foreground)]">
-                {unit.summary}
-              </p>
+              {unit.summary ? (
+                <p className="font-copy mt-4 text-base leading-8 text-[var(--muted-foreground)]">
+                  {unit.summary}
+                </p>
+              ) : null}
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Rent
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-[var(--primary)]">
-                    {unit.monthlyRentLabel}
-                  </p>
-                </div>
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Area
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
-                    {unit.areaLabel}
-                  </p>
-                </div>
-                <div className="stat-chip rounded-[1.4rem] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Rooms
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
-                    {unit.roomsLabel}
-                  </p>
-                </div>
+                {unit.monthlyRentLabel ? (
+                  <div className="stat-chip rounded-[1.4rem] p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                      Rent
+                    </p>
+                    <p className="mt-2 font-display text-2xl font-semibold text-[var(--primary)]">
+                      {unit.monthlyRentLabel}
+                    </p>
+                  </div>
+                ) : null}
+                {unit.areaLabel ? (
+                  <div className="stat-chip rounded-[1.4rem] p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                      Area
+                    </p>
+                    <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
+                      {unit.areaLabel}
+                    </p>
+                  </div>
+                ) : null}
+                {unit.roomsLabel ? (
+                  <div className="stat-chip rounded-[1.4rem] p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                      Rooms
+                    </p>
+                    <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
+                      {unit.roomsLabel}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </article>
 
@@ -135,56 +143,6 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               </div>
             </article>
 
-            <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
-              <p className="eyebrow">Availability</p>
-              <div className="mt-6 flex flex-wrap items-center gap-6">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Minimum stay
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-stone-950">
-                    {unit.minimumStayLabel}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Maximum stay
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-stone-950">
-                    {unit.maximumStayLabel}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Available from
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-stone-950">
-                    {unit.availableFromLabel}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-8 grid grid-cols-2 gap-0 overflow-hidden rounded-[1.5rem] border border-[var(--border)] md:grid-cols-4 xl:grid-cols-6">
-                {unit.availabilityMonths.map((month) => (
-                  <div
-                    key={month.label}
-                    className="border-b border-r border-[var(--border)] bg-white/75 p-4 last:border-r-0"
-                  >
-                    <span
-                      className={`inline-flex h-2.5 w-2.5 rounded-full ${
-                        month.status === "available"
-                          ? "bg-emerald-500"
-                          : "bg-amber-400"
-                      }`}
-                    />
-                    <p className="mt-6 text-sm font-medium text-stone-950">
-                      {month.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </article>
-
             {mapUrl ? (
               <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
                 <p className="eyebrow">Location</p>
@@ -206,18 +164,22 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Rent
               </p>
-              <p className="mt-2 text-3xl font-semibold text-stone-950">
-                {unit.monthlyRentLabel}
-              </p>
+              {unit.monthlyRentLabel ? (
+                <p className="mt-2 text-3xl font-semibold text-stone-950">
+                  {unit.monthlyRentLabel}
+                </p>
+              ) : null}
 
-              <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                  Stay duration
-                </p>
-                <p className="mt-1 text-sm font-semibold text-stone-950">
-                  {unit.availableFromLabel} - Move out
-                </p>
-              </div>
+              {unit.availableFromLabel ? (
+                <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                    Available from
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-stone-950">
+                    {unit.availableFromLabel}
+                  </p>
+                </div>
+              ) : null}
 
               <div className="mt-5 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
                 <p className="text-sm font-semibold text-stone-950">

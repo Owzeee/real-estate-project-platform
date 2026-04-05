@@ -6,6 +6,7 @@ import { updateProject } from "@/features/projects/actions";
 import { ProjectForm } from "@/features/projects/project-form";
 import { ProjectMediaManager } from "@/features/projects/project-media-manager";
 import type { ProjectFormValues } from "@/features/projects/project-form-shared";
+import { emptyAmenitySelectionMap } from "@/features/projects/project-form-shared";
 import { getProjectById } from "@/features/projects/queries";
 import { requireDeveloper } from "@/lib/auth";
 
@@ -58,6 +59,15 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       .filter((item) => item.mediaType === "tour_3d")
       .map((item) => item.fileUrl)
       .join("\n"),
+    amenities: {
+      ...emptyAmenitySelectionMap,
+      ...Object.fromEntries(
+        project.amenityGroups.map((group: { title: string; items: string[] }) => [
+          group.title.toLowerCase(),
+          group.items,
+        ]),
+      ),
+    },
     units: project.units.map((unit) => ({
       title: unit.title,
       slug: unit.slug,
@@ -70,21 +80,15 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       maximumStayMonths: unit.maximumStayMonths?.toString() ?? "12",
       imageUrl: unit.imageUrl ?? "",
       galleryUrls: unit.gallery.map((item) => item.src).join("\n"),
-      essentials:
-        unit.amenityGroups.find((group) => group.title === "Essentials")?.items.join("\n") ??
-        "",
-      kitchen:
-        unit.amenityGroups.find((group) => group.title === "Kitchen")?.items.join("\n") ??
-        "",
-      bedroom:
-        unit.amenityGroups.find((group) => group.title === "Bedroom")?.items.join("\n") ??
-        "",
-      bathroom:
-        unit.amenityGroups.find((group) => group.title === "Bathroom")?.items.join("\n") ??
-        "",
-      other:
-        unit.amenityGroups.find((group) => group.title === "Other")?.items.join("\n") ??
-        "",
+      amenities: {
+        ...emptyAmenitySelectionMap,
+        ...Object.fromEntries(
+          unit.amenityGroups.map((group: { title: string; items: string[] }) => [
+            group.title.toLowerCase(),
+            group.items,
+          ]),
+        ),
+      },
       beds: unit.beds.map((bed) => bed.label).join("\n"),
     })),
   };

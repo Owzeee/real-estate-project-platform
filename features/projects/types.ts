@@ -91,4 +91,5 @@ export type ProjectSummary = {
 export type ProjectDetail = ProjectSummary & {
   media: ProjectMedia[];
   units: ProjectUnit[];
+  amenityGroups: ProjectUnitAmenityGroup[];
 };

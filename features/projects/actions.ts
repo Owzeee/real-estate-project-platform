@@ -7,6 +7,24 @@ import type { ProjectUnit } from "@/features/projects/types";
 import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
 
+const allowedOfferTypes = new Set(["sale", "rent"]);
+const allowedCategories = new Set(["residential", "commercial", "office"]);
+const allowedProjectTypes = new Set([
+  "apartment",
+  "villa",
+  "townhouse",
+  "mixed_use",
+  "commercial",
+  "land",
+]);
+const allowedCompletionStages = new Set([
+  "pre_launch",
+  "under_construction",
+  "ready",
+  "completed",
+]);
+const allowedStatuses = new Set(["draft", "active", "sold_out", "archived"]);
+
 function optionalText(formData: FormData, key: string) {
   const value = formData.get(key)?.toString().trim();
   return value ? value : null;
@@ -73,6 +91,28 @@ function parseUnitsJson(formData: FormData) {
   }
 }
 
+function parseAmenitySelectionJson(formData: FormData, key: string) {
+  const raw = formData.get(key)?.toString().trim();
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string[]>;
+
+    return Object.entries(parsed)
+      .map(([title, items]) => ({
+        title: title.charAt(0).toUpperCase() + title.slice(1),
+        items: Array.isArray(items)
+          ? items.map((item) => item.trim()).filter(Boolean)
+          : [],
+      }))
+      .filter((group) => group.items.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 function buildUnitRows(
   projectId: string,
   currencyCode: string,
@@ -96,12 +136,15 @@ function buildUnitRows(
       const maximumStayMonths = Number(unit.maximumStayMonths);
 
       const amenityGroups = [
-        { title: "Essentials", items: parseUnitItems(unit.essentials ?? "") },
-        { title: "Kitchen", items: parseUnitItems(unit.kitchen ?? "") },
-        { title: "Bedroom", items: parseUnitItems(unit.bedroom ?? "") },
-        { title: "Bathroom", items: parseUnitItems(unit.bathroom ?? "") },
-        { title: "Other", items: parseUnitItems(unit.other ?? "") },
-      ].filter((group) => group.items.length > 0);
+        ...(Object.entries(unit.amenities ?? {}) as [string, string[]][])
+          .map(([title, items]) => ({
+            title: title.charAt(0).toUpperCase() + title.slice(1),
+            items: Array.isArray(items)
+              ? items.map((item) => item.trim()).filter(Boolean)
+              : [],
+          }))
+          .filter((group) => group.items.length > 0),
+      ];
 
       const beds = parseUnitItems(unit.beds ?? "").map((item) => ({
         label: item,
@@ -328,6 +371,19 @@ export async function createProject(
     };
   }
 
+  if (
+    !allowedOfferTypes.has(offerType) ||
+    !allowedCategories.has(category) ||
+    !allowedProjectTypes.has(projectType) ||
+    !allowedCompletionStages.has(completionStage) ||
+    !allowedStatuses.has(status)
+  ) {
+    return {
+      status: "error",
+      message: "One or more typed classification fields are invalid. Pick a value from the suggested options.",
+    };
+  }
+
   const auth = await requireDeveloperOrAdminAccess(developerProfileId);
   const finalDeveloperProfileId =
     auth.profile.role === "developer" && auth.developerProfile
@@ -343,6 +399,7 @@ export async function createProject(
       slug,
       description,
       location,
+      amenity_groups: parseAmenitySelectionJson(formData, "projectAmenitiesJson"),
       offer_type: offerType,
       category,
       city: optionalText(formData, "city"),
@@ -458,6 +515,19 @@ export async function updateProject(
     };
   }
 
+  if (
+    !allowedOfferTypes.has(offerType) ||
+    !allowedCategories.has(category) ||
+    !allowedProjectTypes.has(projectType) ||
+    !allowedCompletionStages.has(completionStage) ||
+    !allowedStatuses.has(status)
+  ) {
+    return {
+      status: "error",
+      message: "One or more typed classification fields are invalid. Pick a value from the suggested options.",
+    };
+  }
+
   const auth = await requireDeveloperOrAdminAccess(
     currentProject.developerProfileId,
   );
@@ -474,6 +544,7 @@ export async function updateProject(
       slug,
       description,
       location,
+      amenity_groups: parseAmenitySelectionJson(formData, "projectAmenitiesJson"),
       offer_type: offerType,
       category,
       city: optionalText(formData, "city"),

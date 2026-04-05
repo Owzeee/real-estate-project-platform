@@ -39,7 +39,7 @@ function mapProjectSummary(row: {
         slug: string;
       }[]
     | null;
-  project_media:
+        project_media:
     | {
         file_url: string;
         sort_order: number;
@@ -296,6 +296,7 @@ export const getProjectBySlug = cache(async (slug: string) => {
           title,
           sort_order
         ),
+        amenity_groups,
         project_units (
           id,
           project_id,
@@ -343,6 +344,7 @@ export const getProjectBySlug = cache(async (slug: string) => {
   return {
     ...summary,
     media,
+    amenityGroups: data.amenity_groups ?? [],
     units: mapProjectUnits(data.project_units),
   };
 });
@@ -394,6 +396,7 @@ export const getProjectById = cache(async (id: string) => {
           title,
           sort_order
         ),
+        amenity_groups,
         project_units (
           id,
           project_id,
@@ -439,6 +442,7 @@ export const getProjectById = cache(async (id: string) => {
       title: item.title,
       sortOrder: item.sort_order,
     })) as ProjectDetail["media"],
+    amenityGroups: data.amenity_groups ?? [],
     units: mapProjectUnits(data.project_units),
   };
 });

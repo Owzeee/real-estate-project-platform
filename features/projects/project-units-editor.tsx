@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import { AmenityCheckboxGroups } from "@/features/projects/amenity-checkbox-groups";
 import type { ProjectUnitFormValue } from "@/features/projects/project-form-shared";
+import { emptyAmenitySelectionMap } from "@/features/projects/project-form-shared";
 
 type ProjectUnitsEditorProps = {
   initialUnits: ProjectUnitFormValue[];
@@ -30,11 +32,7 @@ function createEmptyUnit(): ProjectUnitFormValue {
     maximumStayMonths: "12",
     imageUrl: "",
     galleryUrls: "",
-    essentials: "",
-    kitchen: "",
-    bedroom: "",
-    bathroom: "",
-    other: "",
+    amenities: emptyAmenitySelectionMap,
     beds: "",
   };
 }
@@ -214,6 +212,18 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Cover image URL
+                </label>
+                <input
+                  value={unit.imageUrl}
+                  onChange={(event) =>
+                    updateUnit(index, "imageUrl", event.target.value)
+                  }
+                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
                   Maximum stay (months)
                 </label>
                 <input
@@ -224,16 +234,6 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
                   onChange={(event) =>
                     updateUnit(index, "maximumStayMonths", event.target.value)
                   }
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Cover image URL
-                </label>
-                <input
-                  value={unit.imageUrl}
-                  onChange={(event) => updateUnit(index, "imageUrl", event.target.value)}
                   className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
@@ -251,34 +251,35 @@ export function ProjectUnitsEditor({ initialUnits }: ProjectUnitsEditorProps) {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {[
-                ["essentials", "Essentials"],
-                ["kitchen", "Kitchen"],
-                ["bedroom", "Bedroom"],
-                ["bathroom", "Bathroom"],
-                ["other", "Other"],
-                ["beds", "Beds"],
-              ].map(([key, label]) => (
-                <div key={key}>
-                  <label className="mb-2 block text-sm font-medium text-stone-700">
-                    {label}
-                  </label>
-                  <textarea
-                    rows={5}
-                    value={unit[key as keyof ProjectUnitFormValue] as string}
-                    onChange={(event) =>
-                      updateUnit(
-                        index,
-                        key as keyof ProjectUnitFormValue,
-                        event.target.value,
-                      )
-                    }
-                    placeholder="One item per line"
-                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-                  />
-                </div>
-              ))}
+            <div className="mt-6 space-y-4">
+              <div>
+                <p className="text-sm font-medium text-stone-700">Property amenities</p>
+                <p className="mt-1 text-xs text-stone-500">
+                  Choose the amenities that apply to this specific property.
+                </p>
+              </div>
+              <AmenityCheckboxGroups
+                value={unit.amenities}
+                onChange={(next) =>
+                  setUnits((current) =>
+                    current.map((item, unitIndex) =>
+                      unitIndex === index ? { ...item, amenities: next } : item,
+                    ),
+                  )
+                }
+              />
+              <div>
+                <label className="mb-2 block text-sm font-medium text-stone-700">
+                  Beds
+                </label>
+                <textarea
+                  rows={4}
+                  value={unit.beds}
+                  onChange={(event) => updateUnit(index, "beds", event.target.value)}
+                  placeholder="One bed setup per line"
+                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                />
+              </div>
             </div>
           </article>
         ))}
