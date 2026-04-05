@@ -52,6 +52,8 @@ export default async function NewProjectPage() {
                 maxPrice: "",
                 latitude: "",
                 longitude: "",
+                offerType: "sale",
+                category: "residential",
                 projectType: "apartment",
                 completionStage: "pre_launch",
                 status: "draft",

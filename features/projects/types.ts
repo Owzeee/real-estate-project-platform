@@ -1,5 +1,7 @@
 export type ProjectStatus = "draft" | "active" | "sold_out" | "archived";
 export type ProjectApprovalStatus = "pending" | "approved" | "rejected";
+export type ProjectOfferType = "sale" | "rent";
+export type ProjectCategory = "residential" | "commercial" | "office";
 export type ProjectType =
   | "apartment"
   | "villa"
@@ -76,6 +78,8 @@ export type ProjectSummary = {
   currencyCode: string;
   status: ProjectStatus;
   approvalStatus: ProjectApprovalStatus;
+  offerType: ProjectOfferType;
+  category: ProjectCategory;
   projectType: ProjectType;
   completionStage: CompletionStage;
   isFeatured: boolean;

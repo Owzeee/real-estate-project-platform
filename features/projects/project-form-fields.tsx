@@ -9,6 +9,8 @@ import type {
 } from "@/features/projects/project-form-shared";
 import {
   completionStages,
+  projectCategories,
+  projectOfferTypes,
   projectStatuses,
   projectTypes,
 } from "@/features/projects/project-form-shared";
@@ -225,6 +227,41 @@ export function ProjectFormFields({
             defaultValue={initialValues.longitude}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Listing intent
+          </label>
+          <select
+            name="offerType"
+            required
+            defaultValue={initialValues.offerType}
+            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          >
+            {projectOfferTypes.map((offerType) => (
+              <option key={offerType} value={offerType}>
+                {offerType === "sale" ? "For sale" : "For rent"}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Asset category
+          </label>
+          <select
+            name="category"
+            required
+            defaultValue={initialValues.category}
+            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+          >
+            {projectCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

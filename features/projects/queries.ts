@@ -22,6 +22,8 @@ function mapProjectSummary(row: {
   currency_code: string;
   status: ProjectSummary["status"];
   approval_status: ProjectSummary["approvalStatus"];
+  offer_type: ProjectSummary["offerType"];
+  category: ProjectSummary["category"];
   project_type: ProjectSummary["projectType"];
   completion_stage: ProjectSummary["completionStage"];
   is_featured: boolean;
@@ -66,6 +68,8 @@ function mapProjectSummary(row: {
     currencyCode: row.currency_code,
     status: row.status,
     approvalStatus: row.approval_status,
+    offerType: row.offer_type,
+    category: row.category,
     projectType: row.project_type,
     completionStage: row.completion_stage,
     isFeatured: row.is_featured,
@@ -148,6 +152,8 @@ export const getProjects = cache(async () => {
         currency_code,
         status,
         approval_status,
+        offer_type,
+        category,
         project_type,
         completion_stage,
         is_featured,
@@ -206,6 +212,8 @@ export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?
         currency_code,
         status,
         approval_status,
+        offer_type,
+        category,
         project_type,
         completion_stage,
         is_featured,
@@ -268,6 +276,8 @@ export const getProjectBySlug = cache(async (slug: string) => {
         currency_code,
         status,
         approval_status,
+        offer_type,
+        category,
         project_type,
         completion_stage,
         is_featured,
@@ -364,6 +374,8 @@ export const getProjectById = cache(async (id: string) => {
         currency_code,
         status,
         approval_status,
+        offer_type,
+        category,
         project_type,
         completion_stage,
         is_featured,

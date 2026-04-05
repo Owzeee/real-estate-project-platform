@@ -268,6 +268,8 @@ export async function createProject(
   const slug = formData.get("slug")?.toString().trim();
   const description = formData.get("description")?.toString().trim();
   const location = formData.get("location")?.toString().trim();
+  const offerType = formData.get("offerType")?.toString().trim();
+  const category = formData.get("category")?.toString().trim();
   const projectType = formData.get("projectType")?.toString().trim();
   const completionStage = formData.get("completionStage")?.toString().trim();
   const status = formData.get("status")?.toString().trim();
@@ -280,6 +282,8 @@ export async function createProject(
     !slug ||
     !description ||
     !location ||
+    !offerType ||
+    !category ||
     !projectType ||
     !completionStage ||
     !status
@@ -339,6 +343,8 @@ export async function createProject(
       slug,
       description,
       location,
+      offer_type: offerType,
+      category,
       city: optionalText(formData, "city"),
       country: optionalText(formData, "country"),
       latitude,
@@ -404,6 +410,8 @@ export async function updateProject(
   const slug = formData.get("slug")?.toString().trim();
   const description = formData.get("description")?.toString().trim();
   const location = formData.get("location")?.toString().trim();
+  const offerType = formData.get("offerType")?.toString().trim();
+  const category = formData.get("category")?.toString().trim();
   const projectType = formData.get("projectType")?.toString().trim();
   const completionStage = formData.get("completionStage")?.toString().trim();
   const status = formData.get("status")?.toString().trim();
@@ -417,6 +425,8 @@ export async function updateProject(
     !slug ||
     !description ||
     !location ||
+    !offerType ||
+    !category ||
     !projectType ||
     !completionStage ||
     !status
@@ -464,6 +474,8 @@ export async function updateProject(
       slug,
       description,
       location,
+      offer_type: offerType,
+      category,
       city: optionalText(formData, "city"),
       country: optionalText(formData, "country"),
       latitude,

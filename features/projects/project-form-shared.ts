@@ -1,5 +1,7 @@
 import type {
   CompletionStage,
+  ProjectCategory,
+  ProjectOfferType,
   ProjectStatus,
   ProjectType,
 } from "@/features/projects/types";
@@ -42,6 +44,8 @@ export type ProjectFormValues = {
   maxPrice: string;
   latitude: string;
   longitude: string;
+  offerType: ProjectOfferType;
+  category: ProjectCategory;
   projectType: ProjectType;
   completionStage: CompletionStage;
   status: ProjectStatus;
@@ -68,6 +72,14 @@ export const completionStages = [
   "completed",
 ] as const;
 
+export const projectOfferTypes = ["sale", "rent"] as const;
+
+export const projectCategories = [
+  "residential",
+  "commercial",
+  "office",
+] as const;
+
 export const projectStatuses = [
   "draft",
   "active",
@@ -88,6 +100,8 @@ export const emptyProjectFormValues: ProjectFormValues = {
   maxPrice: "",
   latitude: "",
   longitude: "",
+  offerType: "sale",
+  category: "residential",
   projectType: "apartment",
   completionStage: "pre_launch",
   status: "draft",

@@ -37,6 +37,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     maxPrice: project.maxPrice?.toString() ?? "",
     latitude: project.latitude?.toString() ?? "",
     longitude: project.longitude?.toString() ?? "",
+    offerType: project.offerType,
+    category: project.category,
     projectType: project.projectType,
     completionStage: project.completionStage,
     status: project.status,

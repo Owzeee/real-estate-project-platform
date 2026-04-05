@@ -6,7 +6,9 @@ import { ProjectGallery } from "@/features/projects/project-gallery";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
   buildMapEmbedUrl,
+  formatCategoryLabel,
   formatCompletionStageLabel,
+  formatOfferTypeLabel,
   formatProjectTypeLabel,
   formatStatusLabel,
   getProjectAmenityGroups,
@@ -69,6 +71,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="grid gap-0 xl:grid-cols-[1.08fr_0.92fr]">
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                  {formatOfferTypeLabel(project.offerType)}
+                </span>
+                <span className="rounded-full bg-[rgba(141,104,71,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700">
+                  {formatCategoryLabel(project.category)}
+                </span>
                 <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
                   {formatProjectTypeLabel(project.projectType)}
                 </span>

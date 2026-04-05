@@ -238,6 +238,14 @@ export function formatStatusLabel(status: ProjectSummary["status"]) {
   return titleCase(status);
 }
 
+export function formatOfferTypeLabel(offerType: ProjectSummary["offerType"]) {
+  return offerType === "sale" ? "For Sale" : "For Rent";
+}
+
+export function formatCategoryLabel(category: ProjectSummary["category"]) {
+  return titleCase(category);
+}
+
 export function buildMapEmbedUrl(project: Pick<ProjectSummary, "latitude" | "longitude">) {
   if (project.latitude == null || project.longitude == null) {
     return null;
