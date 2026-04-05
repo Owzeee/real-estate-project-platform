@@ -16,7 +16,7 @@ export default async function AdminProjectsPage() {
     <main className="min-h-screen bg-transparent px-6 py-12 sm:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[0.4fr_1fr]">
-          <section className="rounded-[1.9rem] bg-[linear-gradient(145deg,rgba(32,28,25,0.98),rgba(141,104,71,0.94))] p-8 text-white shadow-[0_32px_90px_rgba(32,28,25,0.22)]">
+          <section className="rounded-[1.9rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] p-8 text-white shadow-[0_32px_90px_rgba(32,28,25,0.22)]">
             <SectionHeading
               eyebrow="Admin"
               title="Project moderation"
