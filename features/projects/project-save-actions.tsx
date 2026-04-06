@@ -4,9 +4,10 @@ import { useProjectsStore, toStoredProject } from "@/features/projects/client-st
 import type { ProjectSummary } from "@/features/projects/types";
 
 export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
-  const { isFavorite, isCompared, toggleFavorite, toggleCompare } = useProjectsStore();
+  const { isFavorite, isProjectCompared, toggleFavorite, toggleProjectCompare } =
+    useProjectsStore();
   const favorite = isFavorite(project.id);
-  const compared = isCompared(project.id);
+  const compared = isProjectCompared(project.id);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -23,7 +24,7 @@ export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
       </button>
       <button
         type="button"
-        onClick={() => toggleCompare(toStoredProject(project))}
+        onClick={() => toggleProjectCompare(toStoredProject(project))}
         className={`rounded-full px-4 py-2 text-sm font-semibold ${
           compared
             ? "bg-[var(--primary)] text-[var(--primary-foreground)]"

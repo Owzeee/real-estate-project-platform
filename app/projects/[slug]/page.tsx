@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { InquiryForm } from "@/features/inquiries/inquiry-form";
 import { ProjectGallery } from "@/features/projects/project-gallery";
+import { PropertyCompareActions } from "@/features/projects/property-compare-actions";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
   buildMapEmbedUrl,
@@ -210,10 +211,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
               <div className="mt-8 space-y-4">
                 {units.map((unit) => (
-                  <Link
+                  <div
                     key={unit.id}
-                    href={`/projects/${project.slug}/units/${unit.slug}`}
-                    className="block rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-4 transition hover:border-[rgba(141,104,71,0.28)] sm:p-5"
+                    className="rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-4 transition hover:border-[rgba(141,104,71,0.28)] sm:p-5"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                       <div
@@ -225,7 +225,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         }}
                       />
 
-                      <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/projects/${project.slug}/units/${unit.slug}`}
+                        className="min-w-0 flex-1"
+                      >
                         <p className="font-copy text-base leading-7 text-stone-700">
                           {unit.title}
                         </p>
@@ -246,13 +249,38 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                             </span>
                           ) : null}
                         </div>
-                      </div>
+                      </Link>
 
-                      <span className="text-sm font-semibold text-[var(--primary)]">
-                        View apartment
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <PropertyCompareActions
+                          property={{
+                            id: unit.id,
+                            projectSlug: project.slug,
+                            projectTitle: project.title,
+                            propertySlug: unit.slug,
+                            title: unit.title,
+                            developerName: project.developerName,
+                            location: project.location,
+                            offerType: unit.offerType,
+                            priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                            areaLabel: unit.areaLabel,
+                            roomsLabel: unit.roomsLabel,
+                            availableFromLabel: unit.availableFromLabel,
+                            minimumStayLabel: unit.minimumStayLabel,
+                            maximumStayLabel: unit.maximumStayLabel,
+                            imageUrl: unit.imageUrl,
+                            beds: unit.beds,
+                            amenityGroups: unit.amenityGroups,
+                          }}
+                        />
+                        <span className="text-sm font-semibold text-[var(--primary)]">
+                          <Link href={`/projects/${project.slug}/units/${unit.slug}`}>
+                            View apartment
+                          </Link>
+                        </span>
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </article>

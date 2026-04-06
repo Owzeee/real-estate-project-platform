@@ -8,11 +8,16 @@ import {
   type ReactNode,
 } from "react";
 
-import { formatCompletionStageLabel, formatProjectTypeLabel } from "@/features/projects/presentation";
+import {
+  formatCompletionStageLabel,
+  formatProjectTypeLabel,
+  type ProjectAmenityGroup,
+  type ProjectBed,
+} from "@/features/projects/presentation";
 import type { ProjectSummary } from "@/features/projects/types";
 import { formatProjectPricing } from "@/lib/utils/format-price";
 
-type StoredProject = Pick<
+export type StoredProject = Pick<
   ProjectSummary,
   | "id"
   | "slug"
@@ -30,38 +35,64 @@ type StoredProject = Pick<
   | "heroMediaUrl"
 >;
 
+export type StoredProperty = {
+  id: string;
+  projectSlug: string;
+  projectTitle: string;
+  propertySlug: string;
+  title: string;
+  developerName: string;
+  location: string;
+  offerType: "sale" | "rent";
+  priceLabel: string;
+  areaLabel: string;
+  roomsLabel: string;
+  availableFromLabel: string;
+  minimumStayLabel: string;
+  maximumStayLabel: string;
+  imageUrl: string | null;
+  beds: ProjectBed[];
+  amenityGroups: ProjectAmenityGroup[];
+};
+
 type ProjectsStoreValue = {
   favorites: StoredProject[];
-  compare: StoredProject[];
+  projectCompare: StoredProject[];
+  propertyCompare: StoredProperty[];
   isFavorite: (id: string) => boolean;
-  isCompared: (id: string) => boolean;
+  isProjectCompared: (id: string) => boolean;
+  isPropertyCompared: (id: string) => boolean;
   toggleFavorite: (project: StoredProject) => void;
-  toggleCompare: (project: StoredProject) => void;
+  toggleProjectCompare: (project: StoredProject) => void;
+  togglePropertyCompare: (property: StoredProperty) => void;
   removeFavorite: (id: string) => void;
-  removeCompare: (id: string) => void;
-  clearCompare: () => void;
+  removeProjectCompare: (id: string) => void;
+  removePropertyCompare: (id: string) => void;
+  clearProjectCompare: () => void;
+  clearPropertyCompare: () => void;
 };
 
 const FAVORITES_KEY = "real-estate-favorites";
-const COMPARE_KEY = "real-estate-compare";
+const PROJECT_COMPARE_KEY = "real-estate-project-compare";
+const PROPERTY_COMPARE_KEY = "real-estate-property-compare";
 const MAX_COMPARE = 3;
 
 const ProjectsStoreContext = createContext<ProjectsStoreValue | null>(null);
 
-function readStorage(key: string): StoredProject[] {
+function readStorage<T>(key: string): T[] {
   if (typeof window === "undefined") {
     return [];
   }
 
   try {
     const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as StoredProject[]) : [];
+    return raw ? (JSON.parse(raw) as T[]) : [];
   } catch {
     return [];
   }
 }
 
-function writeStorage(key: string, value: StoredProject[]) {
+function writeStorage<T>(key: string, value: T[]) {
   if (typeof window === "undefined") {
     return;
   }
@@ -71,18 +102,23 @@ function writeStorage(key: string, value: StoredProject[]) {
 
 export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<StoredProject[]>(() =>
-    readStorage(FAVORITES_KEY),
+    readStorage<StoredProject>(FAVORITES_KEY),
   );
-  const [compare, setCompare] = useState<StoredProject[]>(() =>
-    readStorage(COMPARE_KEY),
+  const [projectCompare, setProjectCompare] = useState<StoredProject[]>(() =>
+    readStorage<StoredProject>(PROJECT_COMPARE_KEY),
+  );
+  const [propertyCompare, setPropertyCompare] = useState<StoredProperty[]>(() =>
+    readStorage<StoredProperty>(PROPERTY_COMPARE_KEY),
   );
 
   const value = useMemo<ProjectsStoreValue>(
     () => ({
       favorites,
-      compare,
+      projectCompare,
+      propertyCompare,
       isFavorite: (id) => favorites.some((project) => project.id === id),
-      isCompared: (id) => compare.some((project) => project.id === id),
+      isProjectCompared: (id) => projectCompare.some((project) => project.id === id),
+      isPropertyCompared: (id) => propertyCompare.some((property) => property.id === id),
       toggleFavorite: (project) => {
         setFavorites((current) => {
           const next = current.some((item) => item.id === project.id)
@@ -93,14 +129,25 @@ export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
           return next;
         });
       },
-      toggleCompare: (project) => {
-        setCompare((current) => {
+      toggleProjectCompare: (project) => {
+        setProjectCompare((current) => {
           const exists = current.some((item) => item.id === project.id);
           const next = exists
             ? current.filter((item) => item.id !== project.id)
             : [...current.slice(-(MAX_COMPARE - 1)), project];
 
-          writeStorage(COMPARE_KEY, next);
+          writeStorage(PROJECT_COMPARE_KEY, next);
+          return next;
+        });
+      },
+      togglePropertyCompare: (property) => {
+        setPropertyCompare((current) => {
+          const exists = current.some((item) => item.id === property.id);
+          const next = exists
+            ? current.filter((item) => item.id !== property.id)
+            : [...current.slice(-(MAX_COMPARE - 1)), property];
+
+          writeStorage(PROPERTY_COMPARE_KEY, next);
           return next;
         });
       },
@@ -111,19 +158,30 @@ export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
           return next;
         });
       },
-      removeCompare: (id) => {
-        setCompare((current) => {
+      removeProjectCompare: (id) => {
+        setProjectCompare((current) => {
           const next = current.filter((item) => item.id !== id);
-          writeStorage(COMPARE_KEY, next);
+          writeStorage(PROJECT_COMPARE_KEY, next);
           return next;
         });
       },
-      clearCompare: () => {
-        writeStorage(COMPARE_KEY, []);
-        setCompare([]);
+      removePropertyCompare: (id) => {
+        setPropertyCompare((current) => {
+          const next = current.filter((item) => item.id !== id);
+          writeStorage(PROPERTY_COMPARE_KEY, next);
+          return next;
+        });
+      },
+      clearProjectCompare: () => {
+        writeStorage(PROJECT_COMPARE_KEY, []);
+        setProjectCompare([]);
+      },
+      clearPropertyCompare: () => {
+        writeStorage(PROPERTY_COMPARE_KEY, []);
+        setPropertyCompare([]);
       },
     }),
-    [compare, favorites],
+    [favorites, projectCompare, propertyCompare],
   );
 
   return (
@@ -162,15 +220,12 @@ export function toStoredProject(project: ProjectSummary): StoredProject {
   };
 }
 
-export function getCompareRows(project: StoredProject) {
+export function getProjectCompareRows(project: StoredProject) {
   return [
     { label: "Developer", value: project.developerName },
     { label: "Location", value: project.location },
     { label: "Type", value: formatProjectTypeLabel(project.projectType) },
-    {
-      label: "Stage",
-      value: formatCompletionStageLabel(project.completionStage),
-    },
+    { label: "Stage", value: formatCompletionStageLabel(project.completionStage) },
     {
       label: "Price",
       value: formatProjectPricing({
@@ -183,5 +238,35 @@ export function getCompareRows(project: StoredProject) {
         currencyCode: project.currencyCode,
       }),
     },
+  ];
+}
+
+function joinValues(values: string[]) {
+  return values.length > 0 ? values.join(", ") : "Not specified";
+}
+
+export function getPropertyCompareRows(property: StoredProperty) {
+  return [
+    { label: "Project", value: property.projectTitle },
+    { label: "Developer", value: property.developerName },
+    { label: "Location", value: property.location },
+    { label: "Listing", value: property.offerType === "rent" ? "For Rent" : "For Sale" },
+    { label: "Price", value: property.priceLabel || "Contact for price" },
+    { label: "Area", value: property.areaLabel || "Not specified" },
+    { label: "Rooms", value: property.roomsLabel || "Not specified" },
+    { label: "Available from", value: property.availableFromLabel || "Not specified" },
+    { label: "Minimum stay", value: property.minimumStayLabel || "Not specified" },
+    { label: "Maximum stay", value: property.maximumStayLabel || "Not specified" },
+    {
+      label: "Beds",
+      value:
+        property.beds.length > 0
+          ? property.beds.map((bed) => `${bed.label} (${bed.roomLabel})`).join(", ")
+          : "Not specified",
+    },
+    ...property.amenityGroups.map((group) => ({
+      label: group.title,
+      value: joinValues(group.items),
+    })),
   ];
 }
