@@ -8,6 +8,7 @@ import { PropertySaveActions } from "@/features/projects/property-save-actions";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
   buildMapEmbedUrl,
+  buildVirtualTourEmbedUrl,
   formatCategoryLabel,
   formatCompletionStageLabel,
   formatOfferTypeLabel,
@@ -17,6 +18,8 @@ import {
   getProjectHighlights,
   getProjectNarrative,
   getProjectUnits,
+  getProjectVideoMedia,
+  getProjectVirtualTourMedia,
 } from "@/features/projects/presentation";
 import { getProjectBySlug, getProjects } from "@/features/projects/queries";
 import { formatProjectPricing } from "@/lib/utils/format-price";
@@ -39,6 +42,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const mapUrl = buildMapEmbedUrl(project);
+  const virtualTour = getProjectVirtualTourMedia(project);
+  const virtualTourEmbedUrl = virtualTour
+    ? buildVirtualTourEmbedUrl(virtualTour.fileUrl)
+    : null;
+  const launchVideo = getProjectVideoMedia(project);
   const highlights = getProjectHighlights(project);
   const units = getProjectUnits(project);
   const amenityGroups = getProjectAmenityGroups(project);
@@ -152,6 +160,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <ProjectSaveActions project={project} />
+                {virtualTour ? (
+                  <a
+                    href={virtualTourEmbedUrl ? "#virtual-tour" : virtualTour.fileUrl}
+                    target={virtualTourEmbedUrl ? undefined : "_blank"}
+                    rel={virtualTourEmbedUrl ? undefined : "noreferrer"}
+                    className="secondary-button px-4 py-2.5 text-sm"
+                  >
+                    Start 3D tour
+                  </a>
+                ) : null}
               </div>
             </div>
 
@@ -163,6 +181,97 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1.38fr)_minmax(320px,0.62fr)]">
           <section className="space-y-8">
+            {virtualTour ? (
+              <article
+                id="virtual-tour"
+                className="surface-panel rounded-[1.9rem] p-7 sm:p-8"
+              >
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="eyebrow">Virtual Tour</p>
+                    <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
+                      Walk through the project digitally
+                    </h2>
+                    <p className="font-copy mt-4 max-w-3xl text-base leading-8 text-[var(--muted-foreground)]">
+                      Launch the interactive 3D experience directly on the page, or open it in a separate tab if the provider requires its own viewer.
+                    </p>
+                  </div>
+                  <a
+                    href={virtualTour.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="secondary-button px-4 py-2.5 text-sm"
+                  >
+                    Open full viewer
+                  </a>
+                </div>
+
+                <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-white">
+                  {virtualTourEmbedUrl ? (
+                    <iframe
+                      title={virtualTour.title ?? `${project.title} virtual tour`}
+                      src={virtualTourEmbedUrl}
+                      className="h-[34rem] w-full border-0"
+                      allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div className="flex min-h-[26rem] items-center justify-center px-8 py-12 text-center">
+                      <div className="max-w-xl">
+                        <p className="font-display text-3xl font-semibold text-stone-950">
+                          This tour opens in an external viewer
+                        </p>
+                        <p className="mt-4 text-sm leading-7 text-[var(--muted-foreground)]">
+                          The current tour provider does not expose a direct embed URL. Use the button below to test the tour in its native viewer.
+                        </p>
+                        <a
+                          href={virtualTour.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="primary-button mt-6 text-sm"
+                        >
+                          Open 3D tour
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </article>
+            ) : null}
+
+            {launchVideo ? (
+              <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="eyebrow">Launch Film</p>
+                    <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
+                      Preview the project through video
+                    </h2>
+                  </div>
+                  <a
+                    href={launchVideo.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="secondary-button px-4 py-2.5 text-sm"
+                  >
+                    Open video
+                  </a>
+                </div>
+
+                <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-black">
+                  <video
+                    controls
+                    preload="metadata"
+                    className="h-[28rem] w-full bg-black object-cover"
+                  >
+                    <source src={launchVideo.fileUrl} />
+                  </video>
+                </div>
+              </article>
+            ) : null}
+
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
               <p className="eyebrow">About This Project</p>
               {project.description ? (

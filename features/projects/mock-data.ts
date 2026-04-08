@@ -309,7 +309,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://matterport.com/discover/space/x7dR5DjK7Lm",
+        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
         title: "3D walkthrough",
       },
     ]),
@@ -434,7 +434,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://matterport.com/discover/space/4Wq3P6mY7rK",
+        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
         title: "Retail promenade 3D tour",
       },
     ]),
@@ -556,7 +556,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://matterport.com/discover/space/V6h9v2S1Qyz",
+        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
         title: "Show villa virtual tour",
       },
     ]),
@@ -662,7 +662,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://matterport.com/discover/space/F3t7zPfR8v9",
+        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
         title: "Signature residence 3D tour",
       },
     ]),
@@ -867,7 +867,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://matterport.com/discover/space/NrK95pJ2jW9",
+        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
         title: "Office plate virtual tour",
       },
     ]),

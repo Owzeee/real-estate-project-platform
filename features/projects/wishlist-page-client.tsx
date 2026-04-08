@@ -86,9 +86,6 @@ export function WishlistPageClient() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <div className="rounded-[1rem] border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-stone-950">
-                    Move in · Move out
-                  </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab("properties")}
@@ -256,7 +253,7 @@ export function WishlistPageClient() {
                       className="rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-5"
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className="font-display text-3xl font-semibold text-stone-950">
                             {project.title}
                           </p>
@@ -264,14 +261,17 @@ export function WishlistPageClient() {
                             {project.location} • {project.developerName}
                           </p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Link href={`/projects/${project.slug}`} className="primary-button px-4 py-2 text-sm">
+                        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                          <Link
+                            href={`/projects/${project.slug}`}
+                            className="primary-button min-w-[8.5rem] px-4 py-2 text-sm"
+                          >
                             Open project
                           </Link>
                           <button
                             type="button"
                             onClick={() => removeFavorite(project.id)}
-                            className="secondary-button px-4 py-2 text-sm"
+                            className="secondary-button min-w-[8.5rem] px-4 py-2 text-sm"
                           >
                             Remove
                           </button>

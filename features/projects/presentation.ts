@@ -296,6 +296,56 @@ export function buildMapEmbedUrl(project: Pick<ProjectSummary, "latitude" | "lon
   return `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${project.latitude}%2C${project.longitude}`;
 }
 
+export function getProjectVirtualTourMedia(project: ProjectDetail) {
+  return project.media.find((item) => item.mediaType === "tour_3d") ?? null;
+}
+
+export function getProjectVideoMedia(project: ProjectDetail) {
+  return project.media.find((item) => item.mediaType === "video") ?? null;
+}
+
+export function buildVirtualTourEmbedUrl(fileUrl: string) {
+  try {
+    const url = new URL(fileUrl);
+
+    if (url.hostname.includes("matterport.com")) {
+      const showId =
+        url.searchParams.get("m") ??
+        url.pathname.match(/\/space\/([^/]+)/)?.[1] ??
+        url.pathname.match(/\/models\/([^/]+)/)?.[1];
+
+      if (showId) {
+        return `https://my.matterport.com/show/?m=${showId}&play=1&qs=1&brand=0`;
+      }
+    }
+
+    if (url.hostname.includes("youtube.com")) {
+      const videoId = url.searchParams.get("v");
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+
+    if (url.hostname === "youtu.be") {
+      const videoId = url.pathname.replace("/", "");
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+
+    if (url.hostname.includes("vimeo.com")) {
+      const videoId = url.pathname.split("/").filter(Boolean)[0];
+      if (videoId) {
+        return `https://player.vimeo.com/video/${videoId}`;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function getProjectHighlights(project: ProjectDetail) {
   const highlights = [
     "Admin-curated inventory",
