@@ -14,13 +14,14 @@ export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
       <button
         type="button"
         onClick={() => toggleFavorite(toStoredProject(project))}
-        className={`rounded-full px-4 py-2 text-sm font-semibold ${
+        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
           favorite
             ? "bg-[var(--secondary)] text-[var(--secondary-foreground)]"
             : "border border-[var(--border)] bg-white text-stone-900"
         }`}
       >
-        {favorite ? "Saved" : "Save"}
+        <span aria-hidden="true">{favorite ? "♥" : "♡"}</span>
+        <span>{favorite ? "In wishlist" : "Add to wishlist"}</span>
       </button>
       <button
         type="button"

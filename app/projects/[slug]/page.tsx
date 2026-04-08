@@ -252,7 +252,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         </div>
                       </Link>
 
-                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                      <div className="flex flex-wrap items-center gap-2 sm:max-w-[15rem] sm:justify-end">
                         <PropertySaveActions
                           property={{
                             id: unit.id,

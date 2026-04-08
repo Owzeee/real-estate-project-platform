@@ -132,29 +132,34 @@ export function WishlistPageClient() {
 
               {activeTab === "properties" ? (
                 favoriteProperties.length === 0 ? (
-                  <div className="relative min-h-[33rem] overflow-hidden rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,251,244,0.84))]">
-                    <div className="absolute left-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center px-6 text-center">
-                      <h2 className="font-display text-4xl font-semibold text-stone-950">
-                        Your wishlist is empty
-                      </h2>
-                      <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted-foreground)]">
+                  <div className="rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,251,244,0.84))] p-8 sm:p-10">
+                    <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+                      <div className="text-center lg:text-left">
+                        <h2 className="font-display text-4xl font-semibold text-stone-950">
+                          Your wishlist is empty
+                        </h2>
+                      <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted-foreground)] lg:max-w-2xl">
                         Save the apartments and layouts you like, then review them here with a map, quick specs, and direct access back into each property page.
+                      </p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
+                        Look for the heart-shaped Add to wishlist button on property cards and pages.
                       </p>
                       <Link href="/projects" className="primary-button mt-6 text-sm">
                         Discover homes
                       </Link>
-                    </div>
+                      </div>
 
-                    <div className="absolute -right-10 bottom-0 grid grid-cols-3 gap-4 p-6 opacity-90 sm:right-2">
-                      {emptyStateImages.map((imageUrl, index) => (
-                        <div
-                          key={imageUrl}
-                          className={`h-28 w-24 rounded-[1.2rem] bg-cover bg-center shadow-[0_18px_38px_rgba(32,28,25,0.16)] sm:h-36 sm:w-28 ${
-                            index % 2 === 0 ? "translate-y-6" : ""
-                          }`}
-                          style={{ backgroundImage: `url(${imageUrl})` }}
-                        />
-                      ))}
+                      <div className="mx-auto grid w-full max-w-[20rem] grid-cols-3 gap-3">
+                        {emptyStateImages.map((imageUrl, index) => (
+                          <div
+                            key={imageUrl}
+                            className={`aspect-[0.8] rounded-[1.2rem] bg-cover bg-center shadow-[0_18px_38px_rgba(32,28,25,0.16)] ${
+                              index % 2 === 0 ? "translate-y-4" : ""
+                            }`}
+                            style={{ backgroundImage: `url(${imageUrl})` }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : (
