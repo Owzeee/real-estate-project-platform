@@ -388,19 +388,7 @@ export function buildVirtualTourEmbedUrl(fileUrl: string) {
     if (url.hostname.includes("matterport.com")) {
       const showId = url.searchParams.get("m");
       if (showId) {
-        const sdkKey = process.env.NEXT_PUBLIC_MATTERPORT_SDK_KEY?.trim();
-        const params = new URLSearchParams({
-          m: showId,
-          play: "1",
-          qs: "1",
-          brand: "0",
-        });
-
-        if (sdkKey) {
-          params.set("applicationKey", sdkKey);
-        }
-
-        return `https://my.matterport.com/show/?${params.toString()}`;
+        return `https://my.matterport.com/show/?m=${showId}&play=1&qs=1&brand=0`;
       }
     }
 

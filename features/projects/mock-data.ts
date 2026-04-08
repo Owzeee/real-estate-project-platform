@@ -13,7 +13,7 @@ const image = (seed: string) =>
 
 const brochureUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 const sampleVideoUrl = "https://www.w3schools.com/html/mov_bbb.mp4";
-const sampleTourUrl = "REPLACE_WITH_REAL_MATTERPORT_SPACE_ID";
+const sampleTourUrl = "https://my.matterport.com/models/25B7rViqy4M";
 
 function makeMedia(
   projectId: string,

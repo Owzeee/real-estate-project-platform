@@ -444,7 +444,7 @@ begin
   values
     (project_1_id, 'image', 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80', null, 'Main exterior', 0),
     (project_1_id, 'brochure', 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', null, 'Project brochure', 1),
-    (project_1_id, 'tour_3d', 'https://360.virtual3dscan.ch/tour/wohnung-eg-01-2-5-zimmer', null, '3D walkthrough', 2),
+    (project_1_id, 'tour_3d', 'https://my.matterport.com/models/25B7rViqy4M', null, '3D walkthrough', 2),
     (project_2_id, 'image', 'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1400&q=80', null, 'Masterplan view', 0),
     (project_2_id, 'video', 'https://www.w3schools.com/html/mov_bbb.mp4', null, 'Launch film', 1),
     (project_3_id, 'image', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80', null, 'Villa exterior', 0),
