@@ -43,6 +43,8 @@ export type StoredProperty = {
   title: string;
   developerName: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   offerType: "sale" | "rent";
   priceLabel: string;
   areaLabel: string;
@@ -56,23 +58,28 @@ export type StoredProperty = {
 };
 
 type ProjectsStoreValue = {
-  favorites: StoredProject[];
+  favoriteProjects: StoredProject[];
+  favoriteProperties: StoredProperty[];
   projectCompare: StoredProject[];
   propertyCompare: StoredProperty[];
   isFavorite: (id: string) => boolean;
+  isFavoriteProperty: (id: string) => boolean;
   isProjectCompared: (id: string) => boolean;
   isPropertyCompared: (id: string) => boolean;
   toggleFavorite: (project: StoredProject) => void;
+  toggleFavoriteProperty: (property: StoredProperty) => void;
   toggleProjectCompare: (project: StoredProject) => void;
   togglePropertyCompare: (property: StoredProperty) => void;
   removeFavorite: (id: string) => void;
+  removeFavoriteProperty: (id: string) => void;
   removeProjectCompare: (id: string) => void;
   removePropertyCompare: (id: string) => void;
   clearProjectCompare: () => void;
   clearPropertyCompare: () => void;
 };
 
-const FAVORITES_KEY = "real-estate-favorites";
+const FAVORITE_PROJECTS_KEY = "real-estate-favorite-projects";
+const FAVORITE_PROPERTIES_KEY = "real-estate-favorite-properties";
 const PROJECT_COMPARE_KEY = "real-estate-project-compare";
 const PROPERTY_COMPARE_KEY = "real-estate-property-compare";
 const MAX_COMPARE = 3;
@@ -101,8 +108,11 @@ function writeStorage<T>(key: string, value: T[]) {
 }
 
 export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<StoredProject[]>(() =>
-    readStorage<StoredProject>(FAVORITES_KEY),
+  const [favoriteProjects, setFavoriteProjects] = useState<StoredProject[]>(() =>
+    readStorage<StoredProject>(FAVORITE_PROJECTS_KEY),
+  );
+  const [favoriteProperties, setFavoriteProperties] = useState<StoredProperty[]>(() =>
+    readStorage<StoredProperty>(FAVORITE_PROPERTIES_KEY),
   );
   const [projectCompare, setProjectCompare] = useState<StoredProject[]>(() =>
     readStorage<StoredProject>(PROJECT_COMPARE_KEY),
@@ -113,19 +123,31 @@ export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ProjectsStoreValue>(
     () => ({
-      favorites,
+      favoriteProjects,
+      favoriteProperties,
       projectCompare,
       propertyCompare,
-      isFavorite: (id) => favorites.some((project) => project.id === id),
+      isFavorite: (id) => favoriteProjects.some((project) => project.id === id),
+      isFavoriteProperty: (id) => favoriteProperties.some((property) => property.id === id),
       isProjectCompared: (id) => projectCompare.some((project) => project.id === id),
       isPropertyCompared: (id) => propertyCompare.some((property) => property.id === id),
       toggleFavorite: (project) => {
-        setFavorites((current) => {
+        setFavoriteProjects((current) => {
           const next = current.some((item) => item.id === project.id)
             ? current.filter((item) => item.id !== project.id)
             : [project, ...current];
 
-          writeStorage(FAVORITES_KEY, next);
+          writeStorage(FAVORITE_PROJECTS_KEY, next);
+          return next;
+        });
+      },
+      toggleFavoriteProperty: (property) => {
+        setFavoriteProperties((current) => {
+          const next = current.some((item) => item.id === property.id)
+            ? current.filter((item) => item.id !== property.id)
+            : [property, ...current];
+
+          writeStorage(FAVORITE_PROPERTIES_KEY, next);
           return next;
         });
       },
@@ -152,9 +174,16 @@ export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
         });
       },
       removeFavorite: (id) => {
-        setFavorites((current) => {
+        setFavoriteProjects((current) => {
           const next = current.filter((item) => item.id !== id);
-          writeStorage(FAVORITES_KEY, next);
+          writeStorage(FAVORITE_PROJECTS_KEY, next);
+          return next;
+        });
+      },
+      removeFavoriteProperty: (id) => {
+        setFavoriteProperties((current) => {
+          const next = current.filter((item) => item.id !== id);
+          writeStorage(FAVORITE_PROPERTIES_KEY, next);
           return next;
         });
       },
@@ -181,7 +210,7 @@ export function ProjectsStoreProvider({ children }: { children: ReactNode }) {
         setPropertyCompare([]);
       },
     }),
-    [favorites, projectCompare, propertyCompare],
+    [favoriteProjects, favoriteProperties, projectCompare, propertyCompare],
   );
 
   return (

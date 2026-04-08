@@ -6,6 +6,7 @@ import { getCurrentAuth } from "@/lib/auth";
 const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/projects", label: "Projects" },
+  { href: "/wishlist", label: "Wishlist" },
   { href: "/developers", label: "Developers" },
 ];
 

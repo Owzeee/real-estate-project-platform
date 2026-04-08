@@ -13,10 +13,12 @@ type CompareTab = "projects" | "properties";
 
 export function ProjectsUtilityTray() {
   const {
-    favorites,
+    favoriteProjects,
+    favoriteProperties,
     projectCompare,
     propertyCompare,
     removeFavorite,
+    removeFavoriteProperty,
     removeProjectCompare,
     removePropertyCompare,
     clearProjectCompare,
@@ -48,7 +50,7 @@ export function ProjectsUtilityTray() {
               onClick={() => setFavoritesOpen((open) => !open)}
               className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-stone-900"
             >
-              Saved {favorites.length}
+              Saved {favoriteProjects.length + favoriteProperties.length}
             </button>
             <button
               type="button"
@@ -82,7 +84,7 @@ export function ProjectsUtilityTray() {
           <div className="surface-panel rounded-[1.75rem] p-5">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-display text-2xl font-semibold text-stone-950">
-                Saved projects
+                Saved shortlist
               </h2>
               <button
                 type="button"
@@ -93,39 +95,69 @@ export function ProjectsUtilityTray() {
               </button>
             </div>
             <div className="mt-5 grid gap-3">
-              {favorites.length === 0 ? (
+              {favoriteProjects.length === 0 && favoriteProperties.length === 0 ? (
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  No saved projects yet.
+                  No saved projects or properties yet.
                 </p>
               ) : (
-                favorites.map((project) => (
-                  <div
-                    key={project.id}
-                    className="flex flex-col gap-3 rounded-[1.2rem] border border-[var(--border)] bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-semibold text-stone-950">{project.title}</p>
-                      <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                        {project.location} • {project.developerName}
-                      </p>
+                <>
+                  {favoriteProperties.map((property) => (
+                    <div
+                      key={property.id}
+                      className="flex flex-col gap-3 rounded-[1.2rem] border border-[var(--border)] bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="font-semibold text-stone-950">{property.title}</p>
+                        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                          {property.location} • {property.projectTitle}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/projects/${property.projectSlug}/units/${property.propertySlug}`}
+                          className="secondary-button px-4 py-2 text-sm"
+                        >
+                          Open
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeFavoriteProperty(property.id)}
+                          className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-stone-900"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/projects/${project.slug}`}
-                        className="secondary-button px-4 py-2 text-sm"
-                      >
-                        Open
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => removeFavorite(project.id)}
-                        className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-stone-900"
-                      >
-                        Remove
-                      </button>
+                  ))}
+                  {favoriteProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="flex flex-col gap-3 rounded-[1.2rem] border border-[var(--border)] bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="font-semibold text-stone-950">{project.title}</p>
+                        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                          {project.location} • {project.developerName}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="secondary-button px-4 py-2 text-sm"
+                        >
+                          Open
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeFavorite(project.id)}
+                          className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-stone-900"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </>
               )}
             </div>
           </div>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { InquiryForm } from "@/features/inquiries/inquiry-form";
 import { ProjectGallery } from "@/features/projects/project-gallery";
 import { PropertyCompareActions } from "@/features/projects/property-compare-actions";
+import { PropertySaveActions } from "@/features/projects/property-save-actions";
 import {
   buildMapEmbedUrl,
   getProjectUnitBySlug,
@@ -94,6 +95,29 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
+                <PropertySaveActions
+                  property={{
+                    id: unit.id,
+                    projectSlug: project.slug,
+                    projectTitle: project.title,
+                    propertySlug: unit.slug,
+                    title: unit.title,
+                    developerName: project.developerName,
+                    location: project.location,
+                    latitude: project.latitude,
+                    longitude: project.longitude,
+                    offerType: unit.offerType,
+                    priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                    areaLabel: unit.areaLabel,
+                    roomsLabel: unit.roomsLabel,
+                    availableFromLabel: unit.availableFromLabel,
+                    minimumStayLabel: unit.minimumStayLabel,
+                    maximumStayLabel: unit.maximumStayLabel,
+                    imageUrl: unit.imageUrl,
+                    beds: unit.beds,
+                    amenityGroups: unit.amenityGroups,
+                  }}
+                />
                 <PropertyCompareActions
                   property={{
                     id: unit.id,
@@ -103,6 +127,8 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                     title: unit.title,
                     developerName: project.developerName,
                     location: project.location,
+                    latitude: project.latitude,
+                    longitude: project.longitude,
                     offerType: unit.offerType,
                     priceLabel: unit.monthlyRentLabel || unit.priceLabel,
                     areaLabel: unit.areaLabel,
