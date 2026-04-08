@@ -20,8 +20,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
         }}
       >
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(23,20,18,0.52)] to-transparent" />
-        <div className="absolute right-4 top-4 rounded-full bg-[rgba(141,104,71,0.88)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-foreground)]">
-          {project.completionStage.replace("_", " ")}
+        <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
+          <div className="rounded-full bg-[rgba(141,104,71,0.88)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-foreground)]">
+            {project.completionStage.replace("_", " ")}
+          </div>
+          {project.hasVirtualTour ? (
+            <div className="rounded-full bg-[rgba(32,28,25,0.82)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">
+              3D Tour
+            </div>
+          ) : null}
         </div>
         <div className="absolute bottom-4 left-4 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-900">
           {project.location}

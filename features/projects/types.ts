@@ -91,6 +91,7 @@ export type ProjectSummary = {
   projectType: ProjectType;
   completionStage: CompletionStage;
   isFeatured: boolean;
+  hasVirtualTour: boolean;
   latitude: number | null;
   longitude: number | null;
   heroMediaUrl: string | null;

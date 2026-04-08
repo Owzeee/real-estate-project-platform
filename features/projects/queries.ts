@@ -43,6 +43,7 @@ function mapProjectSummary(row: {
     | null;
         project_media:
     | {
+        media_type?: string;
         file_url: string;
         sort_order: number;
       }[]
@@ -53,6 +54,7 @@ function mapProjectSummary(row: {
     : row.developer_profiles;
 
   const media = row.project_media?.slice().sort((a, b) => a.sort_order - b.sort_order)[0];
+  const hasVirtualTour = (row.project_media ?? []).some((item) => item.media_type === "tour_3d");
 
   return {
     id: row.id,
@@ -77,6 +79,7 @@ function mapProjectSummary(row: {
     projectType: row.project_type,
     completionStage: row.completion_stage,
     isFeatured: row.is_featured,
+    hasVirtualTour,
     latitude: row.latitude,
     longitude: row.longitude,
     heroMediaUrl: media?.file_url ?? null,
@@ -180,6 +183,7 @@ export const getProjects = cache(async () => {
           slug
         ),
         project_media (
+          media_type,
           file_url,
           sort_order
         )
@@ -242,6 +246,7 @@ export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?
           slug
         ),
         project_media (
+          media_type,
           file_url,
           sort_order
         )

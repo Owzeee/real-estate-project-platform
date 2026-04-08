@@ -1,8 +1,11 @@
 import type {
   ProjectDetail,
+  ProjectMedia,
   ProjectSummary,
   ProjectUnit as StoredProjectUnit,
 } from "@/features/projects/types";
+
+const fallbackPublicTourUrl = "https://360.virtual3dscan.ch/tour/wohnung-eg-01-2-5-zimmer";
 
 export type ProjectAmenityGroup = {
   title: string;
@@ -297,16 +300,37 @@ export function buildMapEmbedUrl(project: Pick<ProjectSummary, "latitude" | "lon
 }
 
 export function getProjectVirtualTourMedia(project: ProjectDetail) {
-  return project.media.find((item) => item.mediaType === "tour_3d") ?? null;
+  const media = project.media.find((item) => item.mediaType === "tour_3d") ?? null;
+
+  if (!media) {
+    return null;
+  }
+
+  return {
+    ...media,
+    fileUrl: normalizeVirtualTourUrl(media.fileUrl),
+  } satisfies ProjectMedia;
 }
 
 export function getProjectVideoMedia(project: ProjectDetail) {
   return project.media.find((item) => item.mediaType === "video") ?? null;
 }
 
+function normalizeVirtualTourUrl(fileUrl: string) {
+  if (
+    fileUrl.includes("x7dR5DjK7Lm") ||
+    fileUrl.includes("discover.matterport.com/space/")
+  ) {
+    return fallbackPublicTourUrl;
+  }
+
+  return fileUrl;
+}
+
 export function buildVirtualTourEmbedUrl(fileUrl: string) {
   try {
-    const url = new URL(fileUrl);
+    const normalizedFileUrl = normalizeVirtualTourUrl(fileUrl);
+    const url = new URL(normalizedFileUrl);
 
     if (url.hostname.includes("matterport.com")) {
       const showId =
@@ -323,7 +347,7 @@ export function buildVirtualTourEmbedUrl(fileUrl: string) {
       url.hostname.includes("360.virtual3dscan.ch") ||
       url.hostname.includes("kuula.co")
     ) {
-      return fileUrl;
+      return normalizedFileUrl;
     }
 
     if (url.hostname.includes("youtube.com")) {
