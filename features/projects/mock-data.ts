@@ -12,6 +12,7 @@ const image = (seed: string) =>
 
 const brochureUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 const sampleVideoUrl = "https://www.w3schools.com/html/mov_bbb.mp4";
+const sampleTourUrl = "https://360.virtual3dscan.ch/tour/wohnung-eg-01-2-5-zimmer";
 
 function makeMedia(
   projectId: string,
@@ -309,7 +310,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
+        fileUrl: sampleTourUrl,
         title: "3D walkthrough",
       },
     ]),
@@ -434,7 +435,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
+        fileUrl: "https://360.virtual3dscan.ch/tour/wohnung-eg-02-3-5-zimmer",
         title: "Retail promenade 3D tour",
       },
     ]),
@@ -556,7 +557,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
+        fileUrl: "https://360.virtual3dscan.ch/tour/wohnung-ug-01-2-5-zimmer",
         title: "Show villa virtual tour",
       },
     ]),
@@ -662,7 +663,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
+        fileUrl: "https://360.virtual3dscan.ch/tour/wohnung-ug-02-2-5-zimmer",
         title: "Signature residence 3D tour",
       },
     ]),
@@ -867,7 +868,7 @@ export const mockProjects: ProjectDetail[] = [
       },
       {
         mediaType: "tour_3d",
-        fileUrl: "https://my.matterport.com/show/?m=tjv9tQLCTzn",
+        fileUrl: sampleTourUrl,
         title: "Office plate virtual tour",
       },
     ]),

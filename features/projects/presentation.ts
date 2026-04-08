@@ -319,6 +319,13 @@ export function buildVirtualTourEmbedUrl(fileUrl: string) {
       }
     }
 
+    if (
+      url.hostname.includes("360.virtual3dscan.ch") ||
+      url.hostname.includes("kuula.co")
+    ) {
+      return fileUrl;
+    }
+
     if (url.hostname.includes("youtube.com")) {
       const videoId = url.searchParams.get("v");
       if (videoId) {
