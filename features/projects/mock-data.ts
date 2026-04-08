@@ -1,4 +1,5 @@
 import type { DeveloperDetail } from "@/features/developers/types";
+import { normalizeVirtualTourUrl } from "@/features/projects/presentation";
 import type {
   ProjectDetail,
   ProjectMedia,
@@ -12,7 +13,7 @@ const image = (seed: string) =>
 
 const brochureUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 const sampleVideoUrl = "https://www.w3schools.com/html/mov_bbb.mp4";
-const sampleTourUrl = "https://360.virtual3dscan.ch/tour/wohnung-eg-01-2-5-zimmer";
+const sampleTourUrl = "REPLACE_WITH_REAL_MATTERPORT_SPACE_ID";
 
 function makeMedia(
   projectId: string,
@@ -947,10 +948,12 @@ export const mockProjectSummaries: ProjectSummary[] = mockProjects.map((project)
   priceMode: project.priceMode,
   category: project.category,
   projectType: project.projectType,
-    completionStage: project.completionStage,
-    isFeatured: project.isFeatured,
-    hasVirtualTour: project.media.some((item) => item.mediaType === "tour_3d"),
-    latitude: project.latitude,
+  completionStage: project.completionStage,
+  isFeatured: project.isFeatured,
+  hasVirtualTour: project.media.some(
+    (item) => item.mediaType === "tour_3d" && Boolean(normalizeVirtualTourUrl(item.fileUrl)),
+  ),
+  latitude: project.latitude,
   longitude: project.longitude,
   heroMediaUrl: project.heroMediaUrl,
 }));

@@ -461,15 +461,18 @@ export function ProjectFormFields({
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-stone-700">
-            3D tour URLs
+            Matterport tours
           </label>
           <textarea
             name="tour3dUrls"
             rows={4}
             defaultValue={initialValues.tour3dUrls}
-            placeholder="One URL per line"
+            placeholder={"One Matterport space ID or Showcase URL per line\nExample: AbCdEfGh123\nExample: https://my.matterport.com/show/?m=AbCdEfGh123"}
             className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
+          <p className="mt-2 text-xs text-stone-500">
+            Use a Matterport Showcase URL or the 11-character space ID. The public site will build the embed automatically.
+          </p>
         </div>
       </section>
 

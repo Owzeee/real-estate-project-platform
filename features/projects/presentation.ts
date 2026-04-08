@@ -5,8 +5,6 @@ import type {
   ProjectUnit as StoredProjectUnit,
 } from "@/features/projects/types";
 
-const fallbackPublicTourUrl = "https://360.virtual3dscan.ch/tour/wohnung-eg-01-2-5-zimmer";
-
 export type ProjectAmenityGroup = {
   title: string;
   items: string[];
@@ -306,9 +304,14 @@ export function getProjectVirtualTourMedia(project: ProjectDetail) {
     return null;
   }
 
+  const normalizedFileUrl = normalizeVirtualTourUrl(media.fileUrl);
+  if (!normalizedFileUrl) {
+    return null;
+  }
+
   return {
     ...media,
-    fileUrl: normalizeVirtualTourUrl(media.fileUrl),
+    fileUrl: normalizedFileUrl,
   } satisfies ProjectMedia;
 }
 
@@ -316,37 +319,92 @@ export function getProjectVideoMedia(project: ProjectDetail) {
   return project.media.find((item) => item.mediaType === "video") ?? null;
 }
 
-function normalizeVirtualTourUrl(fileUrl: string) {
-  if (
-    fileUrl.includes("x7dR5DjK7Lm") ||
-    fileUrl.includes("discover.matterport.com/space/")
-  ) {
-    return fallbackPublicTourUrl;
+const matterportSpaceIdPattern = /^[A-Za-z0-9]{11}$/;
+
+export function extractMatterportSpaceId(value: string) {
+  const rawValue = value.trim();
+  if (!rawValue) {
+    return null;
   }
 
-  return fileUrl;
+  if (matterportSpaceIdPattern.test(rawValue)) {
+    return rawValue;
+  }
+
+  try {
+    const url = new URL(rawValue);
+
+    if (!url.hostname.includes("matterport.com")) {
+      return null;
+    }
+
+    return (
+      url.searchParams.get("m") ??
+      url.pathname.match(/\/space\/([^/]+)/)?.[1] ??
+      url.pathname.match(/\/models\/([^/]+)/)?.[1] ??
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+export function buildMatterportViewerUrl(spaceId: string) {
+  return `https://my.matterport.com/show/?m=${spaceId}`;
+}
+
+export function normalizeVirtualTourUrl(fileUrl: string) {
+  const matterportSpaceId = extractMatterportSpaceId(fileUrl);
+  if (matterportSpaceId) {
+    return buildMatterportViewerUrl(matterportSpaceId);
+  }
+
+  try {
+    const url = new URL(fileUrl);
+    if (
+      url.hostname.includes("kuula.co") ||
+      url.hostname.includes("youtube.com") ||
+      url.hostname === "youtu.be" ||
+      url.hostname.includes("vimeo.com")
+    ) {
+      return fileUrl;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 export function buildVirtualTourEmbedUrl(fileUrl: string) {
+  const normalizedFileUrl = normalizeVirtualTourUrl(fileUrl);
+  if (!normalizedFileUrl) {
+    return null;
+  }
+
   try {
-    const normalizedFileUrl = normalizeVirtualTourUrl(fileUrl);
     const url = new URL(normalizedFileUrl);
 
     if (url.hostname.includes("matterport.com")) {
-      const showId =
-        url.searchParams.get("m") ??
-        url.pathname.match(/\/space\/([^/]+)/)?.[1] ??
-        url.pathname.match(/\/models\/([^/]+)/)?.[1];
-
+      const showId = url.searchParams.get("m");
       if (showId) {
-        return `https://my.matterport.com/show/?m=${showId}&play=1&qs=1&brand=0`;
+        const sdkKey = process.env.NEXT_PUBLIC_MATTERPORT_SDK_KEY?.trim();
+        const params = new URLSearchParams({
+          m: showId,
+          play: "1",
+          qs: "1",
+          brand: "0",
+        });
+
+        if (sdkKey) {
+          params.set("applicationKey", sdkKey);
+        }
+
+        return `https://my.matterport.com/show/?${params.toString()}`;
       }
     }
 
-    if (
-      url.hostname.includes("360.virtual3dscan.ch") ||
-      url.hostname.includes("kuula.co")
-    ) {
+    if (url.hostname.includes("kuula.co")) {
       return normalizedFileUrl;
     }
 
@@ -388,7 +446,7 @@ export function getProjectHighlights(project: ProjectDetail) {
     highlights.push("Featured marketplace placement");
   }
 
-  if (project.media.some((item) => item.mediaType === "tour_3d")) {
+  if (getProjectVirtualTourMedia(project)) {
     highlights.push("Interactive 3D walkthrough");
   }
 

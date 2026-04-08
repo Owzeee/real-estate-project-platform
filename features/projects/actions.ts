@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { type ProjectActionState } from "@/features/projects/action-state";
+import { normalizeVirtualTourUrl } from "@/features/projects/presentation";
 import type { ProjectUnit } from "@/features/projects/types";
 import { requireAdmin, requireDeveloperOrAdminAccess } from "@/lib/auth";
 import { createAdminSupabaseClient, hasServiceRoleEnv } from "@/lib/supabase/server";
@@ -59,14 +60,19 @@ function buildMediaRows(projectId: string, formData: FormData) {
   let sortOrder = 0;
 
   return mediaGroups.flatMap(({ key, mediaType }) =>
-    parseMediaList(formData, key).map((fileUrl) => ({
-      project_id: projectId,
-      media_type: mediaType,
-      file_url: fileUrl,
-      title: null,
-      thumbnail_url: null,
-      sort_order: sortOrder++,
-    })),
+    parseMediaList(formData, key)
+      .map((fileUrl) =>
+        mediaType === "tour_3d" ? normalizeVirtualTourUrl(fileUrl) : fileUrl,
+      )
+      .filter((fileUrl): fileUrl is string => Boolean(fileUrl))
+      .map((fileUrl) => ({
+        project_id: projectId,
+        media_type: mediaType,
+        file_url: fileUrl,
+        title: null,
+        thumbnail_url: null,
+        sort_order: sortOrder++,
+      })),
   );
 }
 

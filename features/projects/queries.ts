@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { mockProjectSummaries, mockProjects } from "@/features/projects/mock-data";
+import { normalizeVirtualTourUrl } from "@/features/projects/presentation";
 import type { ProjectDetail, ProjectSummary, ProjectUnit } from "@/features/projects/types";
 import {
   createAdminSupabaseClient,
@@ -54,7 +55,9 @@ function mapProjectSummary(row: {
     : row.developer_profiles;
 
   const media = row.project_media?.slice().sort((a, b) => a.sort_order - b.sort_order)[0];
-  const hasVirtualTour = (row.project_media ?? []).some((item) => item.media_type === "tour_3d");
+  const hasVirtualTour = (row.project_media ?? []).some(
+    (item) => item.media_type === "tour_3d" && Boolean(normalizeVirtualTourUrl(item.file_url)),
+  );
 
   return {
     id: row.id,
