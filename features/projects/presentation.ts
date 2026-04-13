@@ -4,6 +4,7 @@ import type {
   ProjectSummary,
   ProjectUnit as StoredProjectUnit,
 } from "@/features/projects/types";
+import type { SiteLocale } from "@/lib/i18n";
 
 export type ProjectAmenityGroup = {
   title: string;
@@ -40,13 +41,6 @@ export type ProjectUnitView = {
   availableFromLabel: string;
   availabilityMonths: ProjectAvailabilityMonth[];
 };
-
-function titleCase(value: string) {
-  return value
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
 
 function formatCurrency(currencyCode: string, value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -227,22 +221,61 @@ function getAvailabilityMonths(): ProjectAvailabilityMonth[] {
   ];
 }
 
-export function formatProjectTypeLabel(projectType: ProjectSummary["projectType"]) {
-  return titleCase(projectType);
+export function formatProjectTypeLabel(
+  projectType: ProjectSummary["projectType"],
+  locale: SiteLocale = "fr",
+) {
+  const labels: Record<ProjectSummary["projectType"], { fr: string; en: string }> = {
+    apartment: { fr: "Appartement", en: "Apartment" },
+    villa: { fr: "Villa", en: "Villa" },
+    townhouse: { fr: "Maison de ville", en: "Townhouse" },
+    mixed_use: { fr: "Usage mixte", en: "Mixed use" },
+    commercial: { fr: "Commercial", en: "Commercial" },
+    land: { fr: "Terrain", en: "Land" },
+  };
+
+  return labels[projectType][locale];
 }
 
 export function formatCompletionStageLabel(
   completionStage: ProjectSummary["completionStage"],
+  locale: SiteLocale = "fr",
 ) {
-  return titleCase(completionStage);
+  const labels: Record<ProjectSummary["completionStage"], { fr: string; en: string }> = {
+    pre_launch: { fr: "Pre-lancement", en: "Pre-launch" },
+    under_construction: { fr: "En construction", en: "Under construction" },
+    ready: { fr: "Pret", en: "Ready" },
+    completed: { fr: "Livre", en: "Completed" },
+  };
+
+  return labels[completionStage][locale];
 }
 
-export function formatStatusLabel(status: ProjectSummary["status"]) {
-  return titleCase(status);
+export function formatStatusLabel(
+  status: ProjectSummary["status"],
+  locale: SiteLocale = "fr",
+) {
+  const labels: Record<ProjectSummary["status"], { fr: string; en: string }> = {
+    draft: { fr: "Brouillon", en: "Draft" },
+    active: { fr: "Actif", en: "Active" },
+    archived: { fr: "Archive", en: "Archived" },
+    sold_out: { fr: "Epuise", en: "Sold out" },
+  };
+
+  return labels[status][locale];
 }
 
-export function formatOfferTypeLabel(offerType: ProjectSummary["offerType"]) {
-  return offerType === "sale" ? "For Sale" : "For Rent";
+export function formatOfferTypeLabel(
+  offerType: ProjectSummary["offerType"],
+  locale: SiteLocale = "fr",
+) {
+  return offerType === "sale"
+    ? locale === "fr"
+      ? "A vendre"
+      : "For sale"
+    : locale === "fr"
+      ? "A louer"
+      : "For rent";
 }
 
 export function formatProjectPriceLabel(input: {
@@ -280,8 +313,17 @@ export function formatProjectPriceLabel(input: {
   return "Contact for price";
 }
 
-export function formatCategoryLabel(category: ProjectSummary["category"]) {
-  return titleCase(category);
+export function formatCategoryLabel(
+  category: ProjectSummary["category"],
+  locale: SiteLocale = "fr",
+) {
+  const labels: Record<ProjectSummary["category"], { fr: string; en: string }> = {
+    residential: { fr: "Residentiel", en: "Residential" },
+    commercial: { fr: "Commercial", en: "Commercial" },
+    office: { fr: "Bureaux", en: "Office" },
+  };
+
+  return labels[category][locale];
 }
 
 export function buildMapEmbedUrl(project: Pick<ProjectSummary, "latitude" | "longitude">) {
@@ -527,7 +569,10 @@ function buildGeneratedProjectUnits(project: ProjectDetail): ProjectUnitView[] {
         project.offerType === "rent"
           ? `${formatCurrency(project.currencyCode, monthlyRent)} per month`
           : formatCurrency(project.currencyCode, price),
-      monthlyRentLabel: `${formatCurrency(project.currencyCode, monthlyRent)} per month`,
+      monthlyRentLabel:
+        project.offerType === "rent"
+          ? `${formatCurrency(project.currencyCode, monthlyRent)} per month`
+          : "",
       areaLabel: `${variant.area.toFixed(0)} m²`,
       roomsLabel: `${variant.rooms} rooms`,
       imageUrl: gallery[0]?.src ?? imageFallback,
@@ -585,20 +630,20 @@ function mapStoredProjectUnit(unit: StoredProjectUnit): ProjectUnitView {
         ? unit.monthlyRent != null
           ? `${formatCurrency(unit.currencyCode, unit.monthlyRent)} per month`
           : "Rent on request"
-        : salePriceLabel,
+        : "",
     areaLabel: unit.areaSqm != null ? `${unit.areaSqm.toFixed(0)} m²` : "",
-    roomsLabel: unit.rooms != null ? `${unit.rooms} rooms` : "",
+    roomsLabel: unit.rooms != null && unit.rooms > 0 ? `${unit.rooms} rooms` : "",
     imageUrl: unit.imageUrl,
     gallery: unit.gallery,
     amenityGroups: unit.amenityGroups,
     beds: unit.beds,
-    minimumStayLabel: unit.minimumStayMonths != null
+    minimumStayLabel: unit.offerType === "rent" && unit.minimumStayMonths != null
       ? `${unit.minimumStayMonths} Months`
       : "",
-    maximumStayLabel: unit.maximumStayMonths != null
+    maximumStayLabel: unit.offerType === "rent" && unit.maximumStayMonths != null
       ? `${unit.maximumStayMonths} Months`
       : "",
-    availableFromLabel: unit.availableFrom
+    availableFromLabel: unit.offerType === "rent" && unit.availableFrom
       ? new Date(unit.availableFrom).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",

@@ -1,13 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { InquiryForm } from "@/features/inquiries/inquiry-form";
+import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { ProjectGallery } from "@/features/projects/project-gallery";
 import { PropertyCompareActions } from "@/features/projects/property-compare-actions";
 import { PropertySaveActions } from "@/features/projects/property-save-actions";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
-  buildMapEmbedUrl,
+  buildBreadcrumbJsonLd,
+  buildMetadata,
+  absoluteUrl,
+} from "@/lib/seo";
+import {
   buildVirtualTourEmbedUrl,
   formatCategoryLabel,
   formatCompletionStageLabel,
@@ -22,6 +29,8 @@ import {
   getProjectVirtualTourMedia,
 } from "@/features/projects/presentation";
 import { getProjectBySlug, getProjects } from "@/features/projects/queries";
+import { getTranslations } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n-server";
 import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type ProjectPageProps = {
@@ -30,7 +39,41 @@ type ProjectPageProps = {
   }>;
 };
 
+type SummaryStat = {
+  label: string;
+  value: string;
+  accent: boolean;
+};
+
+export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+
+  if (!project) {
+    return buildMetadata({
+      title: "Projet Immobilier",
+      description: "Fiche projet immobilier en Côte d'Ivoire.",
+      path: `/projects/${slug}`,
+    });
+  }
+
+  return buildMetadata({
+    title: `${project.title} | ${project.location}`,
+    description: `${project.title} par ${project.developerName} à ${project.location}. Consultez les prix, la carte, les médias et les détails du projet.`,
+    path: `/projects/${project.slug}`,
+    image: project.heroMediaUrl ?? undefined,
+    keywords: [
+      project.title,
+      project.location,
+      `${project.projectType} ${project.location}`,
+      `${project.offerType === "rent" ? "location" : "vente"} ${project.location}`,
+    ],
+  });
+}
+
 export default async function ProjectPage({ params }: ProjectPageProps) {
+  const locale = await getCurrentLocale();
+  const t = getTranslations(locale);
   const { slug } = await params;
   const [project, allProjects] = await Promise.all([
     getProjectBySlug(slug),
@@ -41,7 +84,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  const mapUrl = buildMapEmbedUrl(project);
+  const mapItems =
+    project.latitude != null && project.longitude != null
+      ? [
+          {
+            id: project.id,
+            title: project.title,
+            subtitle: `${project.location} • ${project.developerName}`,
+            href: `/projects/${project.slug}`,
+            latitude: project.latitude,
+            longitude: project.longitude,
+            accentLabel: t.projectDetail.projectLocation,
+          },
+        ]
+      : [];
   const virtualTour = getProjectVirtualTourMedia(project);
   const virtualTourEmbedUrl = virtualTour
     ? buildVirtualTourEmbedUrl(virtualTour.fileUrl)
@@ -72,7 +128,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     project.maxPrice != null ||
     project.rentPrice != null
       ? {
-          label: project.offerType === "rent" ? "Rent" : "Pricing",
+          label: project.offerType === "rent" ? t.projectDetail.rent : t.projectDetail.pricing,
           value: formatProjectPricing({
             offerType: project.offerType,
             priceMode: project.priceMode,
@@ -86,23 +142,53 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         }
       : null,
     {
-      label: "Marketplace status",
-      value: formatStatusLabel(project.status),
+      label: t.projectDetail.marketplaceStatus,
+      value: formatStatusLabel(project.status, locale),
       accent: false,
     },
     {
-      label: "Inventory model",
-      value: "Admin-curated",
+      label: t.projectDetail.inventoryModel,
+      value: t.projectDetail.adminCurated,
       accent: false,
     },
-  ].filter((stat): stat is { label: string; value: string; accent: boolean } => stat !== null);
+  ].filter(Boolean) as SummaryStat[];
 
   return (
     <main className="page-shell min-h-screen bg-transparent px-4 py-10 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            buildBreadcrumbJsonLd([
+              { name: "Accueil", path: "/" },
+              { name: "Projets", path: "/projects" },
+              { name: project.title, path: `/projects/${project.slug}` },
+            ]),
+            {
+              "@context": "https://schema.org",
+              "@type": "RealEstateListing",
+              name: project.title,
+              description: project.description,
+              url: absoluteUrl(`/projects/${project.slug}`),
+              image: project.heroMediaUrl ? [project.heroMediaUrl] : undefined,
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: project.city ?? undefined,
+                addressCountry: project.country ?? "CI",
+                streetAddress: project.location,
+              },
+              seller: {
+                "@type": "Organization",
+                name: project.developerName,
+              },
+            },
+          ]),
+        }}
+      />
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">
           <Link href="/projects" className="secondary-button px-4 py-2.5 text-sm">
-            Back to projects
+            {t.projectDetail.backToProjects}
           </Link>
           <span>/</span>
           <span>{project.title}</span>
@@ -113,20 +199,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                  {formatOfferTypeLabel(project.offerType)}
+                  {formatOfferTypeLabel(project.offerType, locale)}
                 </span>
                 <span className="rounded-full bg-[rgba(141,104,71,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700">
-                  {formatCategoryLabel(project.category)}
+                  {formatCategoryLabel(project.category, locale)}
                 </span>
                 <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                  {formatProjectTypeLabel(project.projectType)}
+                  {formatProjectTypeLabel(project.projectType, locale)}
                 </span>
                 <span className="rounded-full bg-[rgba(141,104,71,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700">
-                  {formatCompletionStageLabel(project.completionStage)}
+                  {formatCompletionStageLabel(project.completionStage, locale)}
                 </span>
                 {project.isFeatured ? (
                   <span className="rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--secondary-foreground)]">
-                    Featured
+                    {t.projectDetail.featured}
                   </span>
                 ) : null}
               </div>
@@ -135,14 +221,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {project.title}
               </h1>
               <p className="mt-4 text-base text-[var(--muted-foreground)]">
-                By{" "}
+                {t.projectDetail.byIn}{" "}
                 <Link
                   href={`/developers/${project.developerSlug}`}
                   className="font-semibold text-stone-950 underline decoration-[var(--border)] underline-offset-4"
                 >
                   {project.developerName}
                 </Link>
-                {" "}in {project.location}
+                {" "}{t.projectDetail.in} {project.location}
               </p>
 
               <div className={`mt-8 grid gap-4 ${summaryStats.length > 1 ? "sm:grid-cols-2 lg:grid-cols-3" : ""}`}>
@@ -159,7 +245,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <ProjectSaveActions project={project} />
+                <ProjectSaveActions project={project} locale={locale} />
                 {virtualTour ? (
                   <a
                     href={virtualTourEmbedUrl ? "#virtual-tour" : virtualTour.fileUrl}
@@ -167,7 +253,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     rel={virtualTourEmbedUrl ? undefined : "noreferrer"}
                     className="secondary-button px-4 py-2.5 text-sm"
                   >
-                    Start 3D tour
+                    {t.projectDetail.start3dTour}
                   </a>
                 ) : null}
               </div>
@@ -188,12 +274,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               >
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="eyebrow">Virtual Tour</p>
+                    <p className="eyebrow">{t.projectDetail.virtualTour}</p>
                     <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
-                      Walk through the project digitally
+                      {t.projectDetail.walkThroughTitle}
                     </h2>
                     <p className="font-copy mt-4 max-w-3xl text-base leading-8 text-[var(--muted-foreground)]">
-                      Launch the interactive 3D experience directly on the page, or open it in a separate tab if the provider requires its own viewer.
+                      {t.projectDetail.walkThroughDescription}
                     </p>
                   </div>
                   <a
@@ -202,7 +288,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     rel="noreferrer"
                     className="secondary-button px-4 py-2.5 text-sm"
                   >
-                    Open full viewer
+                    {t.projectDetail.openFullViewer}
                   </a>
                 </div>
 
@@ -221,10 +307,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <div className="flex min-h-[26rem] items-center justify-center px-8 py-12 text-center">
                       <div className="max-w-xl">
                         <p className="font-display text-3xl font-semibold text-stone-950">
-                          This tour opens in an external viewer
+                          {locale === "fr"
+                            ? "Cette visite s'ouvre dans un lecteur externe"
+                            : "This tour opens in an external viewer"}
                         </p>
                         <p className="mt-4 text-sm leading-7 text-[var(--muted-foreground)]">
-                          The current tour provider does not expose a direct embed URL. Use the button below to test the tour in its native viewer.
+                          {locale === "fr"
+                            ? "Le fournisseur actuel ne propose pas d'URL d'integration directe. Utilisez le bouton ci-dessous pour tester la visite dans son lecteur natif."
+                            : "The current tour provider does not expose a direct embed URL. Use the button below to test the tour in its native viewer."}
                         </p>
                         <a
                           href={virtualTour.fileUrl}
@@ -232,7 +322,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                           rel="noreferrer"
                           className="primary-button mt-6 text-sm"
                         >
-                          Open 3D tour
+                          {t.projectDetail.start3dTour}
                         </a>
                       </div>
                     </div>
@@ -245,9 +335,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="eyebrow">Launch Film</p>
+                    <p className="eyebrow">{locale === "fr" ? "Film de presentation" : "Launch film"}</p>
                     <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
-                      Preview the project through video
+                      {locale === "fr"
+                        ? "Decouvrez le projet en video"
+                        : "Preview the project through video"}
                     </h2>
                   </div>
                   <a
@@ -256,7 +348,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     rel="noreferrer"
                     className="secondary-button px-4 py-2.5 text-sm"
                   >
-                    Open video
+                    {locale === "fr" ? "Ouvrir la video" : "Open video"}
                   </a>
                 </div>
 
@@ -273,7 +365,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             ) : null}
 
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
-              <p className="eyebrow">About This Project</p>
+              <p className="eyebrow">{locale === "fr" ? "A propos du projet" : "About this project"}</p>
               {project.description ? (
                 <p className="font-copy mt-6 text-lg leading-8 text-stone-700">
                   {project.description}
@@ -287,9 +379,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="eyebrow">Key Highlights</p>
+                  <p className="eyebrow">{locale === "fr" ? "Points forts" : "Key highlights"}</p>
                   <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
-                    What makes this listing worth attention
+                    {locale === "fr"
+                      ? "Pourquoi ce projet merite l'attention"
+                      : "What makes this listing worth attention"}
                   </h2>
                 </div>
               </div>
@@ -300,7 +394,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     className="rounded-[1.4rem] bg-[rgba(141,104,71,0.05)] p-5"
                   >
                     <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-                      Highlight
+                      {locale === "fr" ? "Atout" : "Highlight"}
                     </p>
                     <p className="mt-3 font-copy text-base leading-7 text-stone-700">
                       {item}
@@ -311,12 +405,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </article>
 
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
-              <p className="eyebrow">Examples of Housing</p>
+              <p className="eyebrow">{locale === "fr" ? "Exemples de biens" : "Examples of housing"}</p>
               <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
-                Explore specific apartments and layouts inside this project
+                {locale === "fr"
+                  ? "Explorez des appartements et typologies a l'interieur de ce projet"
+                  : "Explore specific apartments and layouts inside this project"}
               </h2>
               <p className="font-copy mt-4 max-w-3xl text-base leading-8 text-[var(--muted-foreground)]">
-                Each option opens a dedicated unit page with image gallery, amenity details, bed setup, and availability information.
+                {locale === "fr"
+                  ? "Chaque option ouvre une fiche dediee avec galerie, equipements, configuration des lits et informations de disponibilite."
+                  : "Each option opens a dedicated unit page with image gallery, amenity details, bed setup, and availability information."}
               </p>
 
               <div className="mt-8 space-y-4">
@@ -363,6 +461,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
                       <div className="flex flex-wrap items-center gap-2 sm:max-w-[15rem] sm:justify-end">
                         <PropertySaveActions
+                          locale={locale}
                           property={{
                             id: unit.id,
                             projectSlug: project.slug,
@@ -374,7 +473,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                             latitude: project.latitude,
                             longitude: project.longitude,
                             offerType: unit.offerType,
-                            priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                            priceLabel: unit.priceLabel,
                             areaLabel: unit.areaLabel,
                             roomsLabel: unit.roomsLabel,
                             availableFromLabel: unit.availableFromLabel,
@@ -386,6 +485,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                           }}
                         />
                         <PropertyCompareActions
+                          locale={locale}
                           property={{
                             id: unit.id,
                             projectSlug: project.slug,
@@ -397,7 +497,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                             latitude: project.latitude,
                             longitude: project.longitude,
                             offerType: unit.offerType,
-                            priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                            priceLabel: unit.priceLabel,
                             areaLabel: unit.areaLabel,
                             roomsLabel: unit.roomsLabel,
                             availableFromLabel: unit.availableFromLabel,
@@ -410,7 +510,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         />
                         <span className="text-sm font-semibold text-[var(--primary)]">
                           <Link href={`/projects/${project.slug}/units/${unit.slug}`}>
-                            View apartment
+                            {locale === "fr" ? "Voir le bien" : "View apartment"}
                           </Link>
                         </span>
                       </div>
@@ -421,7 +521,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </article>
 
             <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
-              <p className="eyebrow">Amenities</p>
+              <p className="eyebrow">{locale === "fr" ? "Equipements" : "Amenities"}</p>
               <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_280px]">
                 <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
                   {amenityGroups.slice(0, 4).map((group) => (
@@ -447,13 +547,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                     Project snapshot
                   </p>
-                  {units[0]?.monthlyRentLabel ? (
+                  {units[0]?.priceLabel ? (
                     <p className="mt-3 text-lg font-semibold text-stone-950">
-                      {units[0].monthlyRentLabel}
+                      {units[0].priceLabel}
                     </p>
                   ) : null}
                   <div className="mt-5 space-y-4">
-                    {units[0]?.availableFromLabel ? (
+                    {units[0]?.offerType === "rent" && units[0]?.availableFromLabel ? (
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                           Available from
@@ -463,7 +563,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         </p>
                       </div>
                     ) : null}
-                    {units[0]?.minimumStayLabel ? (
+                    {units[0]?.offerType === "rent" && units[0]?.minimumStayLabel ? (
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                           Minimum stay
@@ -495,14 +595,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 The listing experience should make location part of the decision-making process. This section keeps map visibility close to the property information instead of hiding it behind another screen.
               </p>
 
-              {mapUrl ? (
+              {mapItems.length > 0 ? (
                 <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)]">
-                  <iframe
-                    title={`${project.title} location`}
-                    src={mapUrl}
-                    className="h-[26rem] w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
+                  <InteractiveListingsMap
+                    items={mapItems}
+                    selectedId={project.id}
+                    className="h-[26rem] w-full"
                   />
                 </div>
               ) : (
@@ -547,13 +645,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Contact card
               </p>
-              {units[0]?.monthlyRentLabel ? (
+              {units[0]?.priceLabel ? (
                 <p className="mt-3 text-2xl font-semibold text-stone-950">
-                  {units[0].monthlyRentLabel}
+                  {units[0].priceLabel}
                 </p>
               ) : null}
 
-              {units[0]?.availableFromLabel ? (
+              {units[0]?.offerType === "rent" && units[0]?.availableFromLabel ? (
                 <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                     Available from
@@ -570,9 +668,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                       Developer
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-stone-950">
-                      {project.developerName}
-                    </p>
+                    <div className="mt-2 flex items-center gap-3">
+                      <CompanyLogo
+                        companyName={project.developerName}
+                        logoUrl={project.developerLogoUrl}
+                        className="h-10 w-10"
+                        imageClassName="rounded-xl border border-[var(--border)] object-cover"
+                        fallbackClassName="rounded-xl border border-[var(--border)] bg-[linear-gradient(145deg,var(--primary),color-mix(in_srgb,var(--primary)_72%,black))] text-xs font-bold text-[var(--primary-foreground)]"
+                      />
+                      <p className="text-sm font-semibold text-stone-950">
+                        {project.developerName}
+                      </p>
+                    </div>
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">

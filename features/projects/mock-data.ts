@@ -15,6 +15,40 @@ const brochureUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/p
 const sampleVideoUrl = "https://www.w3schools.com/html/mov_bbb.mp4";
 const sampleTourUrl = "https://my.matterport.com/models/25B7rViqy4M";
 
+function makeCompanyLogo(monogram: string, background: string, foreground = "#fffaf2") {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${background}" />
+          <stop offset="100%" stop-color="#201c19" />
+        </linearGradient>
+      </defs>
+      <rect width="240" height="240" rx="56" fill="url(#g)" />
+      <circle cx="120" cy="120" r="78" fill="rgba(255,250,242,0.08)" />
+      <text x="120" y="136" text-anchor="middle" font-family="Georgia, serif" font-size="78" font-weight="700" fill="${foreground}">
+        ${monogram}
+      </text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+const novastoneLogo = makeCompanyLogo("N", "#8d6847");
+const redcliffLogo = makeCompanyLogo("R", "#6f4d36");
+const bluecrestLogo = makeCompanyLogo("B", "#32506e");
+const verdeLogo = makeCompanyLogo("V", "#4c6b47");
+const summitLogo = makeCompanyLogo("S", "#5a4a65");
+
+const developerLogoById: Record<string, string | null> = {
+  "dev-novastone": novastoneLogo,
+  "dev-redcliff": redcliffLogo,
+  "dev-bluecrest": bluecrestLogo,
+  "dev-verde": verdeLogo,
+  "dev-summit": summitLogo,
+};
+
 function makeMedia(
   projectId: string,
   items: Array<{
@@ -123,6 +157,36 @@ const officeProjectAmenities: ProjectUnitAmenityGroup[] = [
   },
 ];
 
+const landProjectAmenities: ProjectUnitAmenityGroup[] = [
+  {
+    title: "Infrastructure",
+    items: ["Road access", "Utilities corridor", "Stormwater planning", "Street lighting"],
+  },
+  {
+    title: "Planning",
+    items: ["Approved masterplan", "Subdivision readiness", "Flexible plot ratios", "Corner plot options"],
+  },
+  {
+    title: "Access",
+    items: ["Gated entry", "Landscaped boulevard", "Service route", "Visitor parking"],
+  },
+];
+
+const landUnitAmenities: ProjectUnitAmenityGroup[] = [
+  {
+    title: "Plot features",
+    items: ["Corner orientation", "Wide frontage", "Utility connection point", "Build-ready boundary"],
+  },
+  {
+    title: "Delivery",
+    items: ["Serviced roads", "Drainage installed", "Street lighting", "Landscape edge treatment"],
+  },
+  {
+    title: "Investment",
+    items: ["Flexible design brief", "Long-hold potential", "Phased build option", "Developer support desk"],
+  },
+];
+
 const apartmentAmenities: ProjectUnitAmenityGroup[] = [
   {
     title: "Essentials",
@@ -199,15 +263,15 @@ function makeUnit(
     fixedPrice?: number;
     minPrice?: number;
     maxPrice?: number;
-    monthlyRent: number;
+    monthlyRent?: number;
     currencyCode: string;
     areaSqm: number;
     rooms: number;
     galleryUrls: string[];
     amenityGroups: ProjectUnitAmenityGroup[];
     beds: ProjectUnit["beds"];
-    minimumStayMonths: number;
-    maximumStayMonths: number;
+    minimumStayMonths?: number;
+    maximumStayMonths?: number;
     availableFrom: string;
     sortOrder: number;
   },
@@ -223,18 +287,18 @@ function makeUnit(
     fixedPrice:
       input.offerType === "rent"
         ? null
-        : (input.fixedPrice ?? input.minPrice ?? Math.round(input.monthlyRent * 180)),
+        : (input.fixedPrice ?? input.minPrice ?? null),
     minPrice:
       input.offerType === "rent"
         ? null
         : (input.priceMode === "range"
             ? (input.minPrice ?? null)
-            : (input.fixedPrice ?? input.minPrice ?? Math.round(input.monthlyRent * 180))),
+            : (input.fixedPrice ?? input.minPrice ?? null)),
     maxPrice:
       input.offerType === "rent"
         ? null
         : (input.priceMode === "range" ? (input.maxPrice ?? null) : null),
-    monthlyRent: input.monthlyRent,
+    monthlyRent: input.offerType === "rent" ? (input.monthlyRent ?? null) : null,
     currencyCode: input.currencyCode,
     areaSqm: input.areaSqm,
     rooms: input.rooms,
@@ -242,8 +306,8 @@ function makeUnit(
     gallery: makeGallery(input.title, input.galleryUrls),
     amenityGroups: input.amenityGroups,
     beds: input.beds,
-    minimumStayMonths: input.minimumStayMonths,
-    maximumStayMonths: input.maximumStayMonths,
+    minimumStayMonths: input.minimumStayMonths ?? null,
+    maximumStayMonths: input.maximumStayMonths ?? null,
     availableFrom: input.availableFrom,
     availabilityMonths: makeAvailabilityMonths(),
     sortOrder: input.sortOrder,
@@ -256,6 +320,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-novastone",
     developerName: "Novastone Developments",
     developerSlug: "novastone-developments",
+    developerLogoUrl: novastoneLogo,
     title: "Aurora Residences",
     slug: "aurora-residences",
     description:
@@ -322,7 +387,9 @@ export const mockProjects: ProjectDetail[] = [
         title: "1-bedroom marina suite",
         summary:
           "A compact waterfront residence with hotel-style finishes, a balcony facing the marina, and a dedicated remote-work corner.",
-        monthlyRent: 2333,
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 485000,
         currencyCode: "USD",
         areaSqm: 78,
         rooms: 2,
@@ -342,7 +409,10 @@ export const mockProjects: ProjectDetail[] = [
         title: "2-bedroom family residence",
         summary:
           "A wider corner layout with marina views, a dining bay, and a family-friendly split bedroom arrangement.",
-        monthlyRent: 3180,
+        offerType: "sale",
+        priceMode: "range",
+        minPrice: 690000,
+        maxPrice: 760000,
         currencyCode: "USD",
         areaSqm: 124,
         rooms: 3,
@@ -365,7 +435,8 @@ export const mockProjects: ProjectDetail[] = [
         title: "3-bedroom sky penthouse",
         summary:
           "A premium penthouse tier with an entertainer terrace, show kitchen, and full-height glazing across the living area.",
-        monthlyRent: 6120,
+        offerType: "sale",
+        priceMode: "contact",
         currencyCode: "USD",
         areaSqm: 241,
         rooms: 5,
@@ -392,6 +463,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-redcliff",
     developerName: "Redcliff Urban",
     developerSlug: "redcliff-urban",
+    developerLogoUrl: redcliffLogo,
     title: "Canyon Square",
     slug: "canyon-square",
     description:
@@ -448,7 +520,9 @@ export const mockProjects: ProjectDetail[] = [
         title: "Boulevard residence",
         summary:
           "A city-facing apartment with a hospitality lobby, direct plaza access, and a flexible den for work or guest use.",
-        monthlyRent: 1722,
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 352000,
         currencyCode: "USD",
         areaSqm: 82,
         rooms: 2,
@@ -489,7 +563,8 @@ export const mockProjects: ProjectDetail[] = [
         title: "Corner loft collection",
         summary:
           "A taller duplex-style plan overlooking the plaza with an oversized terrace, two living zones, and premium finish upgrades.",
-        monthlyRent: 3910,
+        offerType: "sale",
+        priceMode: "contact",
         currencyCode: "USD",
         areaSqm: 149,
         rooms: 4,
@@ -515,6 +590,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-novastone",
     developerName: "Novastone Developments",
     developerSlug: "novastone-developments",
+    developerLogoUrl: novastoneLogo,
     title: "Serene Villas",
     slug: "serene-villas",
     description:
@@ -571,7 +647,9 @@ export const mockProjects: ProjectDetail[] = [
         title: "Garden villa A",
         summary:
           "A family villa with a pool-ready back garden, two living rooms, and a ground-floor guest suite.",
-        monthlyRent: 4680,
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 940000,
         currencyCode: "USD",
         areaSqm: 312,
         rooms: 5,
@@ -595,7 +673,10 @@ export const mockProjects: ProjectDetail[] = [
         title: "Courtyard villa B",
         summary:
           "A courtyard-focused layout with a shaded outdoor dining zone, family lounge, and upper-level study retreat.",
-        monthlyRent: 5240,
+        offerType: "sale",
+        priceMode: "range",
+        minPrice: 1010000,
+        maxPrice: 1125000,
         currencyCode: "USD",
         areaSqm: 356,
         rooms: 6,
@@ -622,6 +703,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-bluecrest",
     developerName: "Bluecrest Estates",
     developerSlug: "bluecrest-estates",
+    developerLogoUrl: bluecrestLogo,
     title: "Oceanic Crest",
     slug: "oceanic-crest",
     description:
@@ -678,7 +760,9 @@ export const mockProjects: ProjectDetail[] = [
         title: "Sea-view residence",
         summary:
           "A full-height glass apartment with a sunrise-facing balcony and a premium kitchen package for end users or holiday investors.",
-        monthlyRent: 3550,
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 820000,
         currencyCode: "USD",
         areaSqm: 96,
         rooms: 3,
@@ -701,7 +785,10 @@ export const mockProjects: ProjectDetail[] = [
         title: "Signature corner suite",
         summary:
           "A premium corner plan with wraparound glazing, an ocean-facing terrace, and an upgraded marble kitchen palette.",
-        monthlyRent: 4890,
+        offerType: "sale",
+        priceMode: "range",
+        minPrice: 1280000,
+        maxPrice: 1510000,
         currencyCode: "USD",
         areaSqm: 142,
         rooms: 4,
@@ -727,6 +814,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-verde",
     developerName: "Verde Habitat",
     developerSlug: "verde-habitat",
+    developerLogoUrl: verdeLogo,
     title: "Orchid Park Residences",
     slug: "orchid-park-residences",
     description:
@@ -778,7 +866,9 @@ export const mockProjects: ProjectDetail[] = [
         title: "Park-facing townhouse",
         summary:
           "A family-oriented townhouse with direct park frontage, a shaded terrace, and a central kitchen island for daily living.",
-        monthlyRent: 3320,
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 905000,
         currencyCode: "USD",
         areaSqm: 198,
         rooms: 4,
@@ -802,7 +892,10 @@ export const mockProjects: ProjectDetail[] = [
         title: "Corner garden home",
         summary:
           "A wider townhouse plan on a corner parcel with larger glazing, a side garden, and a family lounge upstairs.",
-        monthlyRent: 3870,
+        offerType: "sale",
+        priceMode: "range",
+        minPrice: 1090000,
+        maxPrice: 1215000,
         currencyCode: "USD",
         areaSqm: 232,
         rooms: 5,
@@ -829,6 +922,7 @@ export const mockProjects: ProjectDetail[] = [
     developerProfileId: "dev-summit",
     developerName: "Summit Harbour Group",
     developerSlug: "summit-harbour-group",
+    developerLogoUrl: summitLogo,
     title: "Harbor Exchange",
     slug: "harbor-exchange",
     description:
@@ -925,6 +1019,121 @@ export const mockProjects: ProjectDetail[] = [
       }),
     ],
   },
+  {
+    id: "project-dunes",
+    developerProfileId: "dev-verde",
+    developerName: "Verde Habitat",
+    developerSlug: "verde-habitat",
+    developerLogoUrl: verdeLogo,
+    title: "Dunes Horizon Plots",
+    slug: "dunes-horizon-plots",
+    description:
+      "A serviced land release offering residential villa plots, boutique mixed-use corners, and investment parcels inside a masterplanned low-density district.",
+    location: "Dubai South, Dubai",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    minPrice: 255000,
+    maxPrice: 1680000,
+    rentPrice: null,
+    currencyCode: "USD",
+    status: "active",
+    approvalStatus: "approved",
+    offerType: "sale",
+    priceMode: "range",
+    category: "residential",
+    projectType: "land",
+    completionStage: "ready",
+    isFeatured: false,
+    hasVirtualTour: false,
+    latitude: 24.8801,
+    longitude: 55.1482,
+    heroMediaUrl: image("photo-1500382017468-9049fed747ef"),
+    media: makeMedia("project-dunes", [
+      {
+        mediaType: "image",
+        fileUrl: image("photo-1500382017468-9049fed747ef"),
+        title: "Masterplan vista",
+      },
+      {
+        mediaType: "image",
+        fileUrl: image("photo-1500530855697-b586d89ba3ee"),
+        title: "Serviced boulevard",
+      },
+      {
+        mediaType: "image",
+        fileUrl: image("photo-1506744038136-46273834b3fb"),
+        title: "Plot edge landscape",
+      },
+      {
+        mediaType: "brochure",
+        fileUrl: brochureUrl,
+        title: "Plot allocation brochure",
+      },
+    ]),
+    amenityGroups: landProjectAmenities,
+    units: [
+      makeUnit("project-dunes", "villa-plot-420", {
+        title: "Villa plot 420",
+        summary:
+          "A family villa parcel on an internal green spine with a straightforward rectangular footprint and serviced utility edge.",
+        offerType: "sale",
+        priceMode: "fixed",
+        fixedPrice: 255000,
+        currencyCode: "USD",
+        areaSqm: 420,
+        rooms: 0,
+        galleryUrls: [
+          image("photo-1500382017468-9049fed747ef"),
+          image("photo-1500530855697-b586d89ba3ee"),
+          image("photo-1506744038136-46273834b3fb"),
+        ],
+        amenityGroups: landUnitAmenities,
+        beds: [{ label: "Custom build", roomLabel: "Plot use" }],
+        availableFrom: "2026-04-18",
+        sortOrder: 0,
+      }),
+      makeUnit("project-dunes", "corner-plot-680", {
+        title: "Corner plot 680",
+        summary:
+          "A larger corner parcel suited for a premium villa or branded townhouse cluster, with wider frontage and dual access.",
+        offerType: "sale",
+        priceMode: "range",
+        minPrice: 420000,
+        maxPrice: 495000,
+        currencyCode: "USD",
+        areaSqm: 680,
+        rooms: 0,
+        galleryUrls: [
+          image("photo-1500530855697-b586d89ba3ee"),
+          image("photo-1500382017468-9049fed747ef"),
+          image("photo-1506744038136-46273834b3fb"),
+        ],
+        amenityGroups: landUnitAmenities,
+        beds: [{ label: "Corner parcel", roomLabel: "Plot type" }],
+        availableFrom: "2026-05-05",
+        sortOrder: 1,
+      }),
+      makeUnit("project-dunes", "mixed-use-frontage-1100", {
+        title: "Mixed-use frontage 1100",
+        summary:
+          "A boulevard-facing land parcel intended for low-rise mixed-use development with branded retail at grade and offices above.",
+        offerType: "sale",
+        priceMode: "contact",
+        currencyCode: "USD",
+        areaSqm: 1100,
+        rooms: 0,
+        galleryUrls: [
+          image("photo-1506744038136-46273834b3fb"),
+          image("photo-1500530855697-b586d89ba3ee"),
+          image("photo-1500382017468-9049fed747ef"),
+        ],
+        amenityGroups: landUnitAmenities,
+        beds: [{ label: "Mixed-use rights", roomLabel: "Planning type" }],
+        availableFrom: "2026-06-01",
+        sortOrder: 2,
+      }),
+    ],
+  },
 ];
 
 export const mockProjectSummaries: ProjectSummary[] = mockProjects.map((project) => ({
@@ -932,6 +1141,7 @@ export const mockProjectSummaries: ProjectSummary[] = mockProjects.map((project)
   developerProfileId: project.developerProfileId,
   developerName: project.developerName,
   developerSlug: project.developerSlug,
+  developerLogoUrl: developerLogoById[project.developerProfileId] ?? null,
   title: project.title,
   slug: project.slug,
   description: project.description,
@@ -967,7 +1177,7 @@ export const mockDevelopers: DeveloperDetail[] = [
     description:
       "A regional developer focused on premium residential communities and hospitality-led living concepts.",
     websiteUrl: "https://example.com/novastone",
-    logoUrl: null,
+    logoUrl: novastoneLogo,
     isVerified: true,
     projects: mockProjectSummaries.filter((project) => project.developerProfileId === "dev-novastone"),
   },
@@ -979,7 +1189,7 @@ export const mockDevelopers: DeveloperDetail[] = [
     description:
       "A mixed-use developer focused on urban districts, commercial frontage, and public realm-led planning.",
     websiteUrl: "https://example.com/redcliff",
-    logoUrl: null,
+    logoUrl: redcliffLogo,
     isVerified: true,
     projects: mockProjectSummaries.filter((project) => project.developerProfileId === "dev-redcliff"),
   },
@@ -991,7 +1201,7 @@ export const mockDevelopers: DeveloperDetail[] = [
     description:
       "A luxury coastal developer focused on branded residences and high-spec waterfront living.",
     websiteUrl: "https://example.com/bluecrest",
-    logoUrl: null,
+    logoUrl: bluecrestLogo,
     isVerified: true,
     projects: mockProjectSummaries.filter((project) => project.developerProfileId === "dev-bluecrest"),
   },
@@ -1003,7 +1213,7 @@ export const mockDevelopers: DeveloperDetail[] = [
     description:
       "A sustainability-led developer building low-density communities with strong landscaping and family-oriented planning.",
     websiteUrl: "https://example.com/verde",
-    logoUrl: null,
+    logoUrl: verdeLogo,
     isVerified: false,
     projects: mockProjectSummaries.filter((project) => project.developerProfileId === "dev-verde"),
   },
@@ -1015,7 +1225,7 @@ export const mockDevelopers: DeveloperDetail[] = [
     description:
       "A commercial-led development group specializing in premium office, waterfront retail, and landmark mixed-use projects.",
     websiteUrl: "https://example.com/summit",
-    logoUrl: null,
+    logoUrl: summitLogo,
     isVerified: true,
     projects: mockProjectSummaries.filter((project) => project.developerProfileId === "dev-summit"),
   },

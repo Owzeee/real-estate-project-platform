@@ -1,14 +1,20 @@
 import Link from "next/link";
 
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
+import { formatCompletionStageLabel, formatProjectTypeLabel } from "@/features/projects/presentation";
 import type { ProjectSummary } from "@/features/projects/types";
+import { getTranslations, type SiteLocale } from "@/lib/i18n";
 import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type ProjectCardProps = {
   project: ProjectSummary;
+  locale?: SiteLocale;
 };
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, locale = "fr" }: ProjectCardProps) {
+  const t = getTranslations(locale);
+
   return (
     <article className="surface-panel group flex h-full flex-col overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
       <div
@@ -22,11 +28,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(23,20,18,0.52)] to-transparent" />
         <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
           <div className="rounded-full bg-[rgba(141,104,71,0.88)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-foreground)]">
-            {project.completionStage.replace("_", " ")}
+            {formatCompletionStageLabel(project.completionStage, locale)}
           </div>
           {project.hasVirtualTour ? (
             <div className="rounded-full bg-[rgba(32,28,25,0.82)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">
-              3D Tour
+              {t.projectCard.virtualTour}
             </div>
           ) : null}
         </div>
@@ -38,11 +44,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between gap-4">
           <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-            {project.projectType.replace("_", " ")}
+            {formatProjectTypeLabel(project.projectType, locale)}
           </span>
           {project.isFeatured ? (
             <span className="rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--secondary-foreground)]">
-              Featured
+              {t.projectCard.featured}
             </span>
           ) : null}
         </div>
@@ -50,7 +56,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <h3 className="mt-5 font-display text-2xl font-bold tracking-tight text-stone-950 transition-colors group-hover:text-[var(--primary)] sm:text-3xl">
           {project.title}
         </h3>
-        <p className="mt-2 text-sm text-[var(--muted-foreground)]">{project.developerName}</p>
+        <div className="mt-3 flex items-center gap-3">
+          <CompanyLogo
+            companyName={project.developerName}
+            logoUrl={project.developerLogoUrl}
+            className="h-10 w-10"
+            imageClassName="rounded-xl border border-[var(--border)] object-cover"
+            fallbackClassName="rounded-xl border border-[var(--border)] bg-[linear-gradient(145deg,var(--primary),color-mix(in_srgb,var(--primary)_72%,black))] text-xs font-bold text-[var(--primary-foreground)]"
+          />
+          <p className="text-sm text-[var(--muted-foreground)]">{project.developerName}</p>
+        </div>
         <p className="font-copy mt-4 line-clamp-3 text-[15px] leading-7 text-stone-700">
           {project.description}
         </p>
@@ -58,13 +73,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="mt-6 grid grid-cols-2 gap-4 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-              Location
+              {t.projectCard.location}
             </p>
             <p className="mt-2 text-sm font-medium text-stone-900">{project.location}</p>
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-              {project.offerType === "rent" ? "Rent" : "Pricing"}
+              {project.offerType === "rent" ? t.projectCard.rent : t.projectCard.pricing}
             </p>
             <p className="mt-2 text-sm font-semibold text-[var(--primary)]">
               {formatProjectPricing({
@@ -83,15 +98,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="mt-auto pt-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-              Marketplace listing
+              {t.projectCard.marketplaceListing}
             </p>
-            <ProjectSaveActions project={project} />
+            <ProjectSaveActions project={project} locale={locale} />
           </div>
           <Link
             href={`/projects/${project.slug}`}
             className="primary-button mt-4 w-full text-sm"
           >
-            View project
+            {t.projectCard.viewProject}
           </Link>
         </div>
       </div>

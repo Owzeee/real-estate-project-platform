@@ -36,10 +36,12 @@ function mapProjectSummary(row: {
     | {
         company_name: string;
         slug: string;
+        logo_url?: string | null;
       }
     | {
         company_name: string;
         slug: string;
+        logo_url?: string | null;
       }[]
     | null;
         project_media:
@@ -64,6 +66,7 @@ function mapProjectSummary(row: {
     developerProfileId: row.developer_profile_id,
     developerName: developer?.company_name ?? "Developer",
     developerSlug: developer?.slug ?? "",
+    developerLogoUrl: developer?.logo_url ?? null,
     title: row.title,
     slug: row.slug,
     description: row.description,
@@ -183,7 +186,8 @@ export const getProjects = cache(async () => {
         longitude,
         developer_profiles (
           company_name,
-          slug
+          slug,
+          logo_url
         ),
         project_media (
           media_type,
@@ -246,7 +250,8 @@ export const getDashboardProjectsForDeveloper = cache(async (developerProfileId?
         longitude,
         developer_profiles (
           company_name,
-          slug
+          slug,
+          logo_url
         ),
         project_media (
           media_type,
@@ -313,7 +318,8 @@ export const getProjectBySlug = cache(async (slug: string) => {
         longitude,
         developer_profiles (
           company_name,
-          slug
+          slug,
+          logo_url
         ),
         project_media (
           id,
@@ -420,7 +426,8 @@ export const getProjectById = cache(async (id: string) => {
         longitude,
         developer_profiles (
           company_name,
-          slug
+          slug,
+          logo_url
         ),
         project_media (
           id,

@@ -1,15 +1,48 @@
-/* eslint-disable @next/next/no-img-element */
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { getDeveloperBySlug } from "@/features/developers/queries";
 import { ProjectCard } from "@/features/projects/project-card";
+import {
+  absoluteUrl,
+  buildBreadcrumbJsonLd,
+  buildMetadata,
+} from "@/lib/seo";
 
 type DeveloperPageProps = {
   params: Promise<{
     slug: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: DeveloperPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const developer = await getDeveloperBySlug(slug);
+
+  if (!developer) {
+    return buildMetadata({
+      title: "Promoteur Immobilier",
+      description: "Profil promoteur immobilier en Côte d'Ivoire.",
+      path: `/developers/${slug}`,
+    });
+  }
+
+  return buildMetadata({
+    title: `${developer.companyName} | Promoteur immobilier`,
+    description: `${developer.companyName} présente ses projets, sa visibilité marché et son profil public sur Immo Neuf.`,
+    path: `/developers/${developer.slug}`,
+    image: developer.logoUrl ?? undefined,
+    keywords: [
+      developer.companyName,
+      `promoteur immobilier ${developer.companyName}`,
+      "promoteur immobilier abidjan",
+    ],
+  });
+}
 
 export default async function DeveloperPage({ params }: DeveloperPageProps) {
   const { slug } = await params;
@@ -21,25 +54,36 @@ export default async function DeveloperPage({ params }: DeveloperPageProps) {
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f8f5ee_0%,#ffffff_100%)] px-6 py-12 sm:px-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            buildBreadcrumbJsonLd([
+              { name: "Accueil", path: "/" },
+              { name: "Promoteurs", path: "/developers" },
+              { name: developer.companyName, path: `/developers/${developer.slug}` },
+            ]),
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: developer.companyName,
+              url: absoluteUrl(`/developers/${developer.slug}`),
+              logo: developer.logoUrl ?? undefined,
+              sameAs: developer.websiteUrl ? [developer.websiteUrl] : undefined,
+            },
+          ]),
+        }}
+      />
       <div className="mx-auto max-w-6xl">
         <section className="rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex items-start gap-5">
-              {developer.logoUrl ? (
-                <img
-                  src={developer.logoUrl}
-                  alt={`${developer.companyName} logo`}
-                  className="h-20 w-20 rounded-[1.5rem] border border-stone-200 object-cover"
-                />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-stone-950 text-xl font-semibold text-stone-100">
-                  {developer.companyName
-                    .split(" ")
-                    .slice(0, 2)
-                    .map((part: string) => part[0]?.toUpperCase() ?? "")
-                    .join("") || "DP"}
-                </div>
-              )}
+              <CompanyLogo
+                companyName={developer.companyName}
+                logoUrl={developer.logoUrl}
+                imageClassName="rounded-[1.5rem] border border-stone-200 object-cover"
+                fallbackClassName="rounded-[1.5rem] bg-stone-950 text-xl font-semibold text-stone-100"
+              />
               <div>
                 <SectionHeading
                   eyebrow="Developer Profile"

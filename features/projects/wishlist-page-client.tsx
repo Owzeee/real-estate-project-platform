@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { useProjectsStore } from "@/features/projects/client-store";
-import { buildMapEmbedUrl } from "@/features/projects/presentation";
 
 type WishlistTab = "properties" | "projects";
 
@@ -33,12 +33,17 @@ export function WishlistPageClient() {
     favoriteProperties[0] ??
     null;
 
-  const selectedMapUrl = selectedProperty
-    ? buildMapEmbedUrl({
-        latitude: selectedProperty.latitude,
-        longitude: selectedProperty.longitude,
-      })
-    : null;
+  const propertyMapItems = favoriteProperties
+    .filter((property) => property.latitude != null && property.longitude != null)
+    .map((property) => ({
+      id: property.id,
+      title: property.title,
+      subtitle: `${property.location} • ${property.priceLabel}`,
+      href: `/projects/${property.projectSlug}/units/${property.propertySlug}`,
+      latitude: property.latitude as number,
+      longitude: property.longitude as number,
+      accentLabel: property.offerType === "rent" ? "For Rent" : "For Sale",
+    }));
 
   const shareWishlist = async () => {
     const url = `${window.location.origin}/wishlist`;
@@ -294,14 +299,12 @@ export function WishlistPageClient() {
                   </p>
                 </div>
 
-                {activeTab === "properties" && selectedProperty && selectedMapUrl ? (
+                {activeTab === "properties" && selectedProperty && propertyMapItems.length > 0 ? (
                   <>
-                    <iframe
-                      title={`${selectedProperty.title} map`}
-                      src={selectedMapUrl}
-                      className="min-h-[28rem] w-full flex-1 border-0"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
+                    <InteractiveListingsMap
+                      items={propertyMapItems}
+                      selectedId={selectedProperty.id}
+                      className="min-h-[28rem] w-full flex-1"
                     />
                     <div className="border-t border-[var(--border)] px-6 py-5 sm:px-8">
                       <div className="flex items-start justify-between gap-4">

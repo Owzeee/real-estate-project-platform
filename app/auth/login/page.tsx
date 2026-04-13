@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/features/auth/auth-form";
 import { getCurrentAuth } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  title: "Connexion",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 type LoginPageProps = {
   searchParams?: Promise<{

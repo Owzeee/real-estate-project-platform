@@ -73,6 +73,7 @@ export type ProjectSummary = {
   developerProfileId: string;
   developerName: string;
   developerSlug: string;
+  developerLogoUrl: string | null;
   title: string;
   slug: string;
   description: string;

@@ -2,8 +2,16 @@
 
 import { useProjectsStore, toStoredProject } from "@/features/projects/client-store";
 import type { ProjectSummary } from "@/features/projects/types";
+import { getTranslations, type SiteLocale } from "@/lib/i18n";
 
-export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
+export function ProjectSaveActions({
+  project,
+  locale = "fr",
+}: {
+  project: ProjectSummary;
+  locale?: SiteLocale;
+}) {
+  const t = getTranslations(locale);
   const { isFavorite, isProjectCompared, toggleFavorite, toggleProjectCompare } =
     useProjectsStore();
   const favorite = isFavorite(project.id);
@@ -21,7 +29,7 @@ export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
         }`}
       >
         <span aria-hidden="true">{favorite ? "♥" : "♡"}</span>
-        <span>{favorite ? "In wishlist" : "Add to wishlist"}</span>
+        <span>{favorite ? t.actions.inWishlist : t.actions.addToWishlist}</span>
       </button>
       <button
         type="button"
@@ -32,7 +40,7 @@ export function ProjectSaveActions({ project }: { project: ProjectSummary }) {
             : "border border-[var(--border)] bg-white text-stone-900"
         }`}
       >
-        {compared ? "Added to compare" : "Compare"}
+        {compared ? t.actions.addedToCompare : t.actions.compare}
       </button>
     </div>
   );

@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { InquiryForm } from "@/features/inquiries/inquiry-form";
+import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { ProjectGallery } from "@/features/projects/project-gallery";
 import { PropertyCompareActions } from "@/features/projects/property-compare-actions";
 import { PropertySaveActions } from "@/features/projects/property-save-actions";
-import {
-  buildMapEmbedUrl,
-  getProjectUnitBySlug,
-} from "@/features/projects/presentation";
+import { getProjectUnitBySlug } from "@/features/projects/presentation";
 import { getProjectBySlug } from "@/features/projects/queries";
+import { getTranslations } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n-server";
 
 type ProjectUnitPageProps = {
   params: Promise<{
@@ -19,6 +20,8 @@ type ProjectUnitPageProps = {
 };
 
 export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) {
+  const locale = await getCurrentLocale();
+  const t = getTranslations(locale);
   const { slug, unitSlug } = await params;
   const project = await getProjectBySlug(slug);
 
@@ -32,7 +35,20 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
     notFound();
   }
 
-  const mapUrl = buildMapEmbedUrl(project);
+  const mapItems =
+    project.latitude != null && project.longitude != null
+      ? [
+          {
+            id: unit.id,
+            title: unit.title,
+            subtitle: `${project.location} • ${project.developerName}`,
+            href: `/projects/${project.slug}/units/${unit.slug}`,
+            latitude: project.latitude,
+            longitude: project.longitude,
+            accentLabel: t.unitDetail.unitLocation,
+          },
+        ]
+      : [];
 
   return (
     <main className="page-shell min-h-screen bg-transparent px-4 py-10 sm:px-6 lg:px-8">
@@ -42,7 +58,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
             href={`/projects/${project.slug}`}
             className="secondary-button px-4 py-2.5 text-sm"
           >
-            Back to project
+            {t.unitDetail.backToProject}
           </Link>
           <span>/</span>
           <span>{unit.title}</span>
@@ -51,7 +67,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
         <div className="grid gap-10 xl:grid-cols-[minmax(0,1.42fr)_minmax(300px,0.58fr)]">
           <section className="space-y-8">
             <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
-              <p className="eyebrow">Unit Details</p>
+              <p className="eyebrow">{t.unitDetail.unitDetails}</p>
               <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">
                 {unit.title}
               </h1>
@@ -62,20 +78,20 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               ) : null}
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {unit.monthlyRentLabel ? (
+                {unit.priceLabel ? (
                   <div className="stat-chip rounded-[1.4rem] p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                       {unit.priceHeading}
                     </p>
                     <p className="mt-2 font-display text-2xl font-semibold text-[var(--primary)]">
-                      {unit.monthlyRentLabel}
+                      {unit.priceLabel}
                     </p>
                   </div>
                 ) : null}
                 {unit.areaLabel ? (
                   <div className="stat-chip rounded-[1.4rem] p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                      Area
+                      {t.unitDetail.area}
                     </p>
                     <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
                       {unit.areaLabel}
@@ -85,7 +101,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                 {unit.roomsLabel ? (
                   <div className="stat-chip rounded-[1.4rem] p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                      Rooms
+                      {t.unitDetail.rooms}
                     </p>
                     <p className="mt-2 font-display text-2xl font-semibold text-stone-950">
                       {unit.roomsLabel}
@@ -96,6 +112,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <PropertySaveActions
+                  locale={locale}
                   property={{
                     id: unit.id,
                     projectSlug: project.slug,
@@ -107,7 +124,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                     latitude: project.latitude,
                     longitude: project.longitude,
                     offerType: unit.offerType,
-                    priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                    priceLabel: unit.priceLabel,
                     areaLabel: unit.areaLabel,
                     roomsLabel: unit.roomsLabel,
                     availableFromLabel: unit.availableFromLabel,
@@ -119,6 +136,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                   }}
                 />
                 <PropertyCompareActions
+                  locale={locale}
                   property={{
                     id: unit.id,
                     projectSlug: project.slug,
@@ -130,7 +148,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
                     latitude: project.latitude,
                     longitude: project.longitude,
                     offerType: unit.offerType,
-                    priceLabel: unit.monthlyRentLabel || unit.priceLabel,
+                    priceLabel: unit.priceLabel,
                     areaLabel: unit.areaLabel,
                     roomsLabel: unit.roomsLabel,
                     availableFromLabel: unit.availableFromLabel,
@@ -149,7 +167,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
             </article>
 
             <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
-              <p className="eyebrow">Amenities</p>
+              <p className="eyebrow">{t.unitDetail.amenities}</p>
               <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_260px]">
                 <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
                   {unit.amenityGroups.slice(0, 4).map((group) => (
@@ -173,7 +191,7 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
 
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-base font-semibold text-stone-950">Beds</h2>
+                    <h2 className="text-base font-semibold text-stone-950">{t.unitDetail.beds}</h2>
                     <div className="mt-4 grid gap-3">
                       {unit.beds.map((bed) => (
                         <div
@@ -194,16 +212,14 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               </div>
             </article>
 
-            {mapUrl ? (
+            {mapItems.length > 0 ? (
               <article className="surface-panel rounded-[2rem] p-6 sm:p-8">
-                <p className="eyebrow">Location</p>
+                <p className="eyebrow">{t.unitDetail.location}</p>
                 <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--border)]">
-                  <iframe
-                    title={`${unit.title} location`}
-                    src={mapUrl}
-                    className="h-[24rem] w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
+                  <InteractiveListingsMap
+                    items={mapItems}
+                    selectedId={unit.id}
+                    className="h-[24rem] w-full"
                   />
                 </div>
               </article>
@@ -215,16 +231,16 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 {unit.priceHeading}
               </p>
-              {unit.monthlyRentLabel ? (
+              {unit.priceLabel ? (
                 <p className="mt-2 text-3xl font-semibold text-stone-950">
-                  {unit.monthlyRentLabel}
+                  {unit.priceLabel}
                 </p>
               ) : null}
 
-              {unit.availableFromLabel ? (
+              {unit.offerType === "rent" && unit.availableFromLabel ? (
                 <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                    Available from
+                    {t.unitDetail.availableFrom}
                   </p>
                   <p className="mt-1 text-sm font-semibold text-stone-950">
                     {unit.availableFromLabel}
@@ -233,16 +249,25 @@ export default async function ProjectUnitPage({ params }: ProjectUnitPageProps) 
               ) : null}
 
               <div className="mt-5 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
-                <p className="text-sm font-semibold text-stone-950">
-                  {project.developerName}
-                </p>
+                <div className="flex items-center gap-3">
+                  <CompanyLogo
+                    companyName={project.developerName}
+                    logoUrl={project.developerLogoUrl}
+                    className="h-10 w-10"
+                    imageClassName="rounded-xl border border-[var(--border)] object-cover"
+                    fallbackClassName="rounded-xl border border-[var(--border)] bg-[linear-gradient(145deg,var(--primary),color-mix(in_srgb,var(--primary)_72%,black))] text-xs font-bold text-[var(--primary-foreground)]"
+                  />
+                  <p className="text-sm font-semibold text-stone-950">
+                    {project.developerName}
+                  </p>
+                </div>
                 <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                  Ask for this apartment specifically if the admin has attached extra unit-level notes or availability details.
+                  {t.unitDetail.developerNote}
                 </p>
               </div>
 
               <div className="mt-5">
-                <InquiryForm projectId={project.id} />
+                <InquiryForm projectId={project.id} locale={locale} />
               </div>
             </div>
           </aside>

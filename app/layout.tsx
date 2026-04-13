@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lora, Playfair_Display } from "next/font/google";
+import "leaflet/dist/leaflet.css";
 
 import { SiteHeader } from "@/components/shared/site-header";
 import { ProjectsStoreProvider } from "@/features/projects/client-store";
 import { ProjectsUtilityTray } from "@/features/projects/projects-utility-tray";
+import { getCurrentLocale } from "@/lib/i18n-server";
+import {
+  buildOrganizationJsonLd,
+  buildWebsiteJsonLd,
+  getSiteUrl,
+} from "@/lib/seo";
 import "./globals.css";
 
 const geist = Geist({
@@ -29,22 +36,67 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Real Estate Project Marketplace",
+  metadataBase: getSiteUrl(),
+  title: {
+    default: "Immo Neuf | Immobilier Neuf à Abidjan et en Côte d'Ivoire",
+    template: "%s | Immo Neuf",
+  },
   description:
-    "A premium billboard-style marketplace for real estate development projects built with Next.js and Supabase.",
+    "Plateforme immobilière pour découvrir des programmes neufs, terrains, bureaux et projets d'investissement à Abidjan et en Côte d'Ivoire.",
+  applicationName: "Immo Neuf",
+  keywords: [
+    "immobilier Abidjan",
+    "immobilier Côte d'Ivoire",
+    "programme immobilier Abidjan",
+    "appartement neuf Abidjan",
+    "terrain à vendre Abidjan",
+    "bureaux à louer Abidjan",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Immo Neuf | Immobilier Neuf à Abidjan et en Côte d'Ivoire",
+    description:
+      "Découvrez des projets immobiliers, terrains, bureaux et programmes neufs en Côte d'Ivoire.",
+    url: "/",
+    siteName: "Immo Neuf",
+    locale: "fr_CI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Immo Neuf | Immobilier Neuf à Abidjan et en Côte d'Ivoire",
+    description:
+      "Découvrez des projets immobiliers, terrains, bureaux et programmes neufs en Côte d'Ivoire.",
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getCurrentLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale === "fr" ? "fr-CI" : "en"}
       className={`${geist.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable}`}
     >
       <body className="font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildOrganizationJsonLd()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildWebsiteJsonLd()),
+          }}
+        />
         <ProjectsStoreProvider>
           <SiteHeader />
           {children}

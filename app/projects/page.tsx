@@ -1,13 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ProjectSaveActions } from "@/features/projects/project-save-actions";
+import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { ProjectCard } from "@/features/projects/project-card";
+import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
-  buildMapEmbedUrl,
   formatCompletionStageLabel,
   formatProjectTypeLabel,
 } from "@/features/projects/presentation";
 import { getProjects } from "@/features/projects/queries";
+import { getTranslations } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n-server";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Projets Immobiliers à Abidjan et en Côte d'Ivoire",
+  description:
+    "Parcourez des programmes neufs, terrains, bureaux et projets immobiliers avec cartes, filtres et fiches détaillées pour Abidjan et la Côte d'Ivoire.",
+  path: "/projects",
+  keywords: [
+    "projets immobiliers abidjan",
+    "programme neuf abidjan",
+    "terrain a vendre cote d'ivoire",
+    "bureaux cote d'ivoire",
+  ],
+});
 
 type ProjectsPageProps = {
   searchParams?: Promise<{
@@ -21,6 +38,8 @@ type ProjectsPageProps = {
 };
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+  const locale = await getCurrentLocale();
+  const t = getTranslations(locale);
   const projects = await getProjects();
   const params = (await searchParams) ?? {};
   const query = params.q?.toLowerCase().trim() ?? "";
@@ -50,10 +69,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     filteredProjects[0] ??
     null;
 
-  const selectedMapUrl = selectedProject
-    ? buildMapEmbedUrl(selectedProject)
-    : null;
-
   const buildProjectsHref = (overrides: Record<string, string | null>) => {
     const search = new URLSearchParams();
 
@@ -76,16 +91,33 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     return queryString ? `/projects?${queryString}` : "/projects";
   };
 
+  const mapProjects = filteredProjects
+    .filter((project) => project.latitude != null && project.longitude != null)
+    .map((project) => ({
+      id: project.id,
+      title: project.title,
+      subtitle: `${project.location} • ${project.developerName}`,
+      href: buildProjectsHref({
+        view: "map",
+        selected: project.slug,
+      }),
+      latitude: project.latitude as number,
+      longitude: project.longitude as number,
+      accentLabel: project.isFeatured
+        ? t.projectCard.featured
+        : formatProjectTypeLabel(project.projectType, locale),
+    }));
+
   return (
     <main className="page-shell min-h-screen bg-transparent">
       <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <p className="eyebrow">Marketplace</p>
+          <p className="eyebrow">{t.projects.eyebrow}</p>
           <h1 className="mt-5 font-display text-5xl font-bold tracking-tight text-stone-950 sm:text-6xl">
-            Explore admin-curated development projects
+            {t.projects.title}
           </h1>
           <p className="font-copy mt-5 max-w-3xl text-lg leading-8 text-[var(--muted-foreground)]">
-            Browse managed project inventory with map context, staged availability, and developer-backed inquiry capture.
+            {t.projects.description}
           </p>
         </div>
       </section>
@@ -99,61 +131,61 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 <input type="hidden" name="selected" value={selectedProject.slug} />
               ) : null}
               <div>
-                <p className="text-sm font-semibold text-stone-950">Refine results</p>
+                <p className="text-sm font-semibold text-stone-950">{t.projects.refineResults}</p>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  Narrow by keyword, location, type, and stage.
+                  {t.projects.refineDescription}
                 </p>
               </div>
               <div>
-                <label className="field-label">Search</label>
+                <label className="field-label">{t.projects.search}</label>
                 <input
                   name="q"
                   defaultValue={params.q}
-                  placeholder="Project, developer, keyword"
+                  placeholder={t.projects.searchPlaceholder}
                   className="field-input"
                 />
               </div>
               <div>
-                <label className="field-label">Location</label>
+                <label className="field-label">{t.projects.location}</label>
                 <input
                   name="location"
                   defaultValue={params.location}
-                  placeholder="City, district, country"
+                  placeholder={t.projects.locationPlaceholder}
                   className="field-input"
                 />
               </div>
               <div>
-                <label className="field-label">Project type</label>
+                <label className="field-label">{t.projects.projectType}</label>
                 <select
                   name="type"
                   defaultValue={params.type}
                   className="field-input"
                 >
-                  <option value="">All project types</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="townhouse">Townhouse</option>
-                  <option value="mixed_use">Mixed use</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="land">Land</option>
+                  <option value="">{t.projects.allProjectTypes}</option>
+                  <option value="apartment">{t.projects.apartment}</option>
+                  <option value="villa">{t.projects.villa}</option>
+                  <option value="townhouse">{t.projects.townhouse}</option>
+                  <option value="mixed_use">{t.projects.mixedUse}</option>
+                  <option value="commercial">{t.projects.commercial}</option>
+                  <option value="land">{t.projects.land}</option>
                 </select>
               </div>
               <div>
-                <label className="field-label">Completion stage</label>
+                <label className="field-label">{t.projects.completionStage}</label>
                 <select
                   name="stage"
                   defaultValue={params.stage}
                   className="field-input"
                 >
-                  <option value="">All completion stages</option>
-                  <option value="pre_launch">Pre-launch</option>
-                  <option value="under_construction">Under construction</option>
-                  <option value="ready">Ready</option>
-                  <option value="completed">Completed</option>
+                  <option value="">{t.projects.allCompletionStages}</option>
+                  <option value="pre_launch">{t.projects.preLaunch}</option>
+                  <option value="under_construction">{t.projects.underConstruction}</option>
+                  <option value="ready">{t.projects.ready}</option>
+                  <option value="completed">{t.projects.completed}</option>
                 </select>
               </div>
               <button type="submit" className="primary-button w-full text-sm">
-                Apply filters
+                {t.projects.applyFilters}
               </button>
             </form>
           </aside>
@@ -162,13 +194,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
                 <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
-                  {filteredProjects.length} visible projects
+                  {filteredProjects.length} {t.projects.visibleProjects}
                 </span>
                 <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
-                  {filteredProjects.filter((project) => project.isFeatured).length} featured
+                  {filteredProjects.filter((project) => project.isFeatured).length} {t.projects.featured}
                 </span>
                 <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
-                  {new Set(filteredProjects.map((project) => project.developerProfileId)).size} developers
+                  {new Set(filteredProjects.map((project) => project.developerProfileId)).size} {t.projects.developers}
                 </span>
               </div>
 
@@ -181,7 +213,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       : "text-stone-700 hover:bg-[rgba(141,104,71,0.08)]"
                   }`}
                 >
-                  Normal view
+                  {t.projects.listView}
                 </Link>
                 <Link
                   href={buildProjectsHref({ view: "map" })}
@@ -191,25 +223,25 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       : "text-stone-700 hover:bg-[rgba(141,104,71,0.08)]"
                   }`}
                 >
-                  Map view
+                  {t.projects.mapView}
                 </Link>
               </div>
             </div>
 
             {filteredProjects.length === 0 ? (
               <article className="rounded-[1.75rem] border border-dashed border-[var(--border)] bg-[rgba(255,255,255,0.55)] p-10 text-center text-sm text-[var(--muted-foreground)]">
-                No projects matched the current filters. Broaden the search terms or clear one of the filters.
+                {t.projects.noResults}
               </article>
             ) : currentView === "map" ? (
               <div className="space-y-8">
                 <div className="surface-panel overflow-hidden rounded-[2rem]">
                   <div className="flex flex-col gap-4 border-b border-[var(--border)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-stone-950">Map view</p>
+                      <p className="text-sm font-semibold text-stone-950">{t.projects.mapViewTitle}</p>
                       <p className="mt-1 text-sm text-[var(--muted-foreground)]">
                         {selectedProject
-                          ? `Focused on ${selectedProject.title}`
-                          : "Select a project to preview its location"}
+                          ? `${t.projects.mapViewFocusedOn} ${selectedProject.title}`
+                          : t.projects.mapViewSelectPrompt}
                       </p>
                     </div>
                     {selectedProject ? (
@@ -217,27 +249,25 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         href={`/projects/${selectedProject.slug}`}
                         className="secondary-button px-4 py-2.5 text-sm"
                       >
-                        Open property page
+                        {t.projects.openProjectPage}
                       </Link>
                     ) : null}
                   </div>
 
-                  {selectedProject && selectedMapUrl ? (
-                    <iframe
-                      title={`${selectedProject.title} map`}
-                      src={selectedMapUrl}
-                      className="h-[34rem] w-full border-0"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
+                  {mapProjects.length > 0 ? (
+                    <InteractiveListingsMap
+                      items={mapProjects}
+                      selectedId={selectedProject?.id ?? null}
+                      className="h-[34rem] w-full"
                     />
                   ) : (
                     <div className="flex h-[34rem] items-center justify-center bg-[linear-gradient(180deg,rgba(141,104,71,0.1),rgba(141,104,71,0.04))] p-8 text-center">
                       <div className="max-w-sm">
                         <p className="font-display text-3xl font-semibold text-stone-950">
-                          Map preview unavailable
+                          {t.projects.mapViewTitle}
                         </p>
                         <p className="font-copy mt-4 text-base leading-7 text-[var(--muted-foreground)]">
-                          This project does not have map coordinates yet. Keep the listing visible while the location data is completed.
+                          {t.projects.mapUnavailable}
                         </p>
                       </div>
                     </div>
@@ -255,18 +285,18 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       </div>
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                          Type
+                          {t.projects.projectType}
                         </p>
                         <p className="mt-2 text-sm font-semibold text-stone-950">
-                          {formatProjectTypeLabel(selectedProject.projectType)}
+                          {formatProjectTypeLabel(selectedProject.projectType, locale)}
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                          Stage
+                          {t.projects.completionStage}
                         </p>
                         <p className="mt-2 text-sm font-semibold text-stone-950">
-                          {formatCompletionStageLabel(selectedProject.completionStage)}
+                          {formatCompletionStageLabel(selectedProject.completionStage, locale)}
                         </p>
                       </div>
                     </div>
@@ -298,14 +328,14 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                           <div className="flex min-w-0 flex-1 flex-col">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="rounded-full bg-[rgba(198,154,91,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                                {formatProjectTypeLabel(project.projectType)}
+                                {formatProjectTypeLabel(project.projectType, locale)}
                               </span>
                               <span className="rounded-full bg-[rgba(141,104,71,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700">
-                                {formatCompletionStageLabel(project.completionStage)}
+                                {formatCompletionStageLabel(project.completionStage, locale)}
                               </span>
                               {project.isFeatured ? (
                                 <span className="rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--secondary-foreground)]">
-                                  Featured
+                                  {t.projectCard.featured}
                                 </span>
                               ) : null}
                             </div>
@@ -314,7 +344,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                               {project.title}
                             </h2>
                             <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                              By {project.developerName}
+                              {locale === "fr" ? "Par" : "By"} {project.developerName}
                             </p>
                             <p className="font-copy mt-4 line-clamp-3 text-[15px] leading-7 text-stone-700">
                               {project.description}
@@ -358,13 +388,19 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                                 })}
                                 className={isSelected ? "primary-button px-5 py-3 text-sm" : "secondary-button px-5 py-3 text-sm"}
                               >
-                                {isSelected ? "Viewing on map" : "Show on map"}
+                                {isSelected
+                                  ? locale === "fr"
+                                    ? "Affiche sur la carte"
+                                    : "Viewing on map"
+                                  : locale === "fr"
+                                    ? "Voir sur la carte"
+                                    : "Show on map"}
                               </Link>
                               <Link
                                 href={`/projects/${project.slug}`}
                                 className="primary-button px-5 py-3 text-sm"
                               >
-                                Open property page
+                                {t.projects.openProjectPage}
                               </Link>
                             </div>
                           </div>
@@ -377,7 +413,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             ) : (
               <div className="grid gap-8 md:grid-cols-2 2xl:grid-cols-3">
                 {filteredProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
+                  <ProjectCard key={project.id} project={project} locale={locale} />
                 ))}
               </div>
             )}

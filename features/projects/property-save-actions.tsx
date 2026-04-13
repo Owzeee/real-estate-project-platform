@@ -4,8 +4,16 @@ import {
   type StoredProperty,
   useProjectsStore,
 } from "@/features/projects/client-store";
+import { getTranslations, type SiteLocale } from "@/lib/i18n";
 
-export function PropertySaveActions({ property }: { property: StoredProperty }) {
+export function PropertySaveActions({
+  property,
+  locale = "fr",
+}: {
+  property: StoredProperty;
+  locale?: SiteLocale;
+}) {
+  const t = getTranslations(locale);
   const { isFavoriteProperty, toggleFavoriteProperty } = useProjectsStore();
   const favorite = isFavoriteProperty(property.id);
 
@@ -20,7 +28,7 @@ export function PropertySaveActions({ property }: { property: StoredProperty }) 
       }`}
     >
       <span aria-hidden="true">{favorite ? "♥" : "♡"}</span>
-      <span>{favorite ? "In wishlist" : "Add to wishlist"}</span>
+      <span>{favorite ? t.actions.inWishlist : t.actions.addToWishlist}</span>
     </button>
   );
 }

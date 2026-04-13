@@ -4,8 +4,16 @@ import {
   type StoredProperty,
   useProjectsStore,
 } from "@/features/projects/client-store";
+import { getTranslations, type SiteLocale } from "@/lib/i18n";
 
-export function PropertyCompareActions({ property }: { property: StoredProperty }) {
+export function PropertyCompareActions({
+  property,
+  locale = "fr",
+}: {
+  property: StoredProperty;
+  locale?: SiteLocale;
+}) {
+  const t = getTranslations(locale);
   const { isPropertyCompared, togglePropertyCompare } = useProjectsStore();
   const compared = isPropertyCompared(property.id);
 
@@ -19,7 +27,7 @@ export function PropertyCompareActions({ property }: { property: StoredProperty 
           : "border border-[var(--border)] bg-white text-stone-900"
       }`}
     >
-      {compared ? "Added to compare" : "Compare property"}
+      {compared ? t.actions.addedToCompare : t.actions.compareProperty}
     </button>
   );
 }

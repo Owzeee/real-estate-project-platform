@@ -6,6 +6,7 @@ import {
   submitInquiry,
   type InquiryActionState,
 } from "@/features/inquiries/actions";
+import { getTranslations, type SiteLocale } from "@/lib/i18n";
 
 const initialState: InquiryActionState = {
   status: "idle",
@@ -14,9 +15,11 @@ const initialState: InquiryActionState = {
 
 type InquiryFormProps = {
   projectId: string;
+  locale?: SiteLocale;
 };
 
-export function InquiryForm({ projectId }: InquiryFormProps) {
+export function InquiryForm({ projectId, locale = "fr" }: InquiryFormProps) {
+  const t = getTranslations(locale);
   const [state, formAction, isPending] = useActionState(
     submitInquiry,
     initialState,
@@ -27,7 +30,7 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
       <input type="hidden" name="projectId" value={projectId} />
       <div>
         <label htmlFor="fullName" className="field-label">
-          Full name
+          {t.inquiry.fullName}
         </label>
         <input
           id="fullName"
@@ -50,7 +53,7 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
       </div>
       <div>
         <label htmlFor="phone" className="field-label">
-          Phone
+          {t.inquiry.phone}
         </label>
         <input
           id="phone"
@@ -60,14 +63,14 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
       </div>
       <div>
         <label htmlFor="message" className="field-label">
-          Message
+          {t.inquiry.message}
         </label>
         <textarea
           id="message"
           name="message"
           rows={5}
           className="field-input min-h-32 resize-y"
-          placeholder="Tell the developer what you are looking for."
+          placeholder={t.inquiry.placeholder}
         />
       </div>
       <button
@@ -75,7 +78,7 @@ export function InquiryForm({ projectId }: InquiryFormProps) {
         disabled={isPending}
         className="primary-button w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isPending ? "Sending inquiry..." : "Send inquiry"}
+        {isPending ? t.inquiry.sending : t.inquiry.submit}
       </button>
       {state.message ? (
         <p

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { DeveloperCard } from "@/features/developers/developer-card";
@@ -5,8 +6,26 @@ import { buildMapEmbedUrl } from "@/features/projects/presentation";
 import { getDevelopers } from "@/features/developers/queries";
 import { ProjectCard } from "@/features/projects/project-card";
 import { getFeaturedProjects } from "@/features/projects/queries";
+import { getTranslations } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n-server";
+import { buildBreadcrumbJsonLd, buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Immobilier Neuf à Abidjan et en Côte d'Ivoire",
+  description:
+    "Découvrez des programmes immobiliers, terrains, bureaux et projets neufs à Abidjan et en Côte d'Ivoire sur une plateforme pensée pour la recherche locale.",
+  path: "/",
+  keywords: [
+    "immobilier neuf abidjan",
+    "programme immobilier cote d'ivoire",
+    "terrain abidjan",
+    "bureau abidjan",
+  ],
+});
 
 export default async function Home() {
+  const locale = await getCurrentLocale();
+  const t = getTranslations(locale);
   const [featuredProjects, developers] = await Promise.all([
     getFeaturedProjects(),
     getDevelopers(),
@@ -17,16 +36,24 @@ export default async function Home() {
   const mapProjectUrl = mapProject ? buildMapEmbedUrl(mapProject) : null;
 
   const stats = [
-    { label: "Featured Projects", value: String(featuredProjects.length) },
-    { label: "Marketplace Developers", value: String(developers.length) },
+    { label: t.home.featuredProjects, value: String(featuredProjects.length) },
+    { label: t.home.marketplaceDevelopers, value: String(developers.length) },
     {
-      label: "Verified Brands",
+      label: t.home.verifiedBrands,
       value: String(developers.filter((developer) => developer.isVerified).length),
     },
   ];
 
   return (
     <main className="page-shell min-h-screen bg-transparent">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbJsonLd([{ name: "Accueil", path: "/" }]),
+          ),
+        }}
+      />
       <section className="relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -38,20 +65,20 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(198,154,91,0.16),transparent_28%)]" />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:px-8 lg:py-20">
           <div className="max-w-xl rounded-[2rem] border border-white/55 bg-[rgba(255,251,245,0.72)] p-7 shadow-[0_24px_70px_rgba(32,28,25,0.14)] backdrop-blur-md sm:p-8">
-            <p className="eyebrow">Curated Real Estate Marketplace</p>
+            <p className="eyebrow">{t.home.eyebrow}</p>
             <h1 className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">
-              Admin-managed inventory with a cleaner discovery experience.
+              {t.home.title}
             </h1>
             <p className="font-copy mt-5 text-base leading-8 text-[var(--muted-foreground)] sm:text-lg">
-              Browse serious development projects, compare credible brands, and move into inquiry without the noise of an open listings marketplace.
+              {t.home.description}
             </p>
 
             <div className="mt-7 flex flex-wrap gap-4">
               <Link href="/projects" className="primary-button px-7 py-3.5 text-sm">
-                Explore projects
+                {t.home.exploreProjects}
               </Link>
               <Link href="/developers" className="secondary-button px-7 py-3.5 text-sm">
-                View developers
+                {t.home.viewDevelopers}
               </Link>
             </div>
 
@@ -76,10 +103,10 @@ export default async function Home() {
             <div className="relative flex h-full flex-col justify-between p-8 text-white sm:p-10">
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
-                  "Admin created",
-                  "Map browsing",
-                  "Developer profiles",
-                  "Inquiry capture",
+                  t.home.adminCreated,
+                  t.home.mapBrowsing,
+                  t.home.developerProfiles,
+                  t.home.inquiryCapture,
                 ].map((item) => (
                   <div key={item} className="rounded-full border border-white/10 bg-white/8 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/84">
                     {item}
@@ -92,7 +119,7 @@ export default async function Home() {
                   <div className="flex items-center justify-between px-5 py-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                        Map Spotlight
+                        {t.home.mapSpotlight}
                       </p>
                       <p className="mt-2 font-display text-3xl font-semibold">
                         {mapProject.title}
@@ -102,7 +129,7 @@ export default async function Home() {
                       href="/projects?view=map"
                       className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white/88 hover:bg-white/10"
                     >
-                      Explore map
+                      {t.home.exploreMap}
                     </Link>
                   </div>
                   <iframe
@@ -122,22 +149,22 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="eyebrow">Featured Developments</p>
+            <p className="eyebrow">{t.home.featuredEyebrow}</p>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">
-              Curated projects prepared for serious buyer attention
+              {t.home.featuredTitle}
             </h2>
             <p className="font-copy mt-5 max-w-2xl text-lg leading-8 text-[var(--muted-foreground)]">
-              Featured inventory is controlled through the platform, surfaced with location context, and paired with direct developer inquiry workflows.
+              {t.home.featuredDescription}
             </p>
           </div>
           <Link href="/projects" className="secondary-button px-6 py-3 text-sm">
-            Explore project map
+            {t.home.exploreProjectMap}
           </Link>
         </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {featuredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard key={project.id} project={project} locale={locale} />
           ))}
         </div>
       </section>
@@ -146,25 +173,25 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="eyebrow">Marketplace Developers</p>
+              <p className="eyebrow">{t.home.developersEyebrow}</p>
               <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">
-                Distinct company profiles with real project exposure
+                {t.home.developersTitle}
               </h2>
               <p className="font-copy mt-5 max-w-2xl text-lg leading-8 text-[var(--muted-foreground)]">
-                Each developer gets a public-facing profile, project ownership, inquiry routing, and an admin-managed verification status.
+                {t.home.developersDescription}
               </p>
             </div>
             <Link
               href="/developers"
               className="inline-flex items-center rounded-full bg-[var(--secondary)] px-6 py-3 text-sm font-semibold text-[var(--secondary-foreground)] hover:bg-[color-mix(in_srgb,var(--secondary)_88%,black)]"
             >
-              Meet developers
+              {t.home.meetDevelopers}
             </Link>
           </div>
 
           <div className="mt-12 grid gap-8 lg:grid-cols-2">
             {developers.map((developer) => (
-              <DeveloperCard key={developer.id} developer={developer} />
+              <DeveloperCard key={developer.id} developer={developer} locale={locale} />
             ))}
           </div>
         </div>
