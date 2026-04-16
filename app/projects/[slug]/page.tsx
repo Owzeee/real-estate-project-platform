@@ -19,6 +19,7 @@ import {
   formatCategoryLabel,
   formatCompletionStageLabel,
   formatOfferTypeLabel,
+  getProjectInventoryPriceLabel,
   formatProjectTypeLabel,
   formatStatusLabel,
   getProjectAmenityGroups,
@@ -31,7 +32,6 @@ import {
 import { getProjectBySlug, getProjects } from "@/features/projects/queries";
 import { getTranslations } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
-import { formatProjectPricing } from "@/lib/utils/format-price";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -129,15 +129,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     project.rentPrice != null
       ? {
           label: project.offerType === "rent" ? t.projectDetail.rent : t.projectDetail.pricing,
-          value: formatProjectPricing({
-            offerType: project.offerType,
-            priceMode: project.priceMode,
-            fixedPrice: project.minPrice,
-            minPrice: project.minPrice,
-            maxPrice: project.maxPrice,
-            rentPrice: project.rentPrice,
-            currencyCode: project.currencyCode,
-          }),
+          value: getProjectInventoryPriceLabel(project),
           accent: true,
         }
       : null,
@@ -645,11 +637,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Contact card
               </p>
-              {units[0]?.priceLabel ? (
-                <p className="mt-3 text-2xl font-semibold text-stone-950">
-                  {units[0].priceLabel}
+              <div className="mt-4 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+                  {project.offerType === "rent" ? t.projectDetail.rent : t.projectDetail.pricing}
                 </p>
-              ) : null}
+                <p className="mt-2 text-2xl font-semibold text-stone-950">
+                  {getProjectInventoryPriceLabel(project)}
+                </p>
+              </div>
 
               {units[0]?.offerType === "rent" && units[0]?.availableFromLabel ? (
                 <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
@@ -693,7 +688,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
 
               <div className="mt-5">
-                <InquiryForm projectId={project.id} />
+                <InquiryForm
+                  projectId={project.id}
+                  locale={locale}
+                  propertyOptions={units.map((unit) => ({
+                    value: unit.id,
+                    label: unit.title,
+                  }))}
+                />
               </div>
             </div>
           </aside>

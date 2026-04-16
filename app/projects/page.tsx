@@ -411,7 +411,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 </div>
               </div>
             ) : (
-              <div className="grid gap-8 md:grid-cols-2 2xl:grid-cols-3">
+              <div className="grid gap-8 md:grid-cols-2 2xl:grid-cols-2">
                 {filteredProjects.map((project) => (
                   <ProjectCard key={project.id} project={project} locale={locale} />
                 ))}

@@ -15,6 +15,7 @@ export async function submitInquiry(
   formData: FormData,
 ): Promise<InquiryActionState> {
   const projectId = formData.get("projectId")?.toString().trim();
+  const propertyLabel = formData.get("propertyLabel")?.toString().trim() || null;
   const fullName = formData.get("fullName")?.toString().trim();
   const email = formData.get("email")?.toString().trim();
   const phone = formData.get("phone")?.toString().trim() || null;
@@ -45,6 +46,7 @@ export async function submitInquiry(
 
   const { error } = await supabase.from("inquiries").insert({
     project_id: projectId,
+    property_label: propertyLabel,
     full_name: fullName,
     email,
     phone,

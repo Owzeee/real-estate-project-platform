@@ -83,6 +83,7 @@ create table if not exists public.inquiries (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects (id) on delete cascade,
   buyer_profile_id uuid references public.profiles (id) on delete set null,
+  property_label text,
   full_name text not null,
   email text not null,
   phone text,
@@ -163,6 +164,7 @@ create index if not exists project_media_project_sort_idx on public.project_medi
 create index if not exists project_media_media_type_idx on public.project_media (media_type);
 create index if not exists inquiries_project_id_idx on public.inquiries (project_id);
 create index if not exists inquiries_buyer_profile_id_idx on public.inquiries (buyer_profile_id);
+create index if not exists inquiries_property_label_idx on public.inquiries (property_label);
 create index if not exists inquiries_status_idx on public.inquiries (status);
 
 drop trigger if exists on_auth_user_created on auth.users;

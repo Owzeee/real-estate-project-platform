@@ -5,7 +5,7 @@ import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import { formatCompletionStageLabel, formatProjectTypeLabel } from "@/features/projects/presentation";
 import type { ProjectSummary } from "@/features/projects/types";
 import { getTranslations, type SiteLocale } from "@/lib/i18n";
-import { formatProjectPricing } from "@/lib/utils/format-price";
+import { formatProjectSummaryInventoryPricing } from "@/lib/utils/format-price";
 
 type ProjectCardProps = {
   project: ProjectSummary;
@@ -70,22 +70,23 @@ export function ProjectCard({ project, locale = "fr" }: ProjectCardProps) {
           {project.description}
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+        <div className="mt-6 grid gap-3 rounded-[1.35rem] bg-[rgba(141,104,71,0.05)] p-3 sm:grid-cols-2">
+          <div className="rounded-[1rem] bg-white/72 px-4 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
               {t.projectCard.location}
             </p>
-            <p className="mt-2 text-sm font-medium text-stone-900">{project.location}</p>
+            <p className="mt-2 text-sm font-medium leading-6 text-stone-900">
+              {project.location}
+            </p>
           </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
+          <div className="rounded-[1rem] bg-white/72 px-4 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
               {project.offerType === "rent" ? t.projectCard.rent : t.projectCard.pricing}
             </p>
-            <p className="mt-2 text-sm font-semibold text-[var(--primary)]">
-              {formatProjectPricing({
+            <p className="mt-2 text-base font-semibold leading-6 text-[var(--primary)]">
+              {formatProjectSummaryInventoryPricing({
                 offerType: project.offerType,
                 priceMode: project.priceMode,
-                fixedPrice: project.minPrice,
                 minPrice: project.minPrice,
                 maxPrice: project.maxPrice,
                 rentPrice: project.rentPrice,

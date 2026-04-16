@@ -15,7 +15,7 @@ import {
   type ProjectBed,
 } from "@/features/projects/presentation";
 import type { ProjectSummary } from "@/features/projects/types";
-import { formatProjectPricing } from "@/lib/utils/format-price";
+import { formatProjectSummaryInventoryPricing } from "@/lib/utils/format-price";
 
 export type StoredProject = Pick<
   ProjectSummary,
@@ -256,11 +256,10 @@ export function getProjectCompareRows(project: StoredProject) {
     { label: "Type", value: formatProjectTypeLabel(project.projectType) },
     { label: "Stage", value: formatCompletionStageLabel(project.completionStage) },
     {
-      label: "Price",
-      value: formatProjectPricing({
+      label: "Price range",
+      value: formatProjectSummaryInventoryPricing({
         offerType: project.offerType,
         priceMode: project.priceMode,
-        fixedPrice: project.minPrice,
         minPrice: project.minPrice,
         maxPrice: project.maxPrice,
         rentPrice: project.rentPrice,

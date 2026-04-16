@@ -42,12 +42,41 @@ export type ProjectUnitView = {
   availabilityMonths: ProjectAvailabilityMonth[];
 };
 
+type ProjectInventoryPriceBounds = {
+  min: number | null;
+  max: number | null;
+};
+
 function formatCurrency(currencyCode: string, value: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currencyCode,
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatBoundsLabel(
+  bounds: ProjectInventoryPriceBounds,
+  currencyCode: string,
+  suffix = "",
+) {
+  if (bounds.min != null && bounds.max != null) {
+    if (bounds.min === bounds.max) {
+      return `From ${formatCurrency(currencyCode, bounds.min)}${suffix}`;
+    }
+
+    return `${formatCurrency(currencyCode, bounds.min)} - ${formatCurrency(currencyCode, bounds.max)}${suffix}`;
+  }
+
+  if (bounds.min != null) {
+    return `From ${formatCurrency(currencyCode, bounds.min)}${suffix}`;
+  }
+
+  if (bounds.max != null) {
+    return `Up to ${formatCurrency(currencyCode, bounds.max)}${suffix}`;
+  }
+
+  return null;
 }
 
 function getAmenityGroups(project: ProjectDetail): ProjectAmenityGroup[] {
@@ -585,6 +614,100 @@ function buildGeneratedProjectUnits(project: ProjectDetail): ProjectUnitView[] {
       availabilityMonths: getAvailabilityMonths(),
     };
   });
+}
+
+function getGeneratedProjectInventoryBounds(project: ProjectDetail): ProjectInventoryPriceBounds {
+  const minPrice = project.minPrice ?? 180000;
+  const maxPrice = project.maxPrice ?? minPrice * 1.35;
+  const variants = [
+    0.78,
+    0.9,
+    1.02,
+    1.18,
+  ];
+
+  const values = variants.map((priceFactor) =>
+    Math.round(Math.min(maxPrice, Math.max(minPrice, minPrice * priceFactor))),
+  );
+
+  return {
+    min: values.length > 0 ? Math.min(...values) : null,
+    max: values.length > 0 ? Math.max(...values) : null,
+  };
+}
+
+function getGeneratedProjectRentBounds(project: ProjectDetail): ProjectInventoryPriceBounds {
+  const priceBounds = getGeneratedProjectInventoryBounds(project);
+
+  return {
+    min: priceBounds.min != null ? Math.max(1490, Math.round(priceBounds.min / 180)) : null,
+    max: priceBounds.max != null ? Math.max(1490, Math.round(priceBounds.max / 180)) : null,
+  };
+}
+
+function getStoredSaleInventoryBounds(project: ProjectDetail): ProjectInventoryPriceBounds {
+  const pricedUnits = project.units
+    .filter((unit) => unit.offerType === "sale")
+    .map((unit) => {
+      if (unit.priceMode === "contact") {
+        return null;
+      }
+
+      if (unit.priceMode === "fixed") {
+        const fixed = unit.fixedPrice ?? unit.minPrice;
+
+        return fixed != null ? { min: fixed, max: fixed } : null;
+      }
+
+      const min = unit.minPrice ?? unit.maxPrice;
+      const max = unit.maxPrice ?? unit.minPrice;
+
+      return min != null || max != null
+        ? { min: min ?? null, max: max ?? null }
+        : null;
+    })
+    .filter((value): value is ProjectInventoryPriceBounds => value != null);
+
+  return {
+    min:
+      pricedUnits.length > 0
+        ? Math.min(...pricedUnits.map((item) => item.min ?? item.max).filter((value): value is number => value != null))
+        : null,
+    max:
+      pricedUnits.length > 0
+        ? Math.max(...pricedUnits.map((item) => item.max ?? item.min).filter((value): value is number => value != null))
+        : null,
+  };
+}
+
+function getStoredRentInventoryBounds(project: ProjectDetail): ProjectInventoryPriceBounds {
+  const rents = project.units
+    .filter((unit) => unit.offerType === "rent")
+    .map((unit) => unit.monthlyRent)
+    .filter((value): value is number => value != null);
+
+  return {
+    min: rents.length > 0 ? Math.min(...rents) : null,
+    max: rents.length > 0 ? Math.max(...rents) : null,
+  };
+}
+
+export function getProjectInventoryPriceLabel(project: ProjectDetail) {
+  if (project.offerType === "rent") {
+    const bounds =
+      project.units.length > 0
+        ? getStoredRentInventoryBounds(project)
+        : getGeneratedProjectRentBounds(project);
+
+    return formatBoundsLabel(bounds, project.currencyCode, " per month") ?? "Rent on request";
+  }
+
+  const bounds =
+    project.units.length > 0
+      ? getStoredSaleInventoryBounds(project)
+      : getGeneratedProjectInventoryBounds(project);
+
+  return formatBoundsLabel(bounds, project.currencyCode) ?? "Contact for price";
 }
 
 export function getHousingExamples(project: ProjectDetail) {

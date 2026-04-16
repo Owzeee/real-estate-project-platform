@@ -8,6 +8,7 @@ export type InquiryRecord = {
   developerProfileId: string;
   developerName: string;
   projectTitle: string;
+  propertyLabel: string | null;
   fullName: string;
   email: string;
   phone: string | null;
@@ -19,6 +20,7 @@ export type InquiryRecord = {
 type InquiryRow = {
   id: string;
   project_id: string;
+  property_label: string | null;
   full_name: string;
   email: string;
   phone: string | null;
@@ -67,6 +69,7 @@ function mapInquiry(item: InquiryRow): InquiryRecord {
     developerProfileId: relatedProject?.developer_profile_id ?? "",
     developerName: relatedDeveloper?.company_name ?? "Developer",
     projectTitle: relatedProject?.title ?? "Unknown project",
+    propertyLabel: item.property_label,
     fullName: item.full_name,
     email: item.email,
     phone: item.phone,
@@ -92,6 +95,7 @@ async function fetchInquiries(developerProfileId?: string) {
       `
         id,
         project_id,
+        property_label,
         full_name,
         email,
         phone,

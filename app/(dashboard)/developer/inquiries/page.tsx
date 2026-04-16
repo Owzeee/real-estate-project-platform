@@ -37,6 +37,11 @@ export default async function DeveloperInquiriesPage() {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
                     {inquiry.projectTitle}
                   </p>
+                  {inquiry.propertyLabel ? (
+                    <p className="mt-2 text-sm font-semibold text-stone-950">
+                      Property: {inquiry.propertyLabel}
+                    </p>
+                  ) : null}
                   <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
                     {inquiry.fullName}
                   </h2>

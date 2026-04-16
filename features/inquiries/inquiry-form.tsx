@@ -15,10 +15,18 @@ const initialState: InquiryActionState = {
 
 type InquiryFormProps = {
   projectId: string;
+  propertyOptions?: Array<{
+    value: string;
+    label: string;
+  }>;
   locale?: SiteLocale;
 };
 
-export function InquiryForm({ projectId, locale = "fr" }: InquiryFormProps) {
+export function InquiryForm({
+  projectId,
+  propertyOptions = [],
+  locale = "fr",
+}: InquiryFormProps) {
   const t = getTranslations(locale);
   const [state, formAction, isPending] = useActionState(
     submitInquiry,
@@ -28,6 +36,24 @@ export function InquiryForm({ projectId, locale = "fr" }: InquiryFormProps) {
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="projectId" value={projectId} />
+      <div>
+        <label htmlFor="propertyLabel" className="field-label">
+          {t.inquiry.property}
+        </label>
+        <select
+          id="propertyLabel"
+          name="propertyLabel"
+          className="field-input"
+          defaultValue=""
+        >
+          <option value="">{t.inquiry.wholeProject}</option>
+          {propertyOptions.map((option) => (
+            <option key={option.value} value={option.label}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <div>
         <label htmlFor="fullName" className="field-label">
           {t.inquiry.fullName}

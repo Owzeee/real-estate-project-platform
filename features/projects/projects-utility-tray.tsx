@@ -27,6 +27,7 @@ export function ProjectsUtilityTray() {
   const [compareOpen, setCompareOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<CompareTab>("projects");
+  const [desktopTrayVisible, setDesktopTrayVisible] = useState(true);
 
   const effectiveTab = useMemo<CompareTab>(() => {
     if (activeTab === "projects" && projectCompare.length === 0 && propertyCompare.length > 0) {
@@ -42,9 +43,35 @@ export function ProjectsUtilityTray() {
 
   return (
     <>
-      <div className="fixed bottom-5 left-1/2 z-50 w-[min(96vw,860px)] -translate-x-1/2">
-        <div className="surface-panel flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] px-4 py-3 sm:px-5">
-          <div className="flex flex-wrap items-center gap-3">
+      <div className="fixed bottom-5 left-1/2 z-50 w-[min(96vw,860px)] -translate-x-1/2 lg:left-auto lg:right-5 lg:w-[min(50rem,calc(100vw-2.5rem))] lg:translate-x-0">
+        <button
+          type="button"
+          onClick={() => {
+            setDesktopTrayVisible((visible) => {
+              const nextVisible = !visible;
+
+              if (!nextVisible) {
+                setCompareOpen(false);
+                setFavoritesOpen(false);
+              }
+
+              return nextVisible;
+            });
+          }}
+          aria-expanded={desktopTrayVisible}
+          className="absolute -top-12 right-0 hidden rounded-full border border-[var(--border)] bg-white/95 px-4 py-2 text-sm font-semibold text-stone-900 shadow-[0_12px_30px_rgba(23,20,18,0.14)] backdrop-blur lg:inline-flex"
+        >
+          {desktopTrayVisible ? "Hide compare tray ↓" : "Show compare tray ↑"}
+        </button>
+
+        <div
+          className={`surface-panel rounded-[1.5rem] px-4 py-3 sm:px-5 ${
+            desktopTrayVisible
+              ? "flex flex-wrap items-center justify-between gap-3"
+              : "flex flex-wrap items-center justify-between gap-3 lg:hidden"
+          } lg:flex`}
+        >
+          <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap">
             <button
               type="button"
               onClick={() => setFavoritesOpen((open) => !open)}
@@ -73,14 +100,14 @@ export function ProjectsUtilityTray() {
               Compare properties {propertyCompare.length}/3
             </button>
           </div>
-          <p className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-[var(--muted-foreground)] lg:max-w-[15rem] lg:text-right">
             Compare whole projects or specific apartments side by side.
           </p>
         </div>
       </div>
 
       {favoritesOpen ? (
-        <div className="fixed inset-x-4 bottom-24 z-50 mx-auto w-[min(94vw,760px)]">
+        <div className="fixed inset-x-4 bottom-24 z-50 mx-auto w-[min(94vw,760px)] lg:inset-x-auto lg:right-5 lg:left-auto lg:mx-0 lg:w-[min(36rem,calc(100vw-2.5rem))]">
           <div className="surface-panel rounded-[1.75rem] p-5">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-display text-2xl font-semibold text-stone-950">
@@ -165,8 +192,8 @@ export function ProjectsUtilityTray() {
       ) : null}
 
       {compareOpen ? (
-        <div className="fixed inset-4 bottom-24 z-50 mx-auto overflow-auto">
-          <div className="surface-panel mx-auto w-[min(98vw,1380px)] rounded-[1.75rem] p-5 sm:p-6">
+        <div className="fixed inset-4 bottom-24 z-50 mx-auto overflow-auto lg:inset-auto lg:right-5 lg:bottom-24 lg:left-auto lg:max-h-[calc(100vh-8.5rem)] lg:w-[min(88vw,1180px)]">
+          <div className="surface-panel mx-auto w-[min(98vw,1380px)] rounded-[1.75rem] p-5 sm:p-6 lg:mx-0 lg:w-full">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="font-display text-3xl font-semibold text-stone-950">
