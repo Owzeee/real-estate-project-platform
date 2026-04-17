@@ -25,9 +25,10 @@ export function buildMetadata(input: {
   path?: string;
   image?: string;
   keywords?: string[];
+  noIndex?: boolean;
 }) {
   const canonical = absoluteUrl(input.path ?? "/");
-  const images = input.image ? [input.image] : undefined;
+  const images = [input.image ?? absoluteUrl("/opengraph-image")];
 
   return {
     title: input.title,
@@ -51,6 +52,12 @@ export function buildMetadata(input: {
       description: input.description,
       images,
     },
+    robots: input.noIndex
+      ? {
+          index: false,
+          follow: false,
+        }
+      : undefined,
   } satisfies Metadata;
 }
 

@@ -64,7 +64,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,248,243,0.58)_0%,rgba(250,248,243,0.38)_34%,rgba(250,248,243,0.14)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(198,154,91,0.16),transparent_28%)]" />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:px-8 lg:py-20">
-          <div className="max-w-xl rounded-[2rem] border border-white/55 bg-[rgba(255,251,245,0.72)] p-7 shadow-[0_24px_70px_rgba(32,28,25,0.14)] backdrop-blur-md sm:p-8">
+          <div className="max-w-xl border border-white/55 bg-[rgba(255,251,245,0.72)] p-7 shadow-[0_24px_70px_rgba(32,28,25,0.14)] backdrop-blur-md sm:p-8">
             <p className="eyebrow">{t.home.eyebrow}</p>
             <h1 className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">
               {t.home.title}
@@ -98,8 +98,8 @@ export default async function Home() {
           </div>
 
           <div className="relative min-h-[34rem] lg:min-h-[38rem]">
-            <div className="absolute inset-0 rounded-[2.25rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] shadow-[0_40px_100px_rgba(32,28,25,0.25)]" />
-            <div className="absolute inset-0 rounded-[2.25rem] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] shadow-[0_40px_100px_rgba(32,28,25,0.25)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)]" />
             <div className="relative flex h-full flex-col justify-between p-8 text-white sm:p-10">
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
@@ -115,7 +115,7 @@ export default async function Home() {
               </div>
 
               {mapProject && mapProjectUrl ? (
-                <div className="mt-8 overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/6">
+                <div className="mt-8 overflow-hidden border border-white/10 bg-white/6">
                   <div className="flex items-center justify-between px-5 py-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
@@ -183,7 +183,7 @@ export default async function Home() {
             </div>
             <Link
               href="/developers"
-              className="inline-flex items-center rounded-full bg-[var(--secondary)] px-6 py-3 text-sm font-semibold text-[var(--secondary-foreground)] hover:bg-[color-mix(in_srgb,var(--secondary)_88%,black)]"
+              className="inline-flex items-center bg-[var(--secondary)] px-6 py-3 text-sm font-semibold text-[var(--secondary-foreground)] hover:bg-[color-mix(in_srgb,var(--secondary)_88%,black)]"
             >
               {t.home.meetDevelopers}
             </Link>

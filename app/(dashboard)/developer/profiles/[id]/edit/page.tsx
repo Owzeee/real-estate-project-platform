@@ -46,7 +46,7 @@ export default async function EditDeveloperProfilePage({
           </Link>
         </div>
 
-        <section className="mt-10 rounded-[2rem] border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
+        <section className="mt-10 border border-stone-900/10 bg-white p-8 shadow-[0_20px_60px_rgba(41,37,36,0.08)] sm:p-10">
           <DeveloperProfileForm action={saveDeveloperProfile} developer={developer} />
         </section>
       </div>

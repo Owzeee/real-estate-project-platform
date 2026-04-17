@@ -1,21 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { useProjectsStore } from "@/features/projects/client-store";
+import { trackEvent } from "@/lib/analytics";
+import { createBrowserSupabaseClient, hasPublicSupabaseEnv } from "@/lib/supabase/client";
+import { formatProjectSummaryInventoryPricing } from "@/lib/utils/format-price";
 
 type WishlistTab = "properties" | "projects";
-
-const emptyStateImages = [
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80",
-];
 
 export function WishlistPageClient() {
   const {
@@ -26,11 +20,82 @@ export function WishlistPageClient() {
   } = useProjectsStore();
   const [activeTab, setActiveTab] = useState<WishlistTab>("properties");
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
+  const [projectLocationOverrides, setProjectLocationOverrides] = useState<
+    Record<string, { latitude: number | null; longitude: number | null }>
+  >({});
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  useEffect(() => {
+    const missingCoordinates = favoriteProjects.filter(
+      (project) =>
+        projectLocationOverrides[project.id] == null &&
+        (project.latitude == null || project.longitude == null),
+    );
+
+    if (missingCoordinates.length === 0 || !hasPublicSupabaseEnv()) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadProjectLocations() {
+      const supabase = createBrowserSupabaseClient();
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, latitude, longitude")
+        .in(
+          "id",
+          missingCoordinates.map((project) => project.id),
+        );
+
+      if (cancelled || error || !data) {
+        return;
+      }
+
+      setProjectLocationOverrides((current) => {
+        const next = { ...current };
+
+        for (const row of data) {
+          next[row.id] = {
+            latitude: row.latitude,
+            longitude: row.longitude,
+          };
+        }
+
+        return next;
+      });
+    }
+
+    void loadProjectLocations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [favoriteProjects, projectLocationOverrides]);
+
+  const resolvedFavoriteProjects = useMemo(
+    () =>
+      favoriteProjects.map((project) => ({
+        ...project,
+        latitude: project.latitude ?? projectLocationOverrides[project.id]?.latitude ?? null,
+        longitude: project.longitude ?? projectLocationOverrides[project.id]?.longitude ?? null,
+      })),
+    [favoriteProjects, projectLocationOverrides],
+  );
 
   const selectedProperty =
     favoriteProperties.find((property) => property.id === selectedPropertyId) ??
     favoriteProperties[0] ??
+    null;
+  const selectedProject =
+    resolvedFavoriteProjects.find((project) => project.id === selectedProjectId) ??
+    resolvedFavoriteProjects[0] ??
     null;
 
   const propertyMapItems = favoriteProperties
@@ -44,12 +109,29 @@ export function WishlistPageClient() {
       longitude: property.longitude as number,
       accentLabel: property.offerType === "rent" ? "For Rent" : "For Sale",
     }));
+  const projectMapItems = resolvedFavoriteProjects
+    .filter((project) => project.latitude != null && project.longitude != null)
+    .map((project) => ({
+      id: project.id,
+      title: project.title,
+      subtitle: `${project.location} • ${project.developerName}`,
+      href: `/projects/${project.slug}`,
+      latitude: project.latitude as number,
+      longitude: project.longitude as number,
+      accentLabel: project.offerType === "rent" ? "For Rent" : "For Sale",
+    }));
 
   const shareWishlist = async () => {
     const url = `${window.location.origin}/wishlist`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "Wishlist", url });
+        trackEvent("wishlist_shared", {
+          method: "navigator_share",
+          tab: activeTab,
+          saved_properties_count: favoriteProperties.length,
+          saved_projects_count: resolvedFavoriteProjects.length,
+        });
         return;
       } catch {
         return;
@@ -57,6 +139,12 @@ export function WishlistPageClient() {
     }
 
     await navigator.clipboard.writeText(url);
+    trackEvent("wishlist_shared", {
+      method: "clipboard",
+      tab: activeTab,
+      saved_properties_count: favoriteProperties.length,
+      saved_projects_count: resolvedFavoriteProjects.length,
+    });
     setShareState("copied");
     window.setTimeout(() => setShareState("idle"), 1800);
   };
@@ -67,10 +155,14 @@ export function WishlistPageClient() {
       : "No saved properties yet";
   }, [favoriteProperties.length]);
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <main className="page-shell min-h-screen bg-transparent px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <section className="surface-panel overflow-hidden rounded-[2rem]">
+        <section className="surface-panel overflow-hidden">
           <div className="grid gap-0 xl:grid-cols-[minmax(0,1.02fr)_minmax(360px,0.98fr)]">
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-5 border-b border-[var(--border)] pb-6">
@@ -93,7 +185,10 @@ export function WishlistPageClient() {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => setActiveTab("properties")}
+                    onClick={() => {
+                      setActiveTab("properties");
+                      trackEvent("wishlist_tab_changed", { tab: "properties" });
+                    }}
                     className={`rounded-full px-4 py-2 text-sm font-semibold ${
                       activeTab === "properties"
                         ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
@@ -104,7 +199,10 @@ export function WishlistPageClient() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveTab("projects")}
+                    onClick={() => {
+                      setActiveTab("projects");
+                      trackEvent("wishlist_tab_changed", { tab: "projects" });
+                    }}
                     className={`rounded-full px-4 py-2 text-sm font-semibold ${
                       activeTab === "projects"
                         ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
@@ -127,41 +225,21 @@ export function WishlistPageClient() {
                   <span className="rounded-full bg-[rgba(141,104,71,0.08)] px-4 py-2 text-sm font-semibold text-stone-700">
                     {activeTab === "properties"
                       ? propertyStatLine
-                      : `${favoriteProjects.length} saved projects`}
+                      : `${resolvedFavoriteProjects.length} saved projects`}
                   </span>
                 </div>
               </div>
 
               {activeTab === "properties" ? (
                 favoriteProperties.length === 0 ? (
-                  <div className="rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,251,244,0.84))] p-8 sm:p-10">
-                    <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-                      <div className="text-center lg:text-left">
-                        <h2 className="font-display text-4xl font-semibold text-stone-950">
-                          Your wishlist is empty
-                        </h2>
-                      <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted-foreground)] lg:max-w-2xl">
-                        Save the apartments and layouts you like, then review them here with a map, quick specs, and direct access back into each property page.
+                  <div className="mt-6 border border-dashed border-[var(--border)] bg-white/65 p-10 text-center">
+                    <div className="mx-auto max-w-xl">
+                      <h2 className="font-display text-3xl font-semibold text-stone-950">
+                        Your wishlist is empty
+                      </h2>
+                      <p className="mt-4 text-sm leading-7 text-[var(--muted-foreground)]">
+                        Save properties you want to revisit here, then compare them with map context and quick specs.
                       </p>
-                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                        Look for the heart-shaped Add to wishlist button on property cards and pages.
-                      </p>
-                      <Link href="/projects" className="primary-button mt-6 text-sm">
-                        Discover homes
-                      </Link>
-                      </div>
-
-                      <div className="mx-auto grid w-full max-w-[20rem] grid-cols-3 gap-3">
-                        {emptyStateImages.map((imageUrl, index) => (
-                          <div
-                            key={imageUrl}
-                            className={`aspect-[0.8] rounded-[1.2rem] bg-cover bg-center shadow-[0_18px_38px_rgba(32,28,25,0.16)] ${
-                              index % 2 === 0 ? "translate-y-4" : ""
-                            }`}
-                            style={{ backgroundImage: `url(${imageUrl})` }}
-                          />
-                        ))}
-                      </div>
                     </div>
                   </div>
                 ) : (
@@ -179,7 +257,7 @@ export function WishlistPageClient() {
                           <button
                             type="button"
                             onClick={() => setSelectedPropertyId(property.id)}
-                            className="h-32 rounded-[1.2rem] bg-cover bg-center text-left sm:w-44 sm:flex-none"
+                            className="h-32 bg-cover bg-center text-left sm:w-44 sm:flex-none"
                             style={{
                               backgroundImage: property.imageUrl
                                 ? `linear-gradient(rgba(23,20,18,0.1),rgba(23,20,18,0.18)), url(${property.imageUrl})`
@@ -223,7 +301,16 @@ export function WishlistPageClient() {
                             <div className="mt-4 flex flex-wrap gap-2">
                               <button
                                 type="button"
-                                onClick={() => setSelectedPropertyId(property.id)}
+                                onClick={() => {
+                                  setSelectedPropertyId(property.id);
+                                  trackEvent("wishlist_property_map_focus", {
+                                    property_id: property.id,
+                                    property_slug: property.propertySlug,
+                                    property_title: property.title,
+                                    project_slug: property.projectSlug,
+                                    project_title: property.projectTitle,
+                                  });
+                                }}
                                 className="secondary-button px-4 py-2 text-sm"
                               >
                                 Show on map
@@ -241,8 +328,8 @@ export function WishlistPageClient() {
                     ))}
                   </div>
                 )
-              ) : favoriteProjects.length === 0 ? (
-                <div className="mt-6 rounded-[1.75rem] border border-dashed border-[var(--border)] bg-white/65 p-10 text-center">
+              ) : resolvedFavoriteProjects.length === 0 ? (
+                <div className="mt-6 border border-dashed border-[var(--border)] bg-white/65 p-10 text-center">
                   <p className="font-display text-3xl font-semibold text-stone-950">
                     No saved projects yet
                   </p>
@@ -252,34 +339,84 @@ export function WishlistPageClient() {
                 </div>
               ) : (
                 <div className="mt-6 grid gap-4">
-                  {favoriteProjects.map((project) => (
+                  {resolvedFavoriteProjects.map((project) => (
                     <article
                       key={project.id}
-                      className="rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-5"
+                      className={`border p-5 transition ${
+                        selectedProject?.id === project.id
+                          ? "border-[rgba(141,104,71,0.34)] bg-[rgba(255,255,255,0.96)] shadow-[0_20px_45px_rgba(32,28,25,0.08)]"
+                          : "border-[var(--border)] bg-white/82"
+                      }`}
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProjectId(project.id)}
+                          className="h-32 bg-cover bg-center text-left sm:w-44 sm:flex-none"
+                          style={{
+                            backgroundImage: project.heroMediaUrl
+                              ? `linear-gradient(rgba(23,20,18,0.1),rgba(23,20,18,0.18)), url(${project.heroMediaUrl})`
+                              : "linear-gradient(135deg, rgba(141,104,71,0.24), rgba(198,154,91,0.18))",
+                          }}
+                        />
+
                         <div className="min-w-0 flex-1">
-                          <p className="font-display text-3xl font-semibold text-stone-950">
-                            {project.title}
-                          </p>
-                          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                            {project.location} • {project.developerName}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-                          <Link
-                            href={`/projects/${project.slug}`}
-                            className="primary-button min-w-[8.5rem] px-4 py-2 text-sm"
-                          >
-                            Open project
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => removeFavorite(project.id)}
-                            className="secondary-button min-w-[8.5rem] px-4 py-2 text-sm"
-                          >
-                            Remove
-                          </button>
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="text-lg font-semibold text-stone-950">
+                                {formatProjectSummaryInventoryPricing({
+                                  offerType: project.offerType,
+                                  priceMode: project.priceMode,
+                                  minPrice: project.minPrice,
+                                  maxPrice: project.maxPrice,
+                                  rentPrice: project.rentPrice,
+                                  currencyCode: project.currencyCode,
+                                })}
+                              </p>
+                              <p className="mt-2 text-2xl font-semibold text-stone-950">
+                                {project.title}
+                              </p>
+                              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                                {project.location} • {project.developerName}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFavorite(project.id)}
+                              className="border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-stone-900 hover:border-[var(--primary)] hover:bg-[rgba(141,104,71,0.05)]"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-stone-700">
+                            <span>{project.projectType.replaceAll("_", " ")}</span>
+                            <span>{project.completionStage.replaceAll("_", " ")}</span>
+                            <span>{project.offerType === "rent" ? "For Rent" : "For Sale"}</span>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedProjectId(project.id);
+                                trackEvent("wishlist_project_map_focus", {
+                                  project_id: project.id,
+                                  project_slug: project.slug,
+                                  project_title: project.title,
+                                });
+                              }}
+                              className="secondary-button px-4 py-2 text-sm"
+                            >
+                              Show on map
+                            </button>
+                            <Link
+                              href={`/projects/${project.slug}`}
+                              className="primary-button px-4 py-2 text-sm"
+                            >
+                              Open project
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -305,6 +442,7 @@ export function WishlistPageClient() {
                       items={propertyMapItems}
                       selectedId={selectedProperty.id}
                       className="min-h-[28rem] w-full flex-1"
+                      trackingContext="wishlist_properties_map"
                     />
                     <div className="border-t border-[var(--border)] px-6 py-5 sm:px-8">
                       <div className="flex items-start justify-between gap-4">
@@ -325,6 +463,33 @@ export function WishlistPageClient() {
                       </div>
                     </div>
                   </>
+                ) : activeTab === "projects" && selectedProject && projectMapItems.length > 0 ? (
+                  <>
+                    <InteractiveListingsMap
+                      items={projectMapItems}
+                      selectedId={selectedProject.id}
+                      className="min-h-[28rem] w-full flex-1"
+                      trackingContext="wishlist_projects_map"
+                    />
+                    <div className="border-t border-[var(--border)] px-6 py-5 sm:px-8">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-lg font-semibold text-stone-950">
+                            {selectedProject.title}
+                          </p>
+                          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                            {selectedProject.location} • {selectedProject.developerName}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/projects/${selectedProject.slug}`}
+                          className="secondary-button px-4 py-2 text-sm"
+                        >
+                          Open
+                        </Link>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="flex min-h-[34rem] flex-1 items-center justify-center bg-[linear-gradient(180deg,rgba(141,104,71,0.08),rgba(255,255,255,0.7))] p-8 text-center">
                     <div className="max-w-sm">
@@ -335,7 +500,7 @@ export function WishlistPageClient() {
                       </p>
                       <p className="mt-4 text-sm leading-7 text-[var(--muted-foreground)]">
                         {activeTab === "projects"
-                          ? "The wishlist page is property-led, so map focus follows saved apartments and unit layouts."
+                          ? "Save a project with map coordinates to preview it here."
                           : "Save a property with map coordinates to preview it here."}
                       </p>
                     </div>

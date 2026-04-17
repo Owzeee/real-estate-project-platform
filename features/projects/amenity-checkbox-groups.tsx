@@ -48,7 +48,7 @@ export function AmenityCheckboxGroups({
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggle(group.key, option)}
-                    className="h-4 w-4 rounded border-stone-300 text-stone-950"
+                    className="h-4 w-4 border-stone-300 text-stone-950"
                   />
                   <span>{option}</span>
                 </label>

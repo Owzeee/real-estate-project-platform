@@ -74,7 +74,7 @@ export function ProjectFormFields({
               required
               defaultValue={initialValues.developerProfileId}
               disabled={!hasDevelopers}
-              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
+              className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
             >
               <option value="">Select developer</option>
               {developers.map((developer) => (
@@ -102,7 +102,7 @@ export function ProjectFormFields({
                 setSlug(slugify(nextTitle));
               }
             }}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -118,7 +118,7 @@ export function ProjectFormFields({
               setSlug(slugify(event.target.value));
             }}
             placeholder="aurora-residences"
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <p className="mt-2 text-xs text-stone-500">
             URL preview: <span className="font-medium text-stone-700">/projects/{slug || generatedSlug || "your-project-slug"}</span>
@@ -134,7 +134,7 @@ export function ProjectFormFields({
             required
             rows={5}
             defaultValue={initialValues.description}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
 
@@ -147,7 +147,7 @@ export function ProjectFormFields({
             required
             defaultValue={initialValues.location}
             placeholder="Dubai Marina, Dubai"
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -157,7 +157,7 @@ export function ProjectFormFields({
           <input
             name="city"
             defaultValue={initialValues.city}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -167,7 +167,7 @@ export function ProjectFormFields({
           <input
             name="country"
             defaultValue={initialValues.country}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -178,7 +178,7 @@ export function ProjectFormFields({
             name="currencyCode"
             defaultValue={initialValues.currencyCode}
             maxLength={3}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm uppercase text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm uppercase text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
 
@@ -191,7 +191,7 @@ export function ProjectFormFields({
             type="number"
             step="0.000001"
             defaultValue={initialValues.latitude}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -203,7 +203,7 @@ export function ProjectFormFields({
             type="number"
             step="0.000001"
             defaultValue={initialValues.longitude}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
 
@@ -223,7 +223,7 @@ export function ProjectFormFields({
                 setPriceMode("fixed");
               }
             }}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="project-offer-types">
             {projectOfferTypes.map((offerType) => (
@@ -242,7 +242,7 @@ export function ProjectFormFields({
               required
               value={priceMode}
               onChange={(event) => setPriceMode(event.target.value as typeof initialValues.priceMode)}
-              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+              className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
             />
             <datalist id="project-price-modes">
               {projectPriceModes.map((mode) => (
@@ -262,7 +262,7 @@ export function ProjectFormFields({
             list="project-categories"
             required
             defaultValue={initialValues.category}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="project-categories">
             {projectCategories.map((category) => (
@@ -280,7 +280,7 @@ export function ProjectFormFields({
             list="project-types"
             required
             defaultValue={initialValues.projectType}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="project-types">
             {projectTypes.map((projectType) => (
@@ -297,7 +297,7 @@ export function ProjectFormFields({
             list="completion-stages"
             required
             defaultValue={initialValues.completionStage}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="completion-stages">
             {completionStages.map((completionStage) => (
@@ -314,7 +314,7 @@ export function ProjectFormFields({
             list="project-statuses"
             required
             defaultValue={initialValues.status}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <datalist id="project-statuses">
             {projectStatuses.map((status) => (
@@ -337,7 +337,7 @@ export function ProjectFormFields({
               step="0.01"
               min="0"
               defaultValue={initialValues.rentPrice}
-              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+              className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
             />
           </div>
         ) : null}
@@ -353,7 +353,7 @@ export function ProjectFormFields({
               step="0.01"
               min="0"
               defaultValue={initialValues.fixedPrice}
-              className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+              className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
             />
           </div>
         ) : null}
@@ -370,7 +370,7 @@ export function ProjectFormFields({
                 step="0.01"
                 min="0"
                 defaultValue={initialValues.minPrice}
-                className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
               />
             </div>
             <div>
@@ -383,14 +383,14 @@ export function ProjectFormFields({
                 step="0.01"
                 min="0"
                 defaultValue={initialValues.maxPrice}
-                className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
               />
             </div>
           </>
         ) : null}
 
         {offerType === "sale" && priceMode === "contact" ? (
-          <div className="md:col-span-2 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
+          <div className="md:col-span-2 border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
             This project will display as contact for price on the public listing.
           </div>
         ) : null}
@@ -406,7 +406,7 @@ export function ProjectFormFields({
             type="file"
             accept="image/*"
             multiple
-            className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
+            className="w-full border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
           />
           <p className="mt-2 text-xs text-stone-500">Best for cover images and gallery presentation.</p>
         </div>
@@ -419,7 +419,7 @@ export function ProjectFormFields({
             type="file"
             accept="image/*,video/*,.pdf"
             multiple
-            className="w-full rounded-2xl border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
+            className="w-full border border-dashed border-stone-300 px-4 py-3 text-sm text-stone-700"
           />
           <p className="mt-2 text-xs text-stone-500">Use this for PDFs, videos, and any other supporting campaign assets.</p>
         </div>
@@ -432,7 +432,7 @@ export function ProjectFormFields({
             rows={5}
             defaultValue={initialValues.imageUrls}
             placeholder="One URL per line"
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -444,7 +444,7 @@ export function ProjectFormFields({
             rows={5}
             defaultValue={initialValues.videoUrls}
             placeholder="One URL per line"
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -456,7 +456,7 @@ export function ProjectFormFields({
             rows={4}
             defaultValue={initialValues.brochureUrls}
             placeholder="One URL per line"
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -468,7 +468,7 @@ export function ProjectFormFields({
             rows={4}
             defaultValue={initialValues.tour3dUrls}
             placeholder={"One Matterport space ID or Showcase URL per line\nExample: AbCdEfGh123\nExample: https://my.matterport.com/show/?m=AbCdEfGh123"}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
           <p className="mt-2 text-xs text-stone-500">
             Use a Matterport Showcase URL or the 11-character space ID. The public site will build the embed automatically.
@@ -476,7 +476,7 @@ export function ProjectFormFields({
         </div>
       </section>
 
-      <section className="space-y-4 rounded-[1.75rem] border border-stone-200 bg-white p-6">
+      <section className="space-y-4 border border-stone-200 bg-white p-6">
         <div>
           <p className="text-lg font-semibold text-stone-950">Project amenities</p>
           <p className="mt-1 text-sm text-stone-600">

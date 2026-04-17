@@ -21,16 +21,16 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   }
 
   return (
-    <div className="surface-soft inline-flex rounded-full p-1.5">
+    <div className="inline-flex border border-[var(--border)] bg-white">
       {(["fr", "en"] as const).map((item) => (
         <button
           key={item}
           type="button"
           onClick={() => setLocale(item)}
-          className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+          className={`px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] underline decoration-2 underline-offset-[0.55rem] ${
             locale === item
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "text-stone-700 hover:bg-[rgba(141,104,71,0.08)]"
+              ? "bg-[rgba(141,104,71,0.06)] text-stone-950 decoration-[var(--primary)]"
+              : "text-stone-700 decoration-[rgba(141,104,71,0.35)] hover:bg-[rgba(141,104,71,0.04)]"
           }`}
           aria-pressed={locale === item}
         >

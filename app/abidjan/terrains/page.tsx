@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { ProjectCard } from "@/features/projects/project-card";
 import { getProjects } from "@/features/projects/queries";
-import { buildBreadcrumbJsonLd, buildMetadata } from "@/lib/seo";
+import { absoluteUrl, buildBreadcrumbJsonLd, buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Terrains à Vendre à Abidjan",
@@ -27,17 +27,34 @@ export default async function AbidjanLandPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: JSON.stringify([
             buildBreadcrumbJsonLd([
               { name: "Accueil", path: "/" },
               { name: "Abidjan", path: "/abidjan" },
               { name: "Terrains", path: "/abidjan/terrains" },
             ]),
-          ),
+            {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: "Terrains à Vendre à Abidjan",
+              url: absoluteUrl("/abidjan/terrains"),
+              description:
+                "Parcourez les terrains à vendre à Abidjan et les projets fonciers avec détails, prix, superficie et promoteurs.",
+              mainEntity: {
+                "@type": "ItemList",
+                itemListElement: landProjects.slice(0, 12).map((project, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  url: absoluteUrl(`/projects/${project.slug}`),
+                  name: project.title,
+                })),
+              },
+            },
+          ]),
         }}
       />
       <div className="mx-auto max-w-7xl">
-        <section className="surface-panel rounded-[2rem] p-8 sm:p-10">
+        <section className="surface-panel p-8 sm:p-10">
           <p className="eyebrow">Terrains Abidjan</p>
           <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">
             Terrains &agrave; vendre &agrave; Abidjan
@@ -53,6 +70,15 @@ export default async function AbidjanLandPage() {
             </Link>
             <Link href="/abidjan" className="secondary-button text-sm">
               Retour &agrave; Abidjan
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/abidjan/bureaux" className="border border-[var(--border)] bg-white/80 px-5 py-4 text-sm font-semibold text-stone-900 hover:border-[var(--primary)] hover:bg-[rgba(141,104,71,0.05)]">
+              Voir aussi les bureaux à Abidjan
+            </Link>
+            <Link href="/developers" className="border border-[var(--border)] bg-white/80 px-5 py-4 text-sm font-semibold text-stone-900 hover:border-[var(--primary)] hover:bg-[rgba(141,104,71,0.05)]">
+              Voir les promoteurs
             </Link>
           </div>
         </section>

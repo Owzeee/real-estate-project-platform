@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import { CompanyLogo } from "@/components/shared/company-logo";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getDeveloperBySlug } from "@/features/developers/queries";
+import { getDeveloperBySlug, getDevelopers } from "@/features/developers/queries";
 import { ProjectCard } from "@/features/projects/project-card";
 import {
   absoluteUrl,
@@ -16,6 +16,14 @@ type DeveloperPageProps = {
     slug: string;
   }>;
 };
+
+export async function generateStaticParams() {
+  const developers = await getDevelopers();
+
+  return developers.map((developer) => ({
+    slug: developer.slug,
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -135,7 +143,7 @@ export default async function DeveloperPage({ params }: DeveloperPageProps) {
             ))}
           </div>
           {developer.projects.length === 0 ? (
-            <article className="mt-8 rounded-[2rem] border border-dashed border-stone-300 bg-stone-50 p-8 text-sm text-stone-600">
+            <article className="mt-8 border border-dashed border-stone-300 bg-stone-50 p-8 text-sm text-stone-600">
               No approved projects are visible for this developer yet.
             </article>
           ) : null}

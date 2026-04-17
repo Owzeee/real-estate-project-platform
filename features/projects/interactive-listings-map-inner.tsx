@@ -5,6 +5,7 @@ import { useEffect, useMemo } from "react";
 import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { divIcon } from "leaflet";
 import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { trackEvent } from "@/lib/analytics";
 
 export type InteractiveMapItem = {
   id: string;
@@ -21,6 +22,7 @@ type InteractiveListingsMapInnerProps = {
   selectedId?: string | null;
   onSelectHref?: boolean;
   className?: string;
+  trackingContext?: string;
 };
 
 function FitMapBounds({
@@ -68,6 +70,7 @@ export function InteractiveListingsMapInner({
   selectedId,
   onSelectHref = true,
   className,
+  trackingContext = "map",
 }: InteractiveListingsMapInnerProps) {
   const initialCenter: LatLngExpression = items[0]
     ? [items[0].latitude, items[0].longitude]
@@ -109,7 +112,18 @@ export function InteractiveListingsMapInner({
           if (isSelected) {
             return (
               <Marker key={item.id} position={position} icon={activeMarkerIcon}>
-                <Popup>
+                <Popup
+                  eventHandlers={{
+                    add: () =>
+                      trackEvent("map_marker_selected", {
+                        context: trackingContext,
+                        item_id: item.id,
+                        item_title: item.title,
+                        item_subtitle: item.subtitle ?? "",
+                        item_href: item.href ?? "",
+                      }),
+                  }}
+                >
                   <div className="space-y-2">
                     {item.accentLabel ? (
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
@@ -123,7 +137,7 @@ export function InteractiveListingsMapInner({
                     {item.href && onSelectHref ? (
                       <a
                         href={item.href}
-                        className="inline-flex rounded-full bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--primary-foreground)]"
+                        className="inline-flex bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--primary-foreground)]"
                       >
                         Open
                       </a>
@@ -146,7 +160,18 @@ export function InteractiveListingsMapInner({
                 weight: 2,
               }}
             >
-              <Popup>
+              <Popup
+                eventHandlers={{
+                  add: () =>
+                    trackEvent("map_marker_selected", {
+                      context: trackingContext,
+                      item_id: item.id,
+                      item_title: item.title,
+                      item_subtitle: item.subtitle ?? "",
+                      item_href: item.href ?? "",
+                    }),
+                }}
+              >
                 <div className="space-y-2">
                   {item.accentLabel ? (
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
@@ -160,7 +185,7 @@ export function InteractiveListingsMapInner({
                   {item.href && onSelectHref ? (
                     <a
                       href={item.href}
-                      className="inline-flex rounded-full bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--primary-foreground)]"
+                      className="inline-flex bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--primary-foreground)]"
                     >
                       Open
                     </a>

@@ -22,7 +22,7 @@ export default async function SignupPage() {
     <main className="min-h-screen bg-transparent px-6 py-16 sm:px-10">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_0.8fr] lg:items-center">
         <section className="rounded-[2rem] bg-[linear-gradient(145deg,rgba(198,154,91,0.18),rgba(141,104,71,0.12))] p-8 shadow-[0_30px_80px_rgba(32,28,25,0.08)] sm:p-10">
-          <p className="inline-flex rounded-full bg-[rgba(198,154,91,0.14)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
+          <p className="inline-flex bg-[rgba(198,154,91,0.14)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
             Join The Platform
           </p>
           <h1 className="mt-6 font-display text-5xl font-bold tracking-tight text-stone-950">

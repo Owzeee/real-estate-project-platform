@@ -22,7 +22,7 @@ export function ProjectSaveActions({
       <button
         type="button"
         onClick={() => toggleFavorite(toStoredProject(project))}
-        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold ${
           favorite
             ? "bg-[var(--secondary)] text-[var(--secondary-foreground)]"
             : "border border-[var(--border)] bg-white text-stone-900"

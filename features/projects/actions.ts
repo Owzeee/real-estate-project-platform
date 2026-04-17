@@ -303,12 +303,14 @@ function buildUnitRows(
         })),
         amenity_groups: amenityGroups,
         beds,
-        minimum_stay_months: Number.isFinite(minimumStayMonths)
-          ? minimumStayMonths
-          : null,
-        maximum_stay_months: Number.isFinite(maximumStayMonths)
-          ? maximumStayMonths
-          : null,
+        minimum_stay_months:
+          offerType === "rent" && Number.isFinite(minimumStayMonths)
+            ? minimumStayMonths
+            : null,
+        maximum_stay_months:
+          offerType === "rent" && Number.isFinite(maximumStayMonths)
+            ? maximumStayMonths
+            : null,
         available_from: unit.availableFrom?.toString().trim() || null,
         availability_months: [
           { label: "Mar 2026", status: "limited" },

@@ -16,7 +16,7 @@ export function ProjectCard({ project, locale = "fr" }: ProjectCardProps) {
   const t = getTranslations(locale);
 
   return (
-    <article className="surface-panel group flex h-full flex-col overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
+    <article className="surface-panel group flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
       <div
         className="relative h-60 bg-cover bg-center"
         style={{
@@ -36,7 +36,7 @@ export function ProjectCard({ project, locale = "fr" }: ProjectCardProps) {
             </div>
           ) : null}
         </div>
-        <div className="absolute bottom-4 left-4 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-900">
+        <div className="absolute bottom-4 left-4 bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-900">
           {project.location}
         </div>
       </div>
@@ -70,7 +70,7 @@ export function ProjectCard({ project, locale = "fr" }: ProjectCardProps) {
           {project.description}
         </p>
 
-        <div className="mt-6 grid gap-3 rounded-[1.35rem] bg-[rgba(141,104,71,0.05)] p-3 sm:grid-cols-2">
+        <div className="mt-6 grid gap-3 bg-[rgba(141,104,71,0.05)] p-3 sm:grid-cols-2">
           <div className="rounded-[1rem] bg-white/72 px-4 py-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
               {t.projectCard.location}

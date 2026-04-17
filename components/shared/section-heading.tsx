@@ -12,7 +12,7 @@ export function SectionHeading({
   return (
     <div className="max-w-3xl">
       {eyebrow ? (
-        <p className="inline-flex rounded-full bg-[rgba(198,154,91,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
+        <p className="inline-flex bg-[rgba(198,154,91,0.12)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
           {eyebrow}
         </p>
       ) : null}

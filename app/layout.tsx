@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lora, Playfair_Display } from "next/font/google";
+import Script from "next/script";
 import "leaflet/dist/leaflet.css";
 
+import { AnalyticsTracker } from "@/components/shared/analytics-tracker";
 import { SiteHeader } from "@/components/shared/site-header";
 import { ProjectsStoreProvider } from "@/features/projects/client-store";
 import { ProjectsUtilityTray } from "@/features/projects/projects-utility-tray";
@@ -63,12 +65,14 @@ export const metadata: Metadata = {
     siteName: "Immo Neuf",
     locale: "fr_CI",
     type: "website",
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Immo Neuf | Immobilier Neuf à Abidjan et en Côte d'Ivoire",
     description:
       "Découvrez des projets immobiliers, terrains, bureaux et programmes neufs en Côte d'Ivoire.",
+    images: ["/twitter-image"],
   },
 };
 
@@ -78,6 +82,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getCurrentLocale();
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
     <html
@@ -85,6 +90,23 @@ export default async function RootLayout({
       className={`${geist.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable}`}
     >
       <body className="font-sans antialiased">
+        {gaMeasurementId ? (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                window.gtag = gtag;
+                gtag('js', new Date());
+                gtag('config', '${gaMeasurementId}', { send_page_view: false });
+              `}
+            </Script>
+          </>
+        ) : null}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -98,6 +120,7 @@ export default async function RootLayout({
           }}
         />
         <ProjectsStoreProvider>
+          <AnalyticsTracker />
           <SiteHeader />
           {children}
           <ProjectsUtilityTray />

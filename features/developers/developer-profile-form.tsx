@@ -58,7 +58,7 @@ export function DeveloperProfileForm({
             name="companyName"
             required
             defaultValue={developer.companyName}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -69,7 +69,7 @@ export function DeveloperProfileForm({
             name="slug"
             required
             defaultValue={developer.slug}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div className="md:col-span-2">
@@ -80,7 +80,7 @@ export function DeveloperProfileForm({
             name="description"
             rows={5}
             defaultValue={developer.description ?? ""}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -91,7 +91,7 @@ export function DeveloperProfileForm({
             name="websiteUrl"
             type="url"
             defaultValue={developer.websiteUrl ?? ""}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
         <div>
@@ -103,7 +103,7 @@ export function DeveloperProfileForm({
             type="url"
             value={logoUrl}
             onChange={(event) => setLogoUrl(event.target.value)}
-            className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+            className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
           />
         </div>
       </div>

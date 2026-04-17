@@ -41,7 +41,7 @@ export default async function DeveloperProjectsDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-10 overflow-hidden rounded-[2rem] border border-stone-900/10 bg-white shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
+        <div className="mt-10 overflow-hidden border border-stone-900/10 bg-white shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
           {projects.length === 0 ? (
             <div className="border-b border-stone-100 p-8 text-sm text-stone-600">
               No projects yet. Create your first project submission to start the approval flow.

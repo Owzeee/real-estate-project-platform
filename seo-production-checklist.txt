@@ -1,0 +1,136 @@
+Production SEO Launch Checklist
+
+1. Deployment
+- Deploy the latest version of the project from ~/Desktop/real-estate-platform.
+- Set the production environment variable:
+  NEXT_PUBLIC_SITE_URL=https://immoneuf.ci
+- Confirm the production domain is the only canonical domain used by the site.
+- If preview or staging domains exist, make sure they are not being indexed.
+
+2. Production Technical Checks
+Robots
+- Open:
+  https://immoneuf.ci/robots.txt
+- Confirm:
+  Public crawling is allowed
+  /wishlist is blocked
+  /auth/ is blocked
+  /admin/ is blocked
+  /developer/ is blocked
+
+Sitemap
+- Open:
+  https://immoneuf.ci/sitemap.xml
+- Confirm:
+  The sitemap loads correctly
+  Public pages appear in the sitemap
+  Project pages appear in the sitemap
+  Unit pages appear in the sitemap
+  Developer pages appear in the sitemap
+
+Metadata Checks
+Check these pages:
+- Home page
+- /projects
+- One project detail page
+- One unit detail page
+- One developer detail page
+- /abidjan
+- /abidjan/terrains
+- /abidjan/bureaux
+- /cote-divoire
+
+On each page confirm:
+- The <title> is correct
+- The meta description exists
+- The canonical URL is correct
+- Open Graph tags exist
+- Twitter tags exist
+
+3. Search Console
+- Add and verify the domain in Google Search Console
+- Submit:
+  https://immoneuf.ci/sitemap.xml
+
+URL Inspection
+Inspect these URLs:
+- https://immoneuf.ci/
+- https://immoneuf.ci/projects
+- One project page
+- One unit page
+- One developer page
+- https://immoneuf.ci/abidjan
+- https://immoneuf.ci/abidjan/terrains
+- https://immoneuf.ci/abidjan/bureaux
+- https://immoneuf.ci/cote-divoire
+
+For each URL:
+- Confirm Google can access it
+- Confirm the canonical is correct
+- Request indexing if needed
+
+4. Social Preview Checks
+Test link previews for:
+- Home page
+- One project page
+- One unit page
+- One developer page
+
+Confirm:
+- Preview image is correct
+- Title is correct
+- Description is correct
+
+5. Pages That Must Stay Noindex
+Confirm these are not indexed:
+- /wishlist
+- /compare
+- /auth/*
+- /admin/*
+- /developer/*
+
+6. Final Validation
+- Confirm no staging domain appears in:
+  Canonical tags
+  Sitemap
+  Open Graph URLs
+  Robots
+- Confirm the production domain is consistent everywhere
+- Confirm public pages are indexable
+- Confirm utility/private pages are not indexable
+
+7. Optional Recommended Tasks
+- Add the site to Bing Webmaster Tools
+- Connect Google Search Console with GA4 if GA4 is used
+- Monitor after launch:
+  Index coverage
+  Impressions
+  Clicks
+  CTR
+  Top queries
+  Top landing pages
+
+8. Priority URL Set
+Use this set first for manual QA and indexing:
+- Home
+- Projects listing
+- 1 featured project
+- 1 unit detail page
+- 1 developer profile
+- Abidjan landing page
+- Terrains landing page
+- Bureaux landing page
+- Côte d'Ivoire landing page
+
+Sign-Off
+- [ ] Production deployed
+- [ ] NEXT_PUBLIC_SITE_URL set correctly
+- [ ] Robots verified
+- [ ] Sitemap verified
+- [ ] Metadata verified
+- [ ] Search Console verified
+- [ ] Sitemap submitted
+- [ ] Key URLs inspected
+- [ ] Social previews verified
+- [ ] Noindex routes verified
+- [ ] Canonical domain verified everywhere

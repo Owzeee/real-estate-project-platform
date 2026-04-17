@@ -25,7 +25,7 @@ export default async function AdminNewProjectPage() {
               <p>Select the developer, define the public project details, then add the apartments or units that live inside it.</p>
               <Link
                 href="/admin/projects"
-                className="inline-flex rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/8"
+                className="inline-flex border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/8"
               >
                 Back to admin projects
               </Link>

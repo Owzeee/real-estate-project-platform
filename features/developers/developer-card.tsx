@@ -13,7 +13,7 @@ export function DeveloperCard({ developer, locale = "fr" }: DeveloperCardProps) 
   const t = getTranslations(locale);
 
   return (
-    <article className="surface-panel group h-full overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
+    <article className="surface-panel group h-full overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-[rgba(141,104,71,0.3)] hover:shadow-[0_28px_80px_rgba(32,28,25,0.12)]">
       <div className="relative h-28 bg-gradient-to-r from-[rgba(141,104,71,0.2)] via-[rgba(176,132,90,0.22)] to-[rgba(198,154,91,0.18)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.26),transparent_28%)]" />
       </div>

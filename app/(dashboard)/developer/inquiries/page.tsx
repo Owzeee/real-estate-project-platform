@@ -16,7 +16,7 @@ export default async function DeveloperInquiriesPage() {
           description="Track buyer leads for your own projects and move them through a simple follow-up workflow."
         />
 
-        <div className="mt-8 rounded-[2rem] border border-stone-900/10 bg-white p-6 text-sm text-stone-600 shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
+        <div className="mt-8 border border-stone-900/10 bg-white p-6 text-sm text-stone-600 shadow-[0_20px_60px_rgba(41,37,36,0.08)]">
           Showing inquiries for <span className="font-semibold text-stone-950">{auth.developerProfile.companyName}</span>.
         </div>
 

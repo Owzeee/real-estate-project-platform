@@ -34,8 +34,8 @@ function createEmptyUnit(projectOfferType: "sale" | "rent"): ProjectUnitFormValu
     areaSqm: "",
     rooms: "",
     availableFrom: "",
-    minimumStayMonths: "6",
-    maximumStayMonths: "12",
+    minimumStayMonths: projectOfferType === "rent" ? "6" : "",
+    maximumStayMonths: projectOfferType === "rent" ? "12" : "",
     imageUrl: "",
     galleryUrls: "",
     amenities: emptyAmenitySelectionMap,
@@ -125,7 +125,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                 <input
                   value={unit.title}
                   onChange={(event) => updateUnit(index, "title", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
               <div>
@@ -135,7 +135,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                 <input
                   value={unit.slug}
                   onChange={(event) => updateUnit(index, "slug", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
               <div className="md:col-span-2">
@@ -146,7 +146,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   rows={3}
                   value={unit.summary}
                   onChange={(event) => updateUnit(index, "summary", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
 
@@ -165,12 +165,21 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                               ...item,
                               offerType: nextOfferType,
                               priceMode: nextOfferType === "sale" ? item.priceMode || "fixed" : "fixed",
+                              monthlyRent: nextOfferType === "sale" ? "" : item.monthlyRent,
+                              minimumStayMonths:
+                                nextOfferType === "rent"
+                                  ? item.minimumStayMonths || "6"
+                                  : "",
+                              maximumStayMonths:
+                                nextOfferType === "rent"
+                                  ? item.maximumStayMonths || "12"
+                                  : "",
                             }
                           : item,
                       ),
                     );
                   }}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 >
                   <option value="sale">sale</option>
                   <option value="rent">rent</option>
@@ -185,7 +194,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   value={unit.priceMode}
                   onChange={(event) => updateUnit(index, "priceMode", event.target.value)}
                   disabled={unit.offerType !== "sale"}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950 disabled:bg-stone-100"
                 >
                   <option value="fixed">fixed</option>
                   <option value="range">range</option>
@@ -204,7 +213,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                     step="0.01"
                     value={unit.monthlyRent}
                     onChange={(event) => updateUnit(index, "monthlyRent", event.target.value)}
-                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                   />
                 </div>
               ) : null}
@@ -220,7 +229,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                     step="0.01"
                     value={unit.fixedPrice}
                     onChange={(event) => updateUnit(index, "fixedPrice", event.target.value)}
-                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                   />
                 </div>
               ) : null}
@@ -237,7 +246,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                       step="0.01"
                       value={unit.minPrice}
                       onChange={(event) => updateUnit(index, "minPrice", event.target.value)}
-                      className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                      className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                     />
                   </div>
                   <div>
@@ -250,14 +259,14 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                       step="0.01"
                       value={unit.maxPrice}
                       onChange={(event) => updateUnit(index, "maxPrice", event.target.value)}
-                      className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                      className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                     />
                   </div>
                 </>
               ) : null}
 
               {unit.offerType === "sale" && unit.priceMode === "contact" ? (
-                <div className="md:col-span-2 rounded-[1.2rem] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-600">
+                <div className="md:col-span-2 border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-600">
                   This property will display as contact for price.
                 </div>
               ) : null}
@@ -272,7 +281,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   step="0.01"
                   value={unit.areaSqm}
                   onChange={(event) => updateUnit(index, "areaSqm", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
               <div>
@@ -285,7 +294,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   step="1"
                   value={unit.rooms}
                   onChange={(event) => updateUnit(index, "rooms", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
               <div>
@@ -296,20 +305,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   type="date"
                   value={unit.availableFrom}
                   onChange={(event) => updateUnit(index, "availableFrom", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Minimum stay (months)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={unit.minimumStayMonths}
-                  onChange={(event) => updateUnit(index, "minimumStayMonths", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
               <div>
@@ -319,22 +315,39 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                 <input
                   value={unit.imageUrl}
                   onChange={(event) => updateUnit(index, "imageUrl", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">
-                  Maximum stay (months)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={unit.maximumStayMonths}
-                  onChange={(event) => updateUnit(index, "maximumStayMonths", event.target.value)}
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
-                />
-              </div>
+              {unit.offerType === "rent" ? (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-stone-700">
+                      Minimum stay (months)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={unit.minimumStayMonths}
+                      onChange={(event) => updateUnit(index, "minimumStayMonths", event.target.value)}
+                      className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-stone-700">
+                      Maximum stay (months)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={unit.maximumStayMonths}
+                      onChange={(event) => updateUnit(index, "maximumStayMonths", event.target.value)}
+                      className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                    />
+                  </div>
+                </>
+              ) : null}
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium text-stone-700">
                   Gallery image URLs
@@ -344,7 +357,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   value={unit.galleryUrls}
                   onChange={(event) => updateUnit(index, "galleryUrls", event.target.value)}
                   placeholder="One URL per line"
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
             </div>
@@ -376,7 +389,7 @@ export function ProjectUnitsEditor({ initialUnits, projectOfferType }: ProjectUn
                   value={unit.beds}
                   onChange={(event) => updateUnit(index, "beds", event.target.value)}
                   placeholder="One bed setup per line"
-                  className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
+                  className="w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-950"
                 />
               </div>
             </div>

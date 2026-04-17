@@ -22,7 +22,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
 
   if (galleryImages.length === 0) {
     return (
-      <div className="h-full min-h-[24rem] rounded-[1.6rem] bg-[linear-gradient(135deg,rgba(141,104,71,0.24),rgba(198,154,91,0.18))]" />
+      <div className="h-full min-h-[24rem] bg-[linear-gradient(135deg,rgba(141,104,71,0.24),rgba(198,154,91,0.18))]" />
     );
   }
 
@@ -53,7 +53,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
     <>
       <div className="space-y-4">
         <div
-          className="relative h-[24rem] w-full overflow-hidden rounded-[1.6rem] border border-[var(--border)]"
+          className="relative h-[24rem] w-full overflow-hidden border border-[var(--border)]"
           onTouchStart={(event) => handleTouchStart(event.touches[0]?.clientX ?? 0)}
           onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
         >
@@ -75,7 +75,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
               <button
                 type="button"
                 onClick={goPrev}
-                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/30 bg-[rgba(17,14,12,0.38)] px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm"
+                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 border border-white/30 bg-[rgba(17,14,12,0.38)] px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm"
                 aria-label="Previous image"
               >
                 Prev
@@ -83,7 +83,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
               <button
                 type="button"
                 onClick={goNext}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/30 bg-[rgba(17,14,12,0.38)] px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm"
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 border border-white/30 bg-[rgba(17,14,12,0.38)] px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm"
                 aria-label="Next image"
               >
                 Next
@@ -95,7 +95,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                     type="button"
                     onClick={() => setActiveIndex(index)}
                     aria-label={`View image ${index + 1}`}
-                    className={`h-2.5 rounded-full transition ${
+                    className={`h-2.5 transition ${
                       activeIndex === index
                         ? "w-8 bg-white"
                         : "w-2.5 bg-white/55 hover:bg-white/80"
@@ -103,7 +103,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                   />
                 ))}
               </div>
-              <div className="absolute left-4 top-4 z-10 rounded-full border border-white/20 bg-[rgba(17,14,12,0.38)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+              <div className="absolute left-4 top-4 z-10 border border-white/20 bg-[rgba(17,14,12,0.38)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
                 {activeIndex + 1} / {galleryImages.length}
               </div>
             </>
@@ -117,7 +117,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                 key={`${image.src}-${index}`}
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                className={`overflow-hidden rounded-[1rem] border ${
+                className={`overflow-hidden border ${
                   activeIndex === index
                     ? "border-[var(--primary)] ring-2 ring-[rgba(141,104,71,0.18)]"
                     : "border-[var(--border)]"
@@ -151,7 +151,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
               <button
                 type="button"
                 onClick={goPrev}
-                className="absolute left-3 z-10 rounded-full border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white"
+                className="absolute left-3 z-10 border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white"
               >
                 Prev
               </button>
@@ -170,7 +170,7 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
               <button
                 type="button"
                 onClick={goNext}
-                className="absolute right-3 z-10 rounded-full border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white"
+                className="absolute right-3 z-10 border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white"
               >
                 Next
               </button>

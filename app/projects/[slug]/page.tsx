@@ -45,6 +45,14 @@ type SummaryStat = {
   accent: boolean;
 };
 
+export async function generateStaticParams() {
+  const projects = await getProjects();
+
+  return projects.map((project) => ({
+    slug: project.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
@@ -163,6 +171,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               description: project.description,
               url: absoluteUrl(`/projects/${project.slug}`),
               image: project.heroMediaUrl ? [project.heroMediaUrl] : undefined,
+              geo:
+                project.latitude != null && project.longitude != null
+                  ? {
+                      "@type": "GeoCoordinates",
+                      latitude: project.latitude,
+                      longitude: project.longitude,
+                    }
+                  : undefined,
               address: {
                 "@type": "PostalAddress",
                 addressLocality: project.city ?? undefined,
@@ -173,6 +189,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 "@type": "Organization",
                 name: project.developerName,
               },
+              offers:
+                project.offerType === "rent"
+                  ? project.rentPrice != null
+                    ? {
+                        "@type": "Offer",
+                        price: project.rentPrice,
+                        priceCurrency: project.currencyCode,
+                        availability: "https://schema.org/InStock",
+                      }
+                    : undefined
+                  : project.minPrice != null || project.maxPrice != null
+                    ? {
+                        "@type": "AggregateOffer",
+                        lowPrice: project.minPrice ?? project.maxPrice ?? undefined,
+                        highPrice: project.maxPrice ?? project.minPrice ?? undefined,
+                        priceCurrency: project.currencyCode,
+                        availability: "https://schema.org/InStock",
+                      }
+                    : undefined,
             },
           ]),
         }}
@@ -186,7 +221,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <span>{project.title}</span>
         </div>
 
-        <section className="surface-panel overflow-hidden rounded-[2rem]">
+        <section className="surface-panel overflow-hidden">
           <div className="grid gap-0 xl:grid-cols-[1.08fr_0.92fr]">
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-wrap items-center gap-2">
@@ -225,7 +260,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
               <div className={`mt-8 grid gap-4 ${summaryStats.length > 1 ? "sm:grid-cols-2 lg:grid-cols-3" : ""}`}>
                 {summaryStats.map((stat) => (
-                  <div key={stat.label} className="stat-chip rounded-[1.4rem] p-5">
+                  <div key={stat.label} className="stat-chip p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                       {stat.label}
                     </p>
@@ -262,7 +297,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             {virtualTour ? (
               <article
                 id="virtual-tour"
-                className="surface-panel rounded-[1.9rem] p-7 sm:p-8"
+                className="surface-panel p-7 sm:p-8"
               >
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                   <div>
@@ -284,7 +319,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </a>
                 </div>
 
-                <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-white">
+                <div className="mt-8 overflow-hidden border border-[var(--border)] bg-white">
                   {virtualTourEmbedUrl ? (
                     <iframe
                       title={virtualTour.title ?? `${project.title} virtual tour`}
@@ -324,7 +359,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             ) : null}
 
             {launchVideo ? (
-              <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+              <article className="surface-panel p-7 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="eyebrow">{locale === "fr" ? "Film de presentation" : "Launch film"}</p>
@@ -344,7 +379,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </a>
                 </div>
 
-                <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-black">
+                <div className="mt-8 overflow-hidden border border-[var(--border)] bg-black">
                   <video
                     controls
                     preload="metadata"
@@ -356,7 +391,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </article>
             ) : null}
 
-            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+            <article className="surface-panel p-7 sm:p-8">
               <p className="eyebrow">{locale === "fr" ? "A propos du projet" : "About this project"}</p>
               {project.description ? (
                 <p className="font-copy mt-6 text-lg leading-8 text-stone-700">
@@ -368,7 +403,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </p>
             </article>
 
-            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+            <article className="surface-panel p-7 sm:p-8">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="eyebrow">{locale === "fr" ? "Points forts" : "Key highlights"}</p>
@@ -396,7 +431,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
             </article>
 
-            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+            <article className="surface-panel p-7 sm:p-8">
               <p className="eyebrow">{locale === "fr" ? "Exemples de biens" : "Examples of housing"}</p>
               <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
                 {locale === "fr"
@@ -417,7 +452,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                       <div
-                        className="h-28 rounded-[1.2rem] bg-cover bg-center sm:w-36 sm:flex-none"
+                        className="h-28 bg-cover bg-center sm:w-36 sm:flex-none"
                         style={{
                           backgroundImage: unit.imageUrl
                             ? `linear-gradient(rgba(23,20,18,0.08),rgba(23,20,18,0.18)), url(${unit.imageUrl})`
@@ -512,7 +547,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
             </article>
 
-            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+            <article className="surface-panel p-7 sm:p-8">
               <p className="eyebrow">{locale === "fr" ? "Equipements" : "Amenities"}</p>
               <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_280px]">
                 <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
@@ -524,7 +559,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <div className="mt-4 space-y-3">
                         {group.items.map((item) => (
                           <div key={item} className="flex items-start gap-3">
-                            <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-emerald-300 text-xs text-emerald-600">
+                            <span className="mt-1 inline-flex h-5 w-5 items-center justify-center border border-emerald-300 text-xs text-emerald-600">
                               ✓
                             </span>
                             <span className="text-sm text-stone-700">{item}</span>
@@ -578,7 +613,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
             </article>
 
-            <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+            <article className="surface-panel p-7 sm:p-8">
               <p className="eyebrow">Location</p>
               <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-stone-950">
                 Positioned in {project.location}
@@ -588,7 +623,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </p>
 
               {mapItems.length > 0 ? (
-                <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-[var(--border)]">
+                <div className="mt-8 overflow-hidden border border-[var(--border)]">
                   <InteractiveListingsMap
                     items={mapItems}
                     selectedId={project.id}
@@ -596,14 +631,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   />
                 </div>
               ) : (
-                <div className="mt-8 rounded-[1.75rem] bg-[rgba(141,104,71,0.06)] p-8 text-sm text-[var(--muted-foreground)]">
+                <div className="mt-8 bg-[rgba(141,104,71,0.06)] p-8 text-sm text-[var(--muted-foreground)]">
                   Map coordinates have not been added yet for this project.
                 </div>
               )}
             </article>
 
             {relatedProjects.length > 0 ? (
-              <article className="surface-panel rounded-[1.9rem] p-7 sm:p-8">
+              <article className="surface-panel p-7 sm:p-8">
                 <p className="eyebrow">Related Listings</p>
                 <div className="mt-8 grid gap-4">
                   {relatedProjects.map((item) => (
@@ -633,11 +668,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </section>
 
           <aside className="xl:sticky xl:top-28 xl:self-start">
-            <div className="surface-panel ml-auto rounded-[1.75rem] p-5 sm:max-w-[22rem] sm:p-6">
+            <div className="surface-panel ml-auto p-5 sm:max-w-[22rem] sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                 Contact card
               </p>
-              <div className="mt-4 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-4">
+              <div className="mt-4 border border-[var(--border)] bg-white px-4 py-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                   {project.offerType === "rent" ? t.projectDetail.rent : t.projectDetail.pricing}
                 </p>
@@ -647,7 +682,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
 
               {units[0]?.offerType === "rent" && units[0]?.availableFromLabel ? (
-                <div className="mt-5 rounded-[1.2rem] border border-[var(--border)] bg-white px-4 py-3">
+                <div className="mt-5 border border-[var(--border)] bg-white px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                     Available from
                   </p>
@@ -657,7 +692,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : null}
 
-              <div className="mt-5 rounded-[1.2rem] bg-[rgba(141,104,71,0.05)] p-4">
+              <div className="mt-5 bg-[rgba(141,104,71,0.05)] p-4">
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">

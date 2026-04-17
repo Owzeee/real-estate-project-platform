@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useActionState } from "react";
 
 import {
@@ -7,6 +8,7 @@ import {
   type InquiryActionState,
 } from "@/features/inquiries/actions";
 import { getTranslations, type SiteLocale } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics";
 
 const initialState: InquiryActionState = {
   status: "idle",
@@ -28,13 +30,47 @@ export function InquiryForm({
   locale = "fr",
 }: InquiryFormProps) {
   const t = getTranslations(locale);
+  const startedRef = useRef(false);
   const [state, formAction, isPending] = useActionState(
     submitInquiry,
     initialState,
   );
 
+  useEffect(() => {
+    if (state.status === "success") {
+      trackEvent("inquiry_submitted", {
+        project_id: projectId,
+        property_option_count: propertyOptions.length,
+        status: state.status,
+      });
+    }
+
+    if (state.status === "error" && state.message) {
+      trackEvent("inquiry_submission_failed", {
+        project_id: projectId,
+        property_option_count: propertyOptions.length,
+        status: state.status,
+        message: state.message,
+      });
+    }
+  }, [projectId, propertyOptions.length, state.message, state.status]);
+
   return (
-    <form action={formAction} className="space-y-4">
+    <form
+      action={formAction}
+      className="space-y-4"
+      onFocus={() => {
+        if (startedRef.current) {
+          return;
+        }
+
+        startedRef.current = true;
+        trackEvent("inquiry_started", {
+          project_id: projectId,
+          property_option_count: propertyOptions.length,
+        });
+      }}
+    >
       <input type="hidden" name="projectId" value={projectId} />
       <div>
         <label htmlFor="propertyLabel" className="field-label">
@@ -45,6 +81,12 @@ export function InquiryForm({
           name="propertyLabel"
           className="field-input"
           defaultValue=""
+          onChange={(event) =>
+            trackEvent("inquiry_property_selected", {
+              project_id: projectId,
+              selected_property_label: event.target.value || "whole_project",
+            })
+          }
         >
           <option value="">{t.inquiry.wholeProject}</option>
           {propertyOptions.map((option) => (

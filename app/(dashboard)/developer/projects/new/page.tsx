@@ -24,7 +24,7 @@ export default async function NewProjectPage() {
               <p>Use strong cover imagery, a clean slug, and clear pricing to make moderation and buyer conversion easier.</p>
               <Link
                 href="/developer/projects"
-                className="inline-flex rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/8"
+                className="inline-flex border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/8"
               >
                 Back to dashboard
               </Link>

@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="min-h-screen bg-transparent px-6 py-16 sm:px-10">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_0.8fr] lg:items-center">
         <section className="rounded-[2rem] bg-[linear-gradient(145deg,rgba(141,104,71,0.94),rgba(32,28,25,0.98))] p-8 text-white shadow-[0_40px_100px_rgba(32,28,25,0.22)] sm:p-10">
-          <p className="inline-flex rounded-full bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80">
+          <p className="inline-flex bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80">
             Secure Access
           </p>
           <h1 className="mt-6 font-display text-5xl font-bold tracking-tight">

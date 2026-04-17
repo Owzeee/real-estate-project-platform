@@ -126,7 +126,7 @@ export default async function AdminEditProjectPage({
           </Link>
         </div>
 
-        <section className="mt-10 rounded-[2rem] border border-[rgba(141,104,71,0.12)] bg-[var(--card)] p-8 shadow-[0_24px_70px_rgba(32,28,25,0.08)] sm:p-10">
+        <section className="mt-10 border border-[rgba(141,104,71,0.12)] bg-[var(--card)] p-8 shadow-[0_24px_70px_rgba(32,28,25,0.08)] sm:p-10">
           <ProjectForm
             action={async (state, formData) => {
               "use server";

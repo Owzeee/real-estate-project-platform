@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { InteractiveListingsMap } from "@/features/projects/interactive-listings-map";
 import { ProjectCard } from "@/features/projects/project-card";
+import { ProjectsPageAnalytics } from "@/features/projects/projects-page-analytics";
 import { ProjectSaveActions } from "@/features/projects/project-save-actions";
 import {
   formatCompletionStageLabel,
@@ -110,6 +111,57 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   return (
     <main className="page-shell min-h-screen bg-transparent">
+      <ProjectsPageAnalytics
+        query={query}
+        type={type}
+        stage={stage}
+        location={location}
+        selected={selected}
+        currentView={currentView}
+        resultCount={filteredProjects.length}
+        mapResultCount={mapProjects.length}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Accueil",
+                  item: "https://immoneuf.ci/",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Projets",
+                  item: "https://immoneuf.ci/projects",
+                },
+              ],
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: t.projects.title,
+              url: "https://immoneuf.ci/projects",
+              description: t.projects.description,
+              mainEntity: {
+                "@type": "ItemList",
+                itemListElement: filteredProjects.slice(0, 12).map((project, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  url: `https://immoneuf.ci/projects/${project.slug}`,
+                  name: project.title,
+                })),
+              },
+            },
+          ]),
+        }}
+      />
       <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <p className="eyebrow">{t.projects.eyebrow}</p>
@@ -125,7 +177,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 xl:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <form className="surface-panel space-y-5 rounded-[1.75rem] p-6">
+            <form className="surface-panel space-y-5 p-6">
               <input type="hidden" name="view" value={currentView} />
               {selectedProject ? (
                 <input type="hidden" name="selected" value={selectedProject.slug} />
@@ -193,18 +245,18 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
           <section>
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
-                <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+                <span className="stat-chip px-4 py-2 text-stone-700">
                   {filteredProjects.length} {t.projects.visibleProjects}
                 </span>
-                <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+                <span className="stat-chip px-4 py-2 text-stone-700">
                   {filteredProjects.filter((project) => project.isFeatured).length} {t.projects.featured}
                 </span>
-                <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+                <span className="stat-chip px-4 py-2 text-stone-700">
                   {new Set(filteredProjects.map((project) => project.developerProfileId)).size} {t.projects.developers}
                 </span>
               </div>
 
-              <div className="surface-soft inline-flex rounded-full p-1.5">
+              <div className="surface-soft inline-flex p-1.5">
                 <Link
                   href={buildProjectsHref({ view: "list" })}
                   className={`rounded-full px-5 py-2.5 text-sm font-semibold ${
@@ -234,7 +286,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               </article>
             ) : currentView === "map" ? (
               <div className="space-y-8">
-                <div className="surface-panel overflow-hidden rounded-[2rem]">
+                <div className="surface-panel overflow-hidden">
                   <div className="flex flex-col gap-4 border-b border-[var(--border)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-stone-950">{t.projects.mapViewTitle}</p>
@@ -259,6 +311,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       items={mapProjects}
                       selectedId={selectedProject?.id ?? null}
                       className="h-[34rem] w-full"
+                      trackingContext="projects_listing_map"
                     />
                   ) : (
                     <div className="flex h-[34rem] items-center justify-center bg-[linear-gradient(180deg,rgba(141,104,71,0.1),rgba(141,104,71,0.04))] p-8 text-center">
@@ -310,7 +363,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                     return (
                       <article
                         key={project.id}
-                        className={`surface-panel rounded-[1.75rem] p-5 transition ${
+                        className={`surface-panel p-5 transition ${
                           isSelected
                             ? "ring-2 ring-[rgba(141,104,71,0.28)]"
                             : "hover:-translate-y-0.5"
@@ -318,7 +371,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       >
                         <div className="flex flex-col gap-5 lg:flex-row">
                           <div
-                            className="h-52 rounded-[1.4rem] bg-cover bg-center lg:w-60 lg:flex-none"
+                            className="h-52 bg-cover bg-center lg:w-60 lg:flex-none"
                             style={{
                               backgroundImage: project.heroMediaUrl
                                 ? `linear-gradient(rgba(23,20,18,0.12),rgba(23,20,18,0.26)), url(${project.heroMediaUrl})`
@@ -350,7 +403,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                               {project.description}
                             </p>
 
-                            <div className="mt-5 grid gap-4 rounded-[1.25rem] bg-[rgba(141,104,71,0.05)] p-4 sm:grid-cols-3">
+                            <div className="mt-5 grid gap-4 bg-[rgba(141,104,71,0.05)] p-4 sm:grid-cols-3">
                               <div>
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
                                   Location

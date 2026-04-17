@@ -52,6 +52,7 @@ body {
     linear-gradient(180deg, #fdfaf4 0%, #faf6ee 48%, #f7f0e4 100%);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 a,
@@ -65,6 +66,22 @@ textarea {
     background-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+button:not(:disabled):hover,
+.primary-button:hover,
+.secondary-button:hover,
+.header-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(32, 28, 25, 0.12);
+}
+
+button:disabled,
+.primary-button:disabled,
+.secondary-button:disabled,
+.header-action-button:disabled {
+  transform: none;
+  box-shadow: none;
 }
 
 button:focus-visible,
@@ -154,7 +171,6 @@ a:focus-visible {
 
 .primary-button:hover {
   background: color-mix(in srgb, var(--primary) 88%, black);
-  transform: translateY(-1px);
 }
 
 .secondary-button {
@@ -173,7 +189,6 @@ a:focus-visible {
 .secondary-button:hover {
   border-color: var(--primary);
   background: rgba(141, 104, 71, 0.06);
-  transform: translateY(-1px);
 }
 
 .field-label {
@@ -220,10 +235,23 @@ a:focus-visible {
 }
 
 .leaflet-container {
+  position: relative;
+  z-index: 0;
   height: 100%;
   width: 100%;
   background: #f4efe4;
   font-family: var(--font-sans), sans-serif;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control {
+  z-index: 1 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 2 !important;
 }
 
 .leaflet-control-zoom {

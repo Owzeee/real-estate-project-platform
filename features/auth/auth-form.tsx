@@ -34,7 +34,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             <input
               name="fullName"
               required
-              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+              className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
             />
           </div>
           <div>
@@ -44,7 +44,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             <select
               name="role"
               defaultValue="buyer"
-              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+              className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
             >
               <option value="buyer">Buyer</option>
               <option value="developer">Developer</option>
@@ -61,7 +61,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           name="email"
           type="email"
           required
-          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+          className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
         />
       </div>
 
@@ -73,14 +73,14 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           name="password"
           type="password"
           required
-          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+          className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
         />
       </div>
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary)_88%,black)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending
           ? mode === "login"

@@ -4,7 +4,7 @@ import { DeveloperCard } from "@/features/developers/developer-card";
 import { getDevelopers } from "@/features/developers/queries";
 import { getTranslations } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
-import { buildMetadata } from "@/lib/seo";
+import { absoluteUrl, buildBreadcrumbJsonLd, buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Promoteurs Immobiliers à Abidjan et en Côte d'Ivoire",
@@ -47,6 +47,33 @@ export default async function DevelopersPage({
 
   return (
     <main className="page-shell min-h-screen bg-transparent">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            buildBreadcrumbJsonLd([
+              { name: "Accueil", path: "/" },
+              { name: "Promoteurs", path: "/developers" },
+            ]),
+            {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: t.developersPage.title,
+              url: absoluteUrl("/developers"),
+              description: t.developersPage.description,
+              mainEntity: {
+                "@type": "ItemList",
+                itemListElement: filteredDevelopers.slice(0, 12).map((developer, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  url: absoluteUrl(`/developers/${developer.slug}`),
+                  name: developer.companyName,
+                })),
+              },
+            },
+          ]),
+        }}
+      />
       <section className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.55)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <p className="eyebrow">{t.developersPage.eyebrow}</p>
@@ -57,7 +84,7 @@ export default async function DevelopersPage({
             {t.developersPage.description}
           </p>
 
-          <form className="surface-panel mt-8 max-w-2xl rounded-[1.75rem] p-4 sm:p-5">
+          <form className="surface-panel mt-8 max-w-2xl p-4 sm:p-5">
             <label className="field-label">{t.developersPage.search}</label>
             <input
               name="q"
@@ -71,10 +98,10 @@ export default async function DevelopersPage({
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
-          <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+          <span className="stat-chip px-4 py-2 text-stone-700">
             {filteredDevelopers.length} {t.developersPage.visibleDevelopers}
           </span>
-          <span className="stat-chip rounded-full px-4 py-2 text-stone-700">
+          <span className="stat-chip px-4 py-2 text-stone-700">
             {filteredDevelopers.filter((developer) => developer.isVerified).length} {t.developersPage.verified}
           </span>
         </div>
@@ -86,7 +113,7 @@ export default async function DevelopersPage({
         </div>
 
         {filteredDevelopers.length === 0 ? (
-          <article className="mt-10 rounded-[1.75rem] border border-dashed border-[var(--border)] bg-[rgba(255,255,255,0.55)] p-10 text-center text-sm text-[var(--muted-foreground)]">
+          <article className="mt-10 border border-dashed border-[var(--border)] bg-[rgba(255,255,255,0.55)] p-10 text-center text-sm text-[var(--muted-foreground)]">
             {t.developersPage.noResults}
           </article>
         ) : null}

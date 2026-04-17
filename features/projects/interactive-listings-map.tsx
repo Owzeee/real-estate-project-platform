@@ -31,6 +31,7 @@ type InteractiveListingsMapProps = {
   selectedId?: string | null;
   className?: string;
   onSelectHref?: boolean;
+  trackingContext?: string;
 };
 
 export function InteractiveListingsMap(props: InteractiveListingsMapProps) {
